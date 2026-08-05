@@ -104,7 +104,8 @@ export default function EmployeeExit() {
     );
   }
 
-  const activeResignation = resignations.find(r => r.status !== 'CANCELLED');
+  const activeResignation = resignations.find(r => ['PENDING', 'APPROVED', 'ACCEPTED', 'DRAFT'].includes(r.status));
+  const previousResignations = resignations.filter(r => r.id !== activeResignation?.id);
 
   return (
     <div className="space-y-6">
@@ -238,6 +239,45 @@ export default function EmployeeExit() {
           >
             <Plus size={16} /> Submit Resignation Request
           </button>
+        </div>
+      )}
+
+      {/* Resignation History */}
+      {previousResignations.length > 0 && (
+        <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-6 space-y-4">
+          <h3 className="font-bold text-gray-800 text-base">Previous Resignations History</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left text-gray-500">
+              <thead className="text-xs text-gray-700 uppercase bg-gray-50/50">
+                <tr>
+                  <th className="px-4 py-3">Applied Date</th>
+                  <th className="px-4 py-3">Last Working Day</th>
+                  <th className="px-4 py-3">Notice Period</th>
+                  <th className="px-4 py-3">Reason</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Remarks</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {previousResignations.map((pr) => (
+                  <tr key={pr.id} className="hover:bg-gray-50/50">
+                    <td className="px-4 py-3 font-medium text-gray-900">{formatDate(pr.applied_date)}</td>
+                    <td className="px-4 py-3">{formatDate(pr.last_working_day)}</td>
+                    <td className="px-4 py-3">{pr.notice_period_days} Days</td>
+                    <td className="px-4 py-3 max-w-xs truncate" title={pr.reason}>{pr.reason}</td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-bold ${
+                        pr.status === 'REJECTED' ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-gray-100 text-gray-700'
+                      }`}>
+                        {pr.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-gray-600 max-w-xs truncate" title={pr.comments || '-'}>{pr.comments || '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
