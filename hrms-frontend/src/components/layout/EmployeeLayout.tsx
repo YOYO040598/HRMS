@@ -11,6 +11,7 @@ const allNavItems = [
   { path: '/emp/leave-approvals', label: 'Leave Approvals', icon: CheckSquare, roles: ['HR_ADMIN', 'HR_EXECUTIVE', 'ADMIN', 'MANAGER', 'TEAM_LEAD'] },
   { path: '/emp/assets', label: 'My Assets', icon: Package, roles: ['EMPLOYEE', 'HR_ADMIN', 'HR_EXECUTIVE', 'ADMIN', 'MANAGER', 'TEAM_LEAD'] },
   { path: '/emp/payslips', label: 'Payslips', icon: Wallet, roles: ['EMPLOYEE', 'HR_ADMIN', 'HR_EXECUTIVE', 'ADMIN', 'MANAGER', 'TEAM_LEAD'] },
+  { path: '/emp/exit', label: 'Resignation', icon: LogOut, roles: ['EMPLOYEE', 'HR_ADMIN', 'HR_EXECUTIVE', 'ADMIN', 'MANAGER', 'TEAM_LEAD'] },
   { path: '/emp/notifications', label: 'Notifications', icon: Bell, roles: ['EMPLOYEE', 'HR_ADMIN', 'HR_EXECUTIVE', 'ADMIN', 'MANAGER', 'TEAM_LEAD'] },
 ];
 

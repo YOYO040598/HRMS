@@ -27,13 +27,25 @@ class ResignationViewSet(ResponseMixin, viewsets.ModelViewSet):
     ordering_fields = ['applied_date', 'last_working_day', 'status']
     ordering = ['-applied_date']
 
+    def get_queryset(self):
+        user = self.request.user
+        if not user or not user.is_authenticated:
+            return self.queryset.none()
+        if user.is_superuser or getattr(user, 'is_staff', False) or user.role in ['ADMIN', 'HR_ADMIN', 'HR_EXECUTIVE']:
+            return self.queryset
+        try:
+            employee = user.employee_profile
+            return self.queryset.filter(employee=employee)
+        except Exception:
+            return self.queryset.none()
+
     def get_serializer_class(self):
         if self.action == 'list':
             return ResignationListSerializer
         return ResignationDetailSerializer
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve', 'create']:
             permission_classes = [IsAuthenticated]
         else:
             permission_classes = [IsHROrAdmin]
@@ -73,10 +85,19 @@ class ApplyResignationView(ResponseMixin, generics.GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         from django.utils.dateparse import parse_date
-        try:
-            employee = request.user.employee_profile
-        except Exception:
-            return self.error_response('Employee profile not found')
+        from apps.employees.models import Employee
+        
+        employee_id = request.data.get('employee_id')
+        if employee_id and (request.user.is_superuser or getattr(request.user, 'is_staff', False) or request.user.role in ['ADMIN', 'HR_ADMIN', 'HR_EXECUTIVE']):
+            try:
+                employee = Employee.objects.get(id=employee_id)
+            except Employee.DoesNotExist:
+                return self.error_response('Employee not found')
+        else:
+            try:
+                employee = request.user.employee_profile
+            except Exception:
+                return self.error_response('Employee profile not found')
 
         last_working_day = parse_date(request.data.get('last_working_day', ''))
         if not last_working_day:
@@ -101,7 +122,19 @@ class ApproveResignationView(ResponseMixin, generics.GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         approval_id = request.data.get('approval_id')
+        resignation_id = request.data.get('resignation_id')
         comments = request.data.get('comments', '')
+
+        if not approval_id and resignation_id:
+            try:
+                if request.user.role in ['ADMIN', 'HR_ADMIN', 'HR_EXECUTIVE'] or request.user.is_superuser:
+                    approval = ExitApproval.objects.filter(resignation_id=resignation_id, status='PENDING').first()
+                else:
+                    approval = ExitApproval.objects.filter(resignation_id=resignation_id, approver=request.user, status='PENDING').first()
+                if approval:
+                    approval_id = approval.id
+            except Exception:
+                pass
 
         approval, success, message = approve_resignation(approval_id, request.user, comments)
 
@@ -117,7 +150,19 @@ class RejectResignationView(ResponseMixin, generics.GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         approval_id = request.data.get('approval_id')
+        resignation_id = request.data.get('resignation_id')
         comments = request.data.get('comments', '')
+
+        if not approval_id and resignation_id:
+            try:
+                if request.user.role in ['ADMIN', 'HR_ADMIN', 'HR_EXECUTIVE'] or request.user.is_superuser:
+                    approval = ExitApproval.objects.filter(resignation_id=resignation_id, status='PENDING').first()
+                else:
+                    approval = ExitApproval.objects.filter(resignation_id=resignation_id, approver=request.user, status='PENDING').first()
+                if approval:
+                    approval_id = approval.id
+            except Exception:
+                pass
 
         approval, success, message = reject_resignation(approval_id, request.user, comments)
 
