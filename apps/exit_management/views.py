@@ -131,16 +131,34 @@ class ApproveResignationView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsManagerOrAbove]
 
     def post(self, request, *args, **kwargs):
+        from django.utils import timezone
         approval_id = request.data.get('approval_id')
         resignation_id = request.data.get('resignation_id')
         comments = request.data.get('comments', '')
 
+        if resignation_id and (request.user.role in ['ADMIN', 'HR_ADMIN', 'HR_EXECUTIVE'] or request.user.is_superuser):
+            # Admin/HR can directly approve the resignation
+            try:
+                res = Resignation.objects.get(id=resignation_id)
+                res.status = 'APPROVED'
+                res.approved_by = request.user
+                res.approved_date = timezone.now().date()
+                res.comments = comments
+                res.save(update_fields=['status', 'approved_by', 'approved_date', 'comments'])
+                
+                # Auto-approve any pending clearance approvals
+                ExitApproval.objects.filter(resignation_id=resignation_id, status='PENDING').update(
+                    status='APPROVED', 
+                    approved_at=timezone.now(),
+                    comments=comments or 'Approved by administrator.'
+                )
+                return self.success_response(None, 'Resignation fully approved')
+            except Resignation.DoesNotExist:
+                return self.error_response('Resignation not found')
+
         if not approval_id and resignation_id:
             try:
-                if request.user.role in ['ADMIN', 'HR_ADMIN', 'HR_EXECUTIVE'] or request.user.is_superuser:
-                    approval = ExitApproval.objects.filter(resignation_id=resignation_id, status='PENDING').first()
-                else:
-                    approval = ExitApproval.objects.filter(resignation_id=resignation_id, approver=request.user, status='PENDING').first()
+                approval = ExitApproval.objects.filter(resignation_id=resignation_id, approver=request.user, status='PENDING').first()
                 if approval:
                     approval_id = approval.id
             except Exception:
@@ -159,16 +177,32 @@ class RejectResignationView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsManagerOrAbove]
 
     def post(self, request, *args, **kwargs):
+        from django.utils import timezone
         approval_id = request.data.get('approval_id')
         resignation_id = request.data.get('resignation_id')
         comments = request.data.get('comments', '')
 
+        if resignation_id and (request.user.role in ['ADMIN', 'HR_ADMIN', 'HR_EXECUTIVE'] or request.user.is_superuser):
+            # Admin/HR can directly reject the resignation
+            try:
+                res = Resignation.objects.get(id=resignation_id)
+                res.status = 'REJECTED'
+                res.comments = comments
+                res.save(update_fields=['status', 'comments'])
+                
+                # Auto-reject any pending clearance approvals
+                ExitApproval.objects.filter(resignation_id=resignation_id, status='PENDING').update(
+                    status='REJECTED', 
+                    approved_at=timezone.now(),
+                    comments=comments or 'Rejected by administrator.'
+                )
+                return self.success_response(None, 'Resignation fully rejected')
+            except Resignation.DoesNotExist:
+                return self.error_response('Resignation not found')
+
         if not approval_id and resignation_id:
             try:
-                if request.user.role in ['ADMIN', 'HR_ADMIN', 'HR_EXECUTIVE'] or request.user.is_superuser:
-                    approval = ExitApproval.objects.filter(resignation_id=resignation_id, status='PENDING').first()
-                else:
-                    approval = ExitApproval.objects.filter(resignation_id=resignation_id, approver=request.user, status='PENDING').first()
+                approval = ExitApproval.objects.filter(resignation_id=resignation_id, approver=request.user, status='PENDING').first()
                 if approval:
                     approval_id = approval.id
             except Exception:
