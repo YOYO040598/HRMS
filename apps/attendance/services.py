@@ -43,13 +43,12 @@ def check_in(employee, ip_address=None, device_info=None, location=None):
 
 
 def check_out(employee, ip_address=None):
-    today = timezone.now().date()
     now = timezone.now()
 
     try:
-        attendance = Attendance.objects.get(employee=employee, date=today)
+        attendance = Attendance.objects.filter(employee=employee, check_out__isnull=True).latest('check_in')
     except Attendance.DoesNotExist:
-        return None, False, 'No check-in record found today'
+        return None, False, 'No check-in record found'
 
     if attendance.check_out:
         return attendance, False, 'Already checked out today'

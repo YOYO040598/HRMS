@@ -20,11 +20,27 @@ export default function EmployeeAttendance() {
   const fetchAttendance = async () => {
     try {
       const [todayRes, monthlyRes] = await Promise.all([
-        api.get('/attendance/records/', { params: { date: new Date().toISOString().split('T')[0] } }),
+        api.get('/attendance/records/'),
         api.get('/attendance/monthly/'),
       ]);
-      const todayRecords = todayRes.data.data;
-      if (todayRecords?.length > 0) setTodayAttendance(todayRecords[0]);
+      const records = todayRes.data.data || todayRes.data.results || [];
+      if (records.length > 0) {
+        const latest = records[0];
+        // If the latest record has no check_out, then the employee is checked in
+        if (!latest.check_out) {
+          setTodayAttendance(latest);
+        } else {
+          // If the latest record has check_out, check if it was checked in today
+          const todayStr = new Date().toISOString().split('T')[0];
+          if (latest.date === todayStr) {
+            setTodayAttendance(latest);
+          } else {
+            setTodayAttendance(null);
+          }
+        }
+      } else {
+        setTodayAttendance(null);
+      }
       setRecentAttendance(monthlyRes.data.data?.attendances?.slice(0, 15) || []);
     } catch (err) { console.error(err); } finally { setLoading(false); }
   };

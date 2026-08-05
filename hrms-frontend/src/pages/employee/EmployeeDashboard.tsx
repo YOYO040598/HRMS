@@ -15,19 +15,23 @@ export default function EmployeeDashboard() {
   const fetchDashboard = async () => {
     try {
       const [attRes, leaveRes] = await Promise.all([
-        api.get('/attendance/records/', { params: { date: new Date().toISOString().split('T')[0] } }),
+        api.get('/attendance/records/'),
         api.get('/leave/balance-summary/'),
       ]);
-      const todayRecords = attRes.data.data;
-      if (todayRecords?.length > 0) {
-        const today = todayRecords[0];
-        setStats((prev) => ({
-          ...prev,
-          todayStatus: today.status,
-          checkIn: today.check_in || '',
-          checkOut: today.check_out || '',
-          hoursWorked: today.total_hours || 0,
-        }));
+      const records = attRes.data.data || attRes.data.results || [];
+      if (records.length > 0) {
+        const latest = records[0];
+        const todayStr = new Date().toISOString().split('T')[0];
+        // If it is active (no check_out) or belongs to today
+        if (!latest.check_out || latest.date === todayStr) {
+          setStats((prev) => ({
+            ...prev,
+            todayStatus: latest.status,
+            checkIn: latest.check_in || '',
+            checkOut: latest.check_out || '',
+            hoursWorked: latest.total_hours || 0,
+          }));
+        }
       }
       const balances = leaveRes.data.data;
       if (balances?.length > 0) {
