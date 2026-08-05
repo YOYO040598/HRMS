@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import api from '../../api/axios';
 import type { Asset, Employee } from '../../types';
 import { formatCurrency, formatDate, getStatusColor } from '../../lib/utils';
-import { Package, Search, Plus, UserPlus, RotateCcw, X } from 'lucide-react';
+import { Package, Search, Plus, UserPlus, RotateCcw, X, Info, Laptop, Cpu, Smartphone, Wifi, CreditCard, Box, CheckCircle, AlertTriangle, AlertCircle } from 'lucide-react';
 
-const CATEGORIES = ['LAPTOP', 'DESKTOP', 'MONITOR', 'KEYBOARD', 'MOUSE', 'PHONE', 'TABLET', 'CHAIR', 'DESK', 'OTHER'];
+const CATEGORIES = ['LAPTOP', 'DESKTOP', 'MOBILE', 'SIM_CARD', 'ID_CARD', 'ACCESSORIES'];
 const CONDITIONS = ['NEW', 'GOOD', 'FAIR', 'POOR'];
 
 interface AssetStats {
@@ -14,13 +14,19 @@ interface AssetStats {
   maintenance: number;
 }
 
+interface UpgradedAsset extends Asset {
+  specifications?: Record<string, any>;
+  acceptance_status?: 'PENDING' | 'ACCEPTED' | 'REJECTED' | null;
+}
+
 const defaultAsset = {
   name: '', asset_code: '', category: 'LAPTOP', brand: '', model_name: '', serial_number: '',
   purchase_date: '', purchase_price: 0, warranty_expiry: '', condition: 'NEW', company: '',
+  specifications: {},
 };
 
 export default function AssetManagementPage() {
-  const [assets, setAssets] = useState<Asset[]>([]);
+  const [assets, setAssets] = useState<UpgradedAsset[]>([]);
   const [stats, setStats] = useState<AssetStats>({ total: 0, available: 0, assigned: 0, maintenance: 0 });
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,7 +35,7 @@ export default function AssetManagementPage() {
   const [categoryFilter, setCategoryFilter] = useState('');
 
   const [showAddModal, setShowAddModal] = useState(false);
-  const [assetForm, setAssetForm] = useState(defaultAsset);
+  const [assetForm, setAssetForm] = useState<any>(defaultAsset);
   const [saving, setSaving] = useState(false);
 
   const [showAssignModal, setShowAssignModal] = useState<string | null>(null);
@@ -39,6 +45,8 @@ export default function AssetManagementPage() {
   const [showReturnModal, setShowReturnModal] = useState<string | null>(null);
   const [returnForm, setReturnForm] = useState({ condition: 'GOOD', remarks: '', damage_report: '', is_damaged: false });
   const [returning, setReturning] = useState(false);
+
+  const [expandedAsset, setExpandedAsset] = useState<string | null>(null);
 
   useEffect(() => { fetchAll(); }, [search, statusFilter, categoryFilter]);
 
@@ -88,11 +96,46 @@ export default function AssetManagementPage() {
     if (!showReturnModal) return;
     setReturning(true);
     try {
-      await api.post('/assets/return/', { assignment_id: showReturnModal, ...returnForm });
+      const activeAssignment = assets.find(a => a.id === showReturnModal)?.assignments?.find((as: any) => !as.is_returned);
+      const assignmentId = activeAssignment?.id || showReturnModal;
+      await api.post('/assets/return/', { assignment_id: assignmentId, ...returnForm });
       setShowReturnModal(null);
       setReturnForm({ condition: 'GOOD', remarks: '', damage_report: '', is_damaged: false });
       fetchAll();
     } catch (err) { console.error(err); } finally { setReturning(false); }
+  };
+
+  const updateSpec = (key: string, value: any) => {
+    setAssetForm((prev: any) => ({
+      ...prev,
+      specifications: {
+        ...prev.specifications,
+        [key]: value,
+      },
+    }));
+  };
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'LAPTOP': return <Laptop className="text-indigo-600" size={18} />;
+      case 'DESKTOP': return <Cpu className="text-blue-600" size={18} />;
+      case 'MOBILE': return <Smartphone className="text-emerald-600" size={18} />;
+      case 'SIM_CARD': return <Wifi className="text-amber-600" size={18} />;
+      case 'ID_CARD': return <CreditCard className="text-rose-600" size={18} />;
+      default: return <Box className="text-gray-600" size={18} />;
+    }
+  };
+
+  const getAcceptanceBadge = (status?: string | null) => {
+    if (!status) return null;
+    switch (status) {
+      case 'ACCEPTED':
+        return <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full"><CheckCircle size={10} /> Confirmed</span>;
+      case 'REJECTED':
+        return <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-rose-50 text-rose-700 px-2 py-0.5 rounded-full"><AlertTriangle size={10} /> Rejected</span>;
+      default:
+        return <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full animate-pulse"><AlertCircle size={10} /> Awaiting Sign-off</span>;
+    }
   };
 
   return (
@@ -100,9 +143,9 @@ export default function AssetManagementPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">Asset Management</h2>
-          <p className="text-gray-500">Track and manage company assets and assignments</p>
+          <p className="text-gray-500">Track and manage company assets, assignments, and digital receipts</p>
         </div>
-        <button onClick={() => { setAssetForm(defaultAsset); setShowAddModal(true); }} className="btn-primary flex items-center gap-2">
+        <button onClick={() => { setAssetForm({ ...defaultAsset, category: 'LAPTOP', specifications: {} }); setShowAddModal(true); }} className="btn-primary flex items-center gap-2">
           <Plus size={18} /> Add Asset
         </button>
       </div>
@@ -170,7 +213,6 @@ export default function AssetManagementPage() {
                 <th className="px-6 py-3">Code</th>
                 <th className="px-6 py-3">Category</th>
                 <th className="px-6 py-3">Brand / Model</th>
-                <th className="px-6 py-3">Purchase Price</th>
                 <th className="px-6 py-3">Condition</th>
                 <th className="px-6 py-3">Status</th>
                 <th className="px-6 py-3">Assigned To</th>
@@ -179,34 +221,77 @@ export default function AssetManagementPage() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {loading ? (
-                <tr><td colSpan={9} className="px-6 py-12 text-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto" /></td></tr>
+                <tr><td colSpan={8} className="px-6 py-12 text-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto" /></td></tr>
               ) : assets.length === 0 ? (
-                <tr><td colSpan={9} className="px-6 py-8 text-center text-gray-400">No assets found</td></tr>
+                <tr><td colSpan={8} className="px-6 py-8 text-center text-gray-400">No assets found</td></tr>
               ) : assets.map((a) => (
-                <tr key={a.id} className="hover:bg-gray-50">
-                  <td className="table-cell font-medium text-gray-800">{a.name}</td>
-                  <td className="table-cell font-mono text-xs">{a.asset_code}</td>
-                  <td className="table-cell">{a.category?.replace('_', ' ')}</td>
-                  <td className="table-cell">{a.brand} {a.model_name}</td>
-                  <td className="table-cell">{formatCurrency(a.purchase_price)}</td>
-                  <td className="table-cell">{a.condition}</td>
-                  <td className="table-cell"><span className={`badge ${getStatusColor(a.status)}`}>{a.status}</span></td>
-                  <td className="table-cell">{a.assigned_to_name || '-'}</td>
-                  <td className="table-cell">
-                    <div className="flex items-center gap-1">
-                      {a.status === 'AVAILABLE' && (
-                        <button onClick={() => { setAssignForm({ employee_id: '', condition_at_assignment: a.condition || 'GOOD', expected_return_date: '', notes: '' }); setShowAssignModal(a.id); }} className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1">
-                          <UserPlus size={14} /> Assign
+                <>
+                  <tr key={a.id} className="hover:bg-gray-50 border-b border-gray-50">
+                    <td className="table-cell">
+                      <div className="font-semibold text-gray-800">{a.name}</div>
+                      <div className="text-[10px] text-gray-400 font-mono mt-0.5">{a.serial_number || 'No S/N'}</div>
+                    </td>
+                    <td className="table-cell font-mono text-xs font-semibold">{a.asset_code}</td>
+                    <td className="table-cell">
+                      <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                        {getCategoryIcon(a.category)}
+                        <span className="capitalize">{a.category?.toLowerCase().replace('_', ' ')}</span>
+                      </div>
+                    </td>
+                    <td className="table-cell font-medium text-gray-600">{a.brand} {a.model_name}</td>
+                    <td className="table-cell text-xs">{a.condition}</td>
+                    <td className="table-cell"><span className={`badge ${getStatusColor(a.status)}`}>{a.status}</span></td>
+                    <td className="table-cell">
+                      <div className="flex flex-col gap-1">
+                        <span className="font-medium text-gray-700">{a.assigned_to_name || '-'}</span>
+                        {getAcceptanceBadge(a.acceptance_status)}
+                      </div>
+                    </td>
+                    <td className="table-cell">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setExpandedAsset(expandedAsset === a.id ? null : a.id)}
+                          className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                          title="View specifications"
+                        >
+                          <Info size={16} />
                         </button>
-                      )}
-                      {a.status === 'ASSIGNED' && (
-                        <button onClick={() => { setReturnForm({ condition: 'GOOD', remarks: '', damage_report: '', is_damaged: false }); setShowReturnModal(a.id); }} className="btn-warning text-xs px-3 py-1.5 flex items-center gap-1">
-                          <RotateCcw size={14} /> Return
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
+                        {a.status === 'AVAILABLE' && (
+                          <button onClick={() => { setAssignForm({ employee_id: '', condition_at_assignment: a.condition || 'GOOD', expected_return_date: '', notes: '' }); setShowAssignModal(a.id); }} className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1">
+                            <UserPlus size={14} /> Assign
+                          </button>
+                        )}
+                        {a.status === 'ASSIGNED' && (
+                          <button onClick={() => { setReturnForm({ condition: 'GOOD', remarks: '', damage_report: '', is_damaged: false }); setShowReturnModal(a.id); }} className="btn-warning text-xs px-3 py-1.5 flex items-center gap-1">
+                            <RotateCcw size={14} /> Return
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                  {/* Expanded Specifications Row */}
+                  {expandedAsset === a.id && (
+                    <tr className="bg-indigo-50/40">
+                      <td colSpan={8} className="px-6 py-4">
+                        <div className="text-xs">
+                          <h4 className="font-bold text-indigo-900 mb-2 uppercase tracking-wider text-[10px]">Specifications Checklist</h4>
+                          {a.specifications && Object.keys(a.specifications).length > 0 ? (
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-white p-4 rounded-xl border border-indigo-50">
+                              {Object.entries(a.specifications).map(([key, val]) => (
+                                <div key={key}>
+                                  <span className="text-[10px] text-gray-400 uppercase font-medium">{key.replace(/_/g, ' ')}</span>
+                                  <span className="block font-semibold text-gray-700 text-sm mt-0.5">{typeof val === 'boolean' ? (val ? 'Yes' : 'No') : String(val)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-gray-500 italic">No dynamic specifications loaded for this item.</span>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </>
               ))}
             </tbody>
           </table>
@@ -233,7 +318,7 @@ export default function AssetManagementPage() {
                 </div>
                 <div>
                   <label className="label">Category *</label>
-                  <select value={assetForm.category} onChange={(e) => setAssetForm({ ...assetForm, category: e.target.value })} className="input-field" required>
+                  <select value={assetForm.category} onChange={(e) => setAssetForm({ ...assetForm, category: e.target.value, specifications: {} })} className="input-field" required>
                     {CATEGORIES.map((c) => <option key={c} value={c}>{c.replace('_', ' ')}</option>)}
                   </select>
                 </div>
@@ -267,9 +352,141 @@ export default function AssetManagementPage() {
                     {CONDITIONS.map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
-                <div className="col-span-2">
-                  <label className="label">Company</label>
-                  <input type="text" value={assetForm.company} onChange={(e) => setAssetForm({ ...assetForm, company: e.target.value })} className="input-field" />
+
+                {/* Dynamic Category Specifications Section */}
+                <div className="col-span-2 border-t border-gray-100 pt-4 mt-2">
+                  <h4 className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-3">Specifications Schema Fields</h4>
+                  <div className="grid grid-cols-2 gap-3 bg-gray-50 p-4 rounded-xl">
+                    {assetForm.category === 'LAPTOP' && (
+                      <>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-500 uppercase">Processor</label>
+                          <input type="text" onChange={(e) => updateSpec('processor', e.target.value)} className="input-field mt-1" placeholder="e.g. Core i7" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-500 uppercase">RAM</label>
+                          <input type="text" onChange={(e) => updateSpec('ram', e.target.value)} className="input-field mt-1" placeholder="e.g. 16GB" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-500 uppercase">Storage</label>
+                          <input type="text" onChange={(e) => updateSpec('storage', e.target.value)} className="input-field mt-1" placeholder="e.g. 512GB SSD" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-500 uppercase">OS</label>
+                          <input type="text" onChange={(e) => updateSpec('os', e.target.value)} className="input-field mt-1" placeholder="e.g. Windows 11" />
+                        </div>
+                        <div className="flex items-center gap-2 mt-4 col-span-2">
+                          <input type="checkbox" id="charger" onChange={(e) => updateSpec('charger_included', e.target.checked)} className="rounded text-indigo-600 focus:ring-indigo-500" />
+                          <label htmlFor="charger" className="text-xs font-semibold text-gray-700">Charger Included (Yes/No)</label>
+                        </div>
+                      </>
+                    )}
+
+                    {assetForm.category === 'DESKTOP' && (
+                      <>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-500 uppercase">CPU Specs</label>
+                          <input type="text" onChange={(e) => updateSpec('cpu_specs', e.target.value)} className="input-field mt-1" placeholder="e.g. Ryzen 9" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-500 uppercase">RAM</label>
+                          <input type="text" onChange={(e) => updateSpec('ram', e.target.value)} className="input-field mt-1" placeholder="e.g. 32GB" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-500 uppercase">Storage</label>
+                          <input type="text" onChange={(e) => updateSpec('storage', e.target.value)} className="input-field mt-1" placeholder="e.g. 1TB SSD" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-500 uppercase">Monitor Serial(s)</label>
+                          <input type="text" onChange={(e) => updateSpec('connected_monitor_serial', e.target.value)} className="input-field mt-1" placeholder="e.g. SN-882299" />
+                        </div>
+                        <div className="flex items-center gap-2 mt-4 col-span-2">
+                          <input type="checkbox" id="combo" onChange={(e) => updateSpec('keyboard_mouse_combo', e.target.checked)} className="rounded text-indigo-600 focus:ring-indigo-500" />
+                          <label htmlFor="combo" className="text-xs font-semibold text-gray-700">Keyboard & Mouse Bundle Included</label>
+                        </div>
+                      </>
+                    )}
+
+                    {assetForm.category === 'MOBILE' && (
+                      <>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-500 uppercase">IMEI 1</label>
+                          <input type="text" onChange={(e) => updateSpec('imei_1', e.target.value)} className="input-field mt-1" placeholder="First IMEI" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-500 uppercase">IMEI 2</label>
+                          <input type="text" onChange={(e) => updateSpec('imei_2', e.target.value)} className="input-field mt-1" placeholder="Second IMEI" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-500 uppercase">Storage Capacity</label>
+                          <input type="text" onChange={(e) => updateSpec('storage', e.target.value)} className="input-field mt-1" placeholder="e.g. 128GB" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-500 uppercase">Color</label>
+                          <input type="text" onChange={(e) => updateSpec('color', e.target.value)} className="input-field mt-1" placeholder="e.g. Space Gray" />
+                        </div>
+                      </>
+                    )}
+
+                    {assetForm.category === 'SIM_CARD' && (
+                      <>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-500 uppercase">Mobile Number</label>
+                          <input type="text" onChange={(e) => updateSpec('mobile_number', e.target.value)} className="input-field mt-1" placeholder="+91..." />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-500 uppercase">ICCID</label>
+                          <input type="text" onChange={(e) => updateSpec('iccid', e.target.value)} className="input-field mt-1" placeholder="SIM Serial ICCID" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-500 uppercase">Provider</label>
+                          <input type="text" onChange={(e) => updateSpec('network_provider', e.target.value)} className="input-field mt-1" placeholder="Jio, Airtel, Vodafone..." />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-500 uppercase">PIN/PUK Codes</label>
+                          <input type="text" onChange={(e) => updateSpec('pin_puk_code', e.target.value)} className="input-field mt-1" placeholder="e.g. 4882 / 99229988" />
+                        </div>
+                        <div className="col-span-2">
+                          <label className="text-[10px] font-bold text-gray-500 uppercase">Plan details / Data Limit</label>
+                          <input type="text" onChange={(e) => updateSpec('plan_details', e.target.value)} className="input-field mt-1" placeholder="e.g. Corporate Unlimited 50GB" />
+                        </div>
+                      </>
+                    )}
+
+                    {assetForm.category === 'ID_CARD' && (
+                      <>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-500 uppercase">Card Number</label>
+                          <input type="text" onChange={(e) => updateSpec('card_number', e.target.value)} className="input-field mt-1" placeholder="e.g. ID-8822" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-500 uppercase">RFID Tag</label>
+                          <input type="text" onChange={(e) => updateSpec('rfid_tag', e.target.value)} className="input-field mt-1" placeholder="e.g. RF-002" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-500 uppercase">Access Levels</label>
+                          <input type="text" onChange={(e) => updateSpec('access_levels_granted', e.target.value)} className="input-field mt-1" placeholder="e.g. Floor 2, Server Room" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-500 uppercase">Expiry Date</label>
+                          <input type="date" onChange={(e) => updateSpec('expiry_date', e.target.value)} className="input-field mt-1" />
+                        </div>
+                      </>
+                    )}
+
+                    {assetForm.category === 'ACCESSORIES' && (
+                      <>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-500 uppercase">Serial or SKU</label>
+                          <input type="text" onChange={(e) => updateSpec('serial_number_sku', e.target.value)} className="input-field mt-1" placeholder="e.g. SKU-882" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-500 uppercase">Accessory Type</label>
+                          <input type="text" onChange={(e) => updateSpec('type', e.target.value)} className="input-field mt-1" placeholder="Headset, Adapter, Docking Station..." />
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
@@ -283,81 +500,84 @@ export default function AssetManagementPage() {
         </div>
       )}
 
-      {/* Assign Modal */}
+      {/* Assign Asset Modal */}
       {showAssignModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-800">Assign Asset</h3>
-              <button onClick={() => setShowAssignModal(null)} className="p-2 text-gray-400 hover:text-gray-600"><X size={20} /></button>
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-gray-800">Assign Asset</h3>
+              <button onClick={() => setShowAssignModal(null)} className="p-2 text-gray-400 hover:text-gray-600 rounded-lg"><X size={18} /></button>
             </div>
             <form onSubmit={handleAssign} className="p-6 space-y-4">
               <div>
-                <label className="label">Employee *</label>
-                <select value={assignForm.employee_id} onChange={(e) => setAssignForm({ ...assignForm, employee_id: e.target.value })} className="input-field" required>
-                  <option value="">Select employee</option>
-                  {employees.map((e) => <option key={e.id} value={e.id}>{e.user_full_name} ({e.employee_code})</option>)}
+                <label className="label">Select Employee *</label>
+                <select value={assignForm.employee_id} onChange={(e) => setAssignForm({ ...assignForm, employee_id: e.target.value })} className="input-field text-sm" required>
+                  <option value="">Choose Employee...</option>
+                  {employees.map((emp) => (
+                    <option key={emp.id} value={emp.id}>{emp.user_full_name} ({emp.employee_id})</option>
+                  ))}
                 </select>
               </div>
               <div>
-                <label className="label">Condition at Assignment</label>
-                <select value={assignForm.condition_at_assignment} onChange={(e) => setAssignForm({ ...assignForm, condition_at_assignment: e.target.value })} className="input-field">
-                  {CONDITIONS.map((c) => <option key={c} value={c}>{c}</option>)}
+                <label className="label">Handover Condition</label>
+                <select value={assignForm.condition_at_assignment} onChange={(e) => setAssignForm({ ...assignForm, condition_at_assignment: e.target.value })} className="input-field text-sm">
+                  <option value="GOOD">Good</option>
+                  <option value="NEW">New</option>
+                  <option value="FAIR">Fair</option>
+                  <option value="POOR">Poor</option>
                 </select>
               </div>
               <div>
                 <label className="label">Expected Return Date</label>
-                <input type="date" value={assignForm.expected_return_date} onChange={(e) => setAssignForm({ ...assignForm, expected_return_date: e.target.value })} className="input-field" />
+                <input type="date" value={assignForm.expected_return_date} onChange={(e) => setAssignForm({ ...assignForm, expected_return_date: e.target.value })} className="input-field text-sm" />
               </div>
               <div>
-                <label className="label">Notes</label>
-                <textarea value={assignForm.notes} onChange={(e) => setAssignForm({ ...assignForm, notes: e.target.value })} className="input-field" rows={2} placeholder="Any notes about this assignment..." />
+                <label className="label">Notes / Instructions</label>
+                <textarea value={assignForm.notes} onChange={(e) => setAssignForm({ ...assignForm, notes: e.target.value })} className="input-field min-h-[85px] text-sm" placeholder="Any instructions for employee..." />
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
                 <button type="button" onClick={() => setShowAssignModal(null)} className="btn-secondary">Cancel</button>
-                <button type="submit" disabled={assigning} className="btn-primary">
-                  {assigning ? 'Assigning...' : 'Assign'}
-                </button>
+                <button type="submit" disabled={assigning} className="btn-primary">{assigning ? 'Assigning...' : 'Confirm Assignment'}</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Return Modal */}
+      {/* Return Asset Modal */}
       {showReturnModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-800">Return Asset</h3>
-              <button onClick={() => setShowReturnModal(null)} className="p-2 text-gray-400 hover:text-gray-600"><X size={20} /></button>
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-gray-800">Return Asset Check-off</h3>
+              <button onClick={() => setShowReturnModal(null)} className="p-2 text-gray-400 hover:text-gray-600 rounded-lg"><X size={18} /></button>
             </div>
             <form onSubmit={handleReturn} className="p-6 space-y-4">
               <div>
-                <label className="label">Condition on Return *</label>
-                <select value={returnForm.condition} onChange={(e) => setReturnForm({ ...returnForm, condition: e.target.value })} className="input-field" required>
-                  {CONDITIONS.map((c) => <option key={c} value={c}>{c}</option>)}
+                <label className="label">Return Condition</label>
+                <select value={returnForm.condition} onChange={(e) => setReturnForm({ ...returnForm, condition: e.target.value })} className="input-field text-sm">
+                  <option value="GOOD">Good</option>
+                  <option value="DAMAGED">Damaged / Requires Repair</option>
+                  <option value="SCRAPPED">Scrapped</option>
                 </select>
               </div>
               <div className="flex items-center gap-2">
-                <input type="checkbox" id="is_damaged" checked={returnForm.is_damaged} onChange={(e) => setReturnForm({ ...returnForm, is_damaged: e.target.checked })} className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
-                <label htmlFor="is_damaged" className="text-sm text-gray-700">Asset is damaged</label>
+                <input type="checkbox" id="is_damaged" checked={returnForm.is_damaged} onChange={(e) => setReturnForm({ ...returnForm, is_damaged: e.target.checked })} className="rounded text-indigo-600 focus:ring-indigo-500 animate-pulse" />
+                <label htmlFor="is_damaged" className="text-xs font-semibold text-gray-700">Flag as Damaged</label>
               </div>
               {returnForm.is_damaged && (
                 <div>
-                  <label className="label">Damage Report</label>
-                  <textarea value={returnForm.damage_report} onChange={(e) => setReturnForm({ ...returnForm, damage_report: e.target.value })} className="input-field" rows={3} placeholder="Describe the damage..." />
+                  <label className="label">Damage Report Details *</label>
+                  <textarea value={returnForm.damage_report} onChange={(e) => setReturnForm({ ...returnForm, damage_report: e.target.value })} className="input-field min-h-[85px] text-sm" placeholder="Please detail the nature of damage..." required />
                 </div>
               )}
               <div>
-                <label className="label">Remarks</label>
-                <textarea value={returnForm.remarks} onChange={(e) => setReturnForm({ ...returnForm, remarks: e.target.value })} className="input-field" rows={2} placeholder="Any additional remarks..." />
+                <label className="label">Remarks / Inspection Notes</label>
+                <textarea value={returnForm.remarks} onChange={(e) => setReturnForm({ ...returnForm, remarks: e.target.value })} className="input-field min-h-[85px] text-sm" placeholder="Additional remarks on return handover..." />
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
                 <button type="button" onClick={() => setShowReturnModal(null)} className="btn-secondary">Cancel</button>
-                <button type="submit" disabled={returning} className="btn-warning">
-                  {returning ? 'Returning...' : 'Return Asset'}
-                </button>
+                <button type="submit" disabled={returning} className="btn-primary">{returning ? 'Processing...' : 'Confirm Return'}</button>
               </div>
             </form>
           </div>

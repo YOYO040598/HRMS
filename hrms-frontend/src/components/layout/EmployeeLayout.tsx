@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../hooks/useRedux';
 import { logout } from '../../store/authSlice';
-import { LayoutDashboard, Clock, CalendarDays, Wallet, Bell, LogOut, Menu, X, ChevronDown, CheckSquare } from 'lucide-react';
+import { LayoutDashboard, Clock, CalendarDays, Wallet, Bell, LogOut, Menu, X, ChevronDown, CheckSquare, Package } from 'lucide-react';
 
 const allNavItems = [
   { path: '/emp', label: 'Dashboard', icon: LayoutDashboard, roles: ['EMPLOYEE', 'HR_ADMIN', 'HR_EXECUTIVE', 'ADMIN', 'MANAGER', 'TEAM_LEAD'] },
   { path: '/emp/attendance', label: 'Attendance', icon: Clock, roles: ['EMPLOYEE', 'HR_ADMIN', 'HR_EXECUTIVE', 'ADMIN', 'MANAGER', 'TEAM_LEAD'] },
   { path: '/emp/leave', label: 'Leave', icon: CalendarDays, roles: ['EMPLOYEE', 'HR_ADMIN', 'HR_EXECUTIVE', 'ADMIN', 'MANAGER', 'TEAM_LEAD'] },
   { path: '/emp/leave-approvals', label: 'Leave Approvals', icon: CheckSquare, roles: ['HR_ADMIN', 'HR_EXECUTIVE', 'ADMIN', 'MANAGER', 'TEAM_LEAD'] },
+  { path: '/emp/assets', label: 'My Assets', icon: Package, roles: ['EMPLOYEE', 'HR_ADMIN', 'HR_EXECUTIVE', 'ADMIN', 'MANAGER', 'TEAM_LEAD'] },
   { path: '/emp/payslips', label: 'Payslips', icon: Wallet, roles: ['EMPLOYEE', 'HR_ADMIN', 'HR_EXECUTIVE', 'ADMIN', 'MANAGER', 'TEAM_LEAD'] },
   { path: '/emp/notifications', label: 'Notifications', icon: Bell, roles: ['EMPLOYEE', 'HR_ADMIN', 'HR_EXECUTIVE', 'ADMIN', 'MANAGER', 'TEAM_LEAD'] },
 ];

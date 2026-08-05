@@ -1,5 +1,6 @@
 from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
 
 from apps.assets.models import Asset, AssetAssignment, AssetReturn, AssetHistory
 from apps.assets.serializers import (
@@ -36,6 +37,43 @@ class AssetAssignmentViewSet(ResponseMixin, viewsets.ModelViewSet):
     permission_classes = [IsHROrAdmin]
     pagination_class = StandardPagination
     filterset_class = AssetAssignmentFilter
+
+    def get_permissions(self):
+        if self.action == 'acknowledge':
+            return [IsAuthenticated()]
+        return [IsHROrAdmin()]
+
+    @action(detail=True, methods=['post'], url_path='acknowledge')
+    def acknowledge(self, request, pk=None):
+        from django.utils import timezone
+        assignment = self.get_object()
+        
+        if assignment.employee.user != request.user:
+            return self.error_response("You are not authorized to acknowledge this asset assignment")
+        
+        status_val = request.data.get('status', 'ACCEPTED')
+        comments = request.data.get('comments', '')
+        
+        if status_val not in ['ACCEPTED', 'REJECTED']:
+            return self.error_response("Invalid status")
+            
+        assignment.acceptance_status = status_val
+        assignment.is_acknowledged = True
+        assignment.acknowledged_at = timezone.now()
+        assignment.employee_comments = comments
+        assignment.save()
+        
+        AssetHistory.objects.create(
+            asset=assignment.asset,
+            action='ACKNOWLEDGED',
+            description=f'Receipt acknowledged by employee ({assignment.employee.user.full_name}). Status: {status_val}. Comments: {comments}',
+            performed_by=request.user
+        )
+        
+        return self.success_response(
+            AssetAssignmentSerializer(assignment).data,
+            f"Asset assignment status updated to {status_val}"
+        )
 
 
 class AssetReturnViewSet(ResponseMixin, viewsets.ModelViewSet):

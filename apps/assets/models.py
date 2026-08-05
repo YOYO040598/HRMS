@@ -9,14 +9,10 @@ class Asset(BaseModel):
     class Category(models.TextChoices):
         LAPTOP = 'LAPTOP', 'Laptop'
         DESKTOP = 'DESKTOP', 'Desktop'
-        MONITOR = 'MONITOR', 'Monitor'
-        KEYBOARD = 'KEYBOARD', 'Keyboard'
-        MOUSE = 'MOUSE', 'Mouse'
-        PHONE = 'PHONE', 'Phone'
-        TABLET = 'TABLET', 'Tablet'
-        CHAIR = 'CHAIR', 'Chair'
-        DESK = 'DESK', 'Desk'
-        OTHER = 'OTHER', 'Other'
+        MOBILE = 'MOBILE', 'Mobile'
+        SIM_CARD = 'SIM_CARD', 'SIM Card'
+        ID_CARD = 'ID_CARD', 'ID Card'
+        ACCESSORIES = 'ACCESSORIES', 'Accessories'
 
     class Status(models.TextChoices):
         AVAILABLE = 'AVAILABLE', 'Available'
@@ -43,6 +39,7 @@ class Asset(BaseModel):
         null=True, blank=True
     )
     image = models.ImageField(upload_to='assets/images/', blank=True, null=True)
+    specifications = models.JSONField(default=dict, blank=True)
 
     class Meta:
         verbose_name = 'Asset'
@@ -66,6 +63,14 @@ class AssetAssignment(BaseModel):
     condition_at_return = models.CharField(max_length=50, blank=True, default='')
     notes = models.TextField(blank=True, default='')
     is_returned = models.BooleanField(default=False)
+    is_acknowledged = models.BooleanField(default=False)
+    acknowledged_at = models.DateTimeField(null=True, blank=True)
+    acceptance_status = models.CharField(
+        max_length=20,
+        choices=[('PENDING', 'Pending'), ('ACCEPTED', 'Accepted'), ('REJECTED', 'Rejected')],
+        default='PENDING'
+    )
+    employee_comments = models.TextField(blank=True, default='')
 
     class Meta:
         verbose_name = 'Asset Assignment'
