@@ -1,0 +1,57 @@
+from rest_framework import serializers
+from apps.assets.models import Asset, AssetAssignment, AssetReturn, AssetHistory
+
+
+class AssetSerializer(serializers.ModelSerializer):
+    assigned_to_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Asset
+        fields = [
+            'id', 'name', 'asset_code', 'category', 'description', 'brand',
+            'model_name', 'serial_number', 'purchase_date', 'purchase_price',
+            'warranty_expiry', 'status', 'condition', 'location', 'company',
+            'image', 'assigned_to_name',
+        ]
+        read_only_fields = ['id']
+
+    def get_assigned_to_name(self, obj):
+        if obj.status == 'ASSIGNED':
+            assignment = obj.assignments.filter(is_returned=False).first()
+            if assignment:
+                return assignment.employee.user.full_name
+        return None
+
+
+class AssetAssignmentSerializer(serializers.ModelSerializer):
+    employee_name = serializers.CharField(source='employee.user.full_name', read_only=True)
+    asset_name = serializers.CharField(source='asset.name', read_only=True)
+    asset_code = serializers.CharField(source='asset.asset_code', read_only=True)
+
+    class Meta:
+        model = AssetAssignment
+        fields = [
+            'id', 'asset', 'asset_name', 'asset_code', 'employee', 'employee_name',
+            'assigned_by', 'assigned_date', 'expected_return_date', 'actual_return_date',
+            'condition_at_assignment', 'condition_at_return', 'notes', 'is_returned',
+        ]
+        read_only_fields = ['id']
+
+
+class AssetReturnSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AssetReturn
+        fields = [
+            'id', 'assignment', 'returned_by', 'return_date', 'condition',
+            'remarks', 'damage_report', 'is_damaged',
+        ]
+        read_only_fields = ['id']
+
+
+class AssetHistorySerializer(serializers.ModelSerializer):
+    performed_by_name = serializers.CharField(source='performed_by.full_name', read_only=True)
+
+    class Meta:
+        model = AssetHistory
+        fields = ['id', 'asset', 'action', 'description', 'performed_by', 'performed_by_name', 'timestamp']
+        read_only_fields = ['id', 'timestamp']

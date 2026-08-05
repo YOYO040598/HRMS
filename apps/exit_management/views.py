@@ -1,0 +1,202 @@
+from rest_framework import viewsets, generics
+from rest_framework.permissions import IsAuthenticated
+
+from apps.exit_management.models import Resignation, ExitApproval, FullAndFinal, ExperienceLetter
+from apps.exit_management.serializers import (
+    ResignationListSerializer, ResignationDetailSerializer,
+    ExitApprovalSerializer, FullAndFinalSerializer, ExperienceLetterSerializer,
+)
+from apps.exit_management.filters import ResignationFilter
+from apps.exit_management.services import (
+    apply_resignation, approve_resignation, reject_resignation,
+    relieve_employee, init_fnf, complete_fnf, generate_experience_letter,
+)
+from apps.accounts.permissions import IsHROrAdmin, IsManagerOrAbove
+from apps.common.pagination import StandardPagination
+from apps.common.mixins import ResponseMixin
+
+
+class ResignationViewSet(ResponseMixin, viewsets.ModelViewSet):
+    queryset = Resignation.objects.select_related(
+        'employee__user', 'approved_by'
+    ).prefetch_related('approvals').all()
+    permission_classes = [IsAuthenticated]
+    pagination_class = StandardPagination
+    filterset_class = ResignationFilter
+    search_fields = ['employee__user__first_name', 'employee__user__last_name', 'employee__employee_id']
+    ordering_fields = ['applied_date', 'last_working_day', 'status']
+    ordering = ['-applied_date']
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return ResignationListSerializer
+        return ResignationDetailSerializer
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [IsHROrAdmin]
+        return [permission() for permission in permission_classes]
+
+
+class ExitApprovalViewSet(ResponseMixin, viewsets.ModelViewSet):
+    queryset = ExitApproval.objects.select_related('resignation', 'approver').all()
+    serializer_class = ExitApprovalSerializer
+    permission_classes = [IsManagerOrAbove]
+    pagination_class = StandardPagination
+    filterset_fields = ['resignation', 'status', 'level']
+
+
+class FullAndFinalViewSet(ResponseMixin, viewsets.ModelViewSet):
+    queryset = FullAndFinal.objects.select_related(
+        'employee__user', 'resignation', 'completed_by'
+    ).all()
+    serializer_class = FullAndFinalSerializer
+    permission_classes = [IsHROrAdmin]
+    pagination_class = StandardPagination
+    filterset_fields = ['employee', 'status']
+
+
+class ExperienceLetterViewSet(ResponseMixin, viewsets.ModelViewSet):
+    queryset = ExperienceLetter.objects.select_related(
+        'employee__user', 'issued_by'
+    ).all()
+    serializer_class = ExperienceLetterSerializer
+    permission_classes = [IsHROrAdmin]
+    pagination_class = StandardPagination
+    filterset_fields = ['employee', 'is_sent']
+
+
+class ApplyResignationView(ResponseMixin, generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        from django.utils.dateparse import parse_date
+        try:
+            employee = request.user.employee_profile
+        except Exception:
+            return self.error_response('Employee profile not found')
+
+        last_working_day = parse_date(request.data.get('last_working_day', ''))
+        if not last_working_day:
+            return self.error_response('Last working day is required')
+
+        resignation, success, message = apply_resignation(
+            employee=employee,
+            last_working_day=last_working_day,
+            reason=request.data.get('reason', ''),
+            notice_period_days=int(request.data.get('notice_period_days', 30)),
+        )
+
+        if success:
+            return self.created_response(
+                ResignationDetailSerializer(resignation).data, message
+            )
+        return self.error_response(message)
+
+
+class ApproveResignationView(ResponseMixin, generics.GenericAPIView):
+    permission_classes = [IsManagerOrAbove]
+
+    def post(self, request, *args, **kwargs):
+        approval_id = request.data.get('approval_id')
+        comments = request.data.get('comments', '')
+
+        approval, success, message = approve_resignation(approval_id, request.user, comments)
+
+        if success:
+            return self.success_response(
+                ExitApprovalSerializer(approval).data, message
+            )
+        return self.error_response(message)
+
+
+class RejectResignationView(ResponseMixin, generics.GenericAPIView):
+    permission_classes = [IsManagerOrAbove]
+
+    def post(self, request, *args, **kwargs):
+        approval_id = request.data.get('approval_id')
+        comments = request.data.get('comments', '')
+
+        approval, success, message = reject_resignation(approval_id, request.user, comments)
+
+        if success:
+            return self.success_response(
+                ExitApprovalSerializer(approval).data, message
+            )
+        return self.error_response(message)
+
+
+class RelieveEmployeeView(ResponseMixin, generics.GenericAPIView):
+    permission_classes = [IsHROrAdmin]
+
+    def post(self, request, *args, **kwargs):
+        resignation_id = request.data.get('resignation_id')
+
+        resignation, success, message = relieve_employee(resignation_id, request.user)
+
+        if success:
+            return self.success_response(
+                ResignationDetailSerializer(resignation).data, message
+            )
+        return self.error_response(message)
+
+
+class GenerateExperienceLetterView(ResponseMixin, generics.GenericAPIView):
+    permission_classes = [IsHROrAdmin]
+
+    def post(self, request, *args, **kwargs):
+        from apps.employees.models import Employee
+        employee_id = request.data.get('employee_id')
+
+        try:
+            employee = Employee.objects.get(id=employee_id)
+        except Employee.DoesNotExist:
+            return self.error_response('Employee not found')
+
+        content = request.data.get('content', '')
+        letter = generate_experience_letter(employee, request.user, content)
+
+        return self.created_response(
+            ExperienceLetterSerializer(letter).data, 'Experience letter generated'
+        )
+
+
+class InitiateFnFView(ResponseMixin, generics.GenericAPIView):
+    permission_classes = [IsHROrAdmin]
+
+    def post(self, request, *args, **kwargs):
+        resignation_id = request.data.get('resignation_id')
+        if not resignation_id:
+            return self.error_response('resignation_id is required')
+
+        try:
+            resignation = Resignation.objects.get(id=resignation_id)
+        except Resignation.DoesNotExist:
+            return self.error_response('Resignation not found')
+
+        fnf = init_fnf(resignation.employee, resignation)
+
+        return self.created_response(
+            FullAndFinalSerializer(fnf).data, 'F&F initiated'
+        )
+
+
+class CompleteFnFView(ResponseMixin, generics.GenericAPIView):
+    permission_classes = [IsHROrAdmin]
+
+    def post(self, request, *args, **kwargs):
+        fnf_id = request.data.get('fnf_id')
+        final_amount = request.data.get('final_amount', 0)
+
+        if not fnf_id:
+            return self.error_response('fnf_id is required')
+
+        fnf, success, message = complete_fnf(fnf_id, request.user, final_amount)
+
+        if success:
+            return self.success_response(
+                FullAndFinalSerializer(fnf).data, message
+            )
+        return self.error_response(message)

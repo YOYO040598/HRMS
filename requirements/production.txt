@@ -1,0 +1,5 @@
+-r base.txt
+redis>=5.0
+celery>=5.3
+django-storages>=1.14
+boto3>=1.34
