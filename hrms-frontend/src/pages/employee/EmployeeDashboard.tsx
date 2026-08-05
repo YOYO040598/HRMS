@@ -58,8 +58,8 @@ export default function EmployeeDashboard() {
         }
         .bento-card:hover {
           transform: translateY(-5px);
-          box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05), 0 10px 20px -10px rgba(37, 99, 235, 0.05);
-          border-color: rgba(37, 99, 235, 0.3);
+          box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05), 0 10px 20px -10px rgba(234, 88, 12, 0.05);
+          border-color: rgba(234, 88, 12, 0.3);
         }
         @keyframes drift {
           0% { transform: translate(0px, 0px) scale(1); }
@@ -72,7 +72,7 @@ export default function EmployeeDashboard() {
       {/* Top Bar Greeting */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-bold text-[#2563eb] uppercase tracking-widest mb-1.5">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#ea580c] uppercase tracking-widest mb-1.5">
             <Sparkles size={14} /> Employee Workspace
           </div>
           <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Welcome, {user?.first_name}!</h2>
@@ -87,10 +87,10 @@ export default function EmployeeDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-auto">
         
         {/* Welcome Banner Bento Card */}
-        <div className="md:col-span-2 bg-gradient-to-tr from-[#1e3a8a] to-[#3b82f6] rounded-3xl p-8 text-white relative overflow-hidden shadow-lg shadow-[#2563eb]/15 flex flex-col justify-between min-h-[220px]">
+        <div className="md:col-span-2 bg-gradient-to-tr from-[#ea580c] to-[#f97316] rounded-3xl p-8 text-white relative overflow-hidden shadow-lg shadow-[#ea580c]/15 flex flex-col justify-between min-h-[220px]">
           {/* Ambient Glow Bubbles */}
           <div className="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-2xl animate-drift pointer-events-none" />
-          <div className="absolute -bottom-8 -left-8 w-36 h-36 bg-[#eff6ff]/20 rounded-full blur-xl pointer-events-none" />
+          <div className="absolute -bottom-8 -left-8 w-36 h-36 bg-white/10 rounded-full blur-xl pointer-events-none" />
           
           <div className="relative z-10">
             <span className="text-[10px] font-extrabold uppercase tracking-widest bg-white/20 px-2.5 py-1 rounded-full text-indigo-100">Active Profile</span>
@@ -177,8 +177,8 @@ export default function EmployeeDashboard() {
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md">Quick Access</span>
           </div>
           <div className="grid grid-cols-3 gap-3">
-            <Link to="/emp/attendance" className="p-3 bg-gray-50 hover:bg-blue-50/50 hover:text-[#2563eb] rounded-2xl text-center transition-all border border-gray-100/50">
-              <Clock size={20} className="mx-auto mb-1.5 text-[#2563eb]" />
+            <Link to="/emp/attendance" className="p-3 bg-gray-50 hover:bg-orange-50/50 hover:text-[#ea580c] rounded-2xl text-center transition-all border border-gray-100/50">
+              <Clock size={20} className="mx-auto mb-1.5 text-[#ea580c]" />
               <span className="text-xs font-bold block">Attendance</span>
             </Link>
             <Link to="/emp/leave" className="p-3 bg-gray-50 hover:bg-amber-50/50 hover:text-amber-600 rounded-2xl text-center transition-all border border-gray-100/50">

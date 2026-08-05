@@ -35,7 +35,7 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
         <div className="p-4 flex items-center justify-between">
           {sidebarOpen && (
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 bg-emerald-500 rounded-lg flex items-center justify-center font-bold text-lg shadow-md shadow-emerald-500/10">H</div>
+              <div className="w-9 h-9 bg-[#ea580c] rounded-lg flex items-center justify-center font-bold text-lg shadow-md shadow-orange-500/10">H</div>
               <span className="text-xl font-bold tracking-tight">HRMS</span>
             </div>
           )}
@@ -53,7 +53,7 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
                 to={item.path}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 ${
                   isActive
-                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/15'
+                    ? 'bg-[#ea580c] text-white shadow-md shadow-orange-500/15'
                     : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
                 }`}
               >

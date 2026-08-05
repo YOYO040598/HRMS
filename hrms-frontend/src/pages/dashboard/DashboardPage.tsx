@@ -76,7 +76,7 @@ export default function DashboardPage() {
       {/* Greeting Title */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-bold text-[#2563eb] uppercase tracking-widest mb-1.5">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#ea580c] uppercase tracking-widest mb-1.5">
             <Sparkles size={14} /> Organization Overview
           </div>
           <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">System Dashboard</h2>
@@ -91,9 +91,9 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-auto">
         
         {/* Welcome Banner Bento */}
-        <div className="md:col-span-4 bg-gradient-to-tr from-[#1e3a8a] to-[#3b82f6] rounded-3xl p-8 text-white relative overflow-hidden shadow-lg shadow-[#2563eb]/15 min-h-[160px] flex flex-col justify-center">
+        <div className="md:col-span-4 bg-gradient-to-tr from-[#ea580c] to-[#f97316] rounded-3xl p-8 text-white relative overflow-hidden shadow-lg shadow-[#ea580c]/15 min-h-[160px] flex flex-col justify-center">
           <div className="absolute -top-12 -right-12 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-drift pointer-events-none" />
-          <div className="absolute -bottom-8 -left-8 w-48 h-48 bg-[#eff6ff]/20 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute -bottom-8 -left-8 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none" />
           
           <div className="relative z-10">
             <h3 className="text-3xl font-extrabold tracking-tight">{getGreeting()}, Administrator!</h3>
@@ -104,10 +104,10 @@ export default function DashboardPage() {
         {/* Total Employees Stat */}
         <Link to="/employees" className="bento-card bg-white rounded-3xl p-6 flex flex-col justify-between min-h-[160px] group">
           <div className="flex justify-between items-start">
-            <div className="w-10 h-10 bg-blue-50 rounded-2xl flex items-center justify-center text-[#2563eb]">
+            <div className="w-10 h-10 bg-orange-50 rounded-2xl flex items-center justify-center text-[#ea580c]">
               <Users size={20} />
             </div>
-            <ChevronRight size={16} className="text-gray-300 group-hover:text-[#2563eb] transition-colors" />
+            <ChevronRight size={16} className="text-gray-300 group-hover:text-[#ea580c] transition-colors" />
           </div>
           <div>
             <div className="text-3xl font-black text-gray-900 mt-1">{stats?.total_employees || 0}</div>
@@ -193,7 +193,7 @@ export default function DashboardPage() {
         {/* Department Headcount Bar Chart */}
         <div className="bento-card md:col-span-2 bg-white rounded-3xl p-6">
           <h3 className="text-lg font-bold text-gray-900 tracking-tight mb-4 flex items-center gap-2">
-            <TrendingUp size={18} className="text-[#2563eb]" /> Department Headcount
+            <TrendingUp size={18} className="text-[#ea580c]" /> Department Headcount
           </h3>
           {deptBreakdown.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
@@ -202,7 +202,7 @@ export default function DashboardPage() {
                 <XAxis dataKey="code" tick={{ fontSize: 11, fontWeight: 600, fill: '#64748b' }} />
                 <YAxis tick={{ fontSize: 11, fontWeight: 600, fill: '#64748b' }} />
                 <Tooltip contentStyle={{ borderRadius: '16px', border: '1px solid rgba(226, 232, 240, 0.8)', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.05)' }} />
-                <Bar dataKey="total_employees" fill="#2563eb" radius={[6, 6, 0, 0]} name="Total" />
+                <Bar dataKey="total_employees" fill="#ea580c" radius={[6, 6, 0, 0]} name="Total" />
                 <Bar dataKey="present_today" fill="#10b981" radius={[6, 6, 0, 0]} name="Present" />
               </BarChart>
             </ResponsiveContainer>
