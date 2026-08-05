@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../hooks/useRedux';
 import { login, clearError } from '../../store/authSlice';
-import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -21,110 +21,120 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800 text-white p-12 flex-col justify-between">
-        <div>
-          <div className="flex items-center gap-3 mb-16">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-              <span className="text-2xl font-bold">H</span>
+    <div className="min-h-screen w-full relative flex items-center justify-center overflow-hidden bg-[#030306] p-4 sm:p-6">
+      {/* CSS Animation Styles */}
+      <style>{`
+        @keyframes float-blob-1 {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(50px, -70px) scale(1.15); }
+          66% { transform: translate(-30px, 40px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        @keyframes float-blob-2 {
+          0% { transform: translate(0px, 0px) scale(1.1); }
+          50% { transform: translate(-60px, 50px) scale(0.85); }
+          100% { transform: translate(0px, 0px) scale(1.1); }
+        }
+        @keyframes float-blob-3 {
+          0% { transform: translate(0px, 0px) scale(0.9); }
+          50% { transform: translate(40px, 60px) scale(1.1); }
+          100% { transform: translate(0px, 0px) scale(0.9); }
+        }
+        .blob-1 { animation: float-blob-1 15s infinite ease-in-out; }
+        .blob-2 { animation: float-blob-2 18s infinite ease-in-out; }
+        .blob-3 { animation: float-blob-3 12s infinite ease-in-out; }
+      `}</style>
+
+      {/* Vibrant Background Animated Blobs */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-indigo-600/30 blur-[120px] blob-1 pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[45vw] h-[45vw] rounded-full bg-purple-600/25 blur-[120px] blob-2 pointer-events-none" />
+      <div className="absolute top-[30%] right-[10%] w-[35vw] h-[35vw] rounded-full bg-pink-600/20 blur-[100px] blob-3 pointer-events-none" />
+
+      {/* Glassmorphic Login Container */}
+      <div className="w-full max-w-[460px] relative z-10">
+        <div className="bg-white/[0.04] backdrop-blur-[24px] -webkit-backdrop-blur-[24px] border border-white/[0.12] rounded-[32px] p-8 sm:p-10 shadow-[0_32px_64px_rgba(0,0,0,0.5)]">
+          {/* Logo / Brand */}
+          <div className="flex items-center gap-3 mb-8 justify-center">
+            <div className="w-11 h-11 bg-gradient-to-tr from-[#5e6ad2] to-[#818cf8] rounded-xl flex items-center justify-center font-bold text-white shadow-lg shadow-[#5e6ad2]/20">
+              <span className="text-xl font-extrabold font-mono">H</span>
             </div>
-            <span className="text-3xl font-bold">HRMS</span>
+            <span className="text-2xl font-bold tracking-tight text-white">HRMS <span className="text-xs font-semibold px-2 py-0.5 rounded bg-white/10 text-indigo-300 ml-1">Admin</span></span>
           </div>
 
-          <h1 className="text-5xl font-bold leading-tight mb-6">
-            Human Resource<br />Management System
-          </h1>
-          <p className="text-xl text-indigo-100 leading-relaxed max-w-lg">
-            Streamline your HR operations with our comprehensive platform. Manage employees, attendance, payroll, and more.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-6 mt-12">
-          {[
-            { num: '500+', label: 'Employees' },
-            { num: '50+', label: 'Companies' },
-            { num: '99%', label: 'Uptime' },
-            { num: '24/7', label: 'Support' },
-          ].map((stat) => (
-            <div key={stat.label} className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-              <div className="text-3xl font-bold">{stat.num}</div>
-              <div className="text-indigo-200 text-sm">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Right Panel - Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-gray-50">
-        <div className="w-full max-w-md">
-          <div className="lg:hidden flex items-center gap-2 mb-8">
-            <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">H</div>
-            <span className="text-2xl font-bold text-gray-800">HRMS</span>
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-extrabold text-white tracking-tight mb-2">Welcome Back</h2>
+            <p className="text-sm text-gray-400 font-medium">Sign in to your administrative dashboard</p>
           </div>
-
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">Welcome back</h2>
-          <p className="text-gray-500 mb-8">Sign in to your account to continue</p>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-300 text-xs font-semibold flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0" />
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="label">Email address</label>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <label className="block text-[11px] font-bold text-indigo-300 uppercase tracking-wider">Email Address</label>
               <div className="relative">
-                <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); dispatch(clearError()); }}
-                  className="input-field pl-10"
-                  placeholder="Enter your email"
+                  className="w-full pl-12 pr-4 py-3.5 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#5e6ad2]/40 focus:border-[#5e6ad2] transition-all outline-none text-white placeholder-gray-500 text-sm font-medium"
+                  placeholder="name@company.com"
                   required
                 />
               </div>
             </div>
 
-            <div>
-              <label className="label">Password</label>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <label className="block text-[11px] font-bold text-indigo-300 uppercase tracking-wider">Password</label>
+              </div>
               <div className="relative">
-                <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input-field pl-10 pr-10"
-                  placeholder="Enter your password"
+                  className="w-full pl-12 pr-12 py-3.5 bg-white/[0.03] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#5e6ad2]/40 focus:border-[#5e6ad2] transition-all outline-none text-white placeholder-gray-500 text-sm font-medium"
+                  placeholder="••••••••"
                   required
                 />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors">
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
-            <button type="submit" disabled={loading} className="btn-primary w-full py-3 flex items-center justify-center gap-2 text-base">
-              {loading ? <><Loader2 size={20} className="animate-spin" /> Signing in...</> : 'Sign in'}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-4 bg-gradient-to-r from-[#5e6ad2] to-[#7c89f8] text-white font-bold rounded-xl hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-[#5e6ad2]/25 flex items-center justify-center gap-2 text-sm uppercase tracking-wider cursor-pointer"
+            >
+              {loading ? (
+                <><Loader2 size={18} className="animate-spin" /> Authenticating...</>
+              ) : (
+                <>Sign In <ArrowRight size={16} /></>
+              )}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-gray-500">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-indigo-600 font-semibold hover:text-indigo-700">Create account</Link>
-          </p>
-
-          <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-100">
-            <p className="text-xs font-medium text-blue-800 mb-2">Demo Credentials:</p>
-            <p className="text-xs text-blue-600">Admin: admin@hrms.com / Admin@123</p>
-            <p className="text-xs text-blue-600 mt-1">Employee: Login with your Employee ID (get from HR)</p>
+          {/* Demo credentials */}
+          <div className="mt-8 p-4 bg-white/[0.02] rounded-2xl border border-white/[0.06] text-xs space-y-2">
+            <p className="font-bold text-indigo-300">Default Demo Admin Account:</p>
+            <div className="text-gray-400 font-medium">
+              <span className="font-semibold text-white">Email:</span> admin@hrms.com<br />
+              <span className="font-semibold text-white">Password:</span> Admin@123
+            </div>
           </div>
 
-          <p className="mt-4 text-center text-sm text-gray-500">
-            Employee? <Link to="/emp/login" className="text-emerald-600 font-semibold hover:text-emerald-700">Sign in as Employee</Link>
-          </p>
+          <div className="mt-6 text-center text-xs">
+            <span className="text-gray-500 font-medium">Are you an Employee?</span>{' '}
+            <Link to="/emp/login" className="text-indigo-400 font-bold hover:text-indigo-300 transition-colors uppercase tracking-wider ml-1">Sign in here</Link>
+          </div>
         </div>
       </div>
     </div>
