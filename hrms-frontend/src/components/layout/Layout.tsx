@@ -44,15 +44,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
-      <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-gradient-to-b from-indigo-950 to-indigo-900 text-white transition-all duration-300 flex flex-col`}>
+      <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-gradient-to-b from-[#0f172a] to-[#0f172a] text-white border-r border-slate-800/40 transition-all duration-300 flex flex-col`}>
         <div className="p-4 flex items-center justify-between">
           {sidebarOpen && (
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 bg-indigo-500 rounded-lg flex items-center justify-center font-bold text-lg">H</div>
-              <span className="text-xl font-bold">HRMS</span>
+              <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg shadow-md shadow-blue-500/10">H</div>
+              <span className="text-xl font-bold tracking-tight">HRMS</span>
             </div>
           )}
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 hover:bg-indigo-800 rounded-lg transition-colors">
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer">
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
@@ -64,24 +64,24 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 ${
                   isActive
-                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
-                    : 'text-indigo-200 hover:bg-indigo-800 hover:text-white'
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/15'
+                    : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
                 }`}
               >
                 <item.icon size={20} />
-                {sidebarOpen && <span className="font-medium">{item.label}</span>}
+                {sidebarOpen && <span className="font-semibold text-sm">{item.label}</span>}
               </Link>
             );
           })}
         </nav>
 
         {sidebarOpen && (
-          <div className="p-4 border-t border-indigo-800">
-            <div className="text-xs text-indigo-300 mb-1">Logged in as</div>
-            <div className="text-sm font-medium text-white truncate">{user?.full_name || user?.email}</div>
-            <div className="text-xs text-indigo-400">{user?.role?.replace('_', ' ')}</div>
+          <div className="p-4 border-t border-slate-800/80">
+            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">Logged in as</div>
+            <div className="text-sm font-bold text-white truncate">{user?.full_name || user?.email}</div>
+            <div className="text-[11px] font-medium text-slate-400 mt-0.5">{user?.role?.replace('_', ' ')}</div>
           </div>
         )}
       </aside>

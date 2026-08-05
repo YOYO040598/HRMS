@@ -1,35 +1,35 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root {
-    --color-primary: #5e6ad2;
-    --color-primary-hover: #4d57c0;
-    --color-primary-light: #eef2ff;
-    --color-success: #10b981;
-    --color-warning: #f59e0b;
-    --color-danger: #ef4444;
-    --color-info: #3b82f6;
-    --color-sidebar: #0b0f19;
+    --color-primary: #2563eb;
+    --color-primary-hover: #1d4ed8;
+    --color-primary-light: #eff6ff;
+    --color-success: #059669;
+    --color-warning: #d97706;
+    --color-danger: #dc2626;
+    --color-info: #2563eb;
+    --color-sidebar: #0f172a;
     --color-sidebar-hover: #1e293b;
-    --color-sidebar-active: #5e6ad2;
+    --color-sidebar-active: #2563eb;
   }
 }
 
 @layer base {
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    @apply bg-[#fafbfc] text-[#1e293b] antialiased;
+    @apply bg-[#f8fafc] text-[#0f172a] antialiased;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Outfit', sans-serif;
-    letter-spacing: -0.02em;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: -0.015em;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-[#5e6ad2] text-white px-5 py-2.5 rounded-xl hover:bg-[#4d57c0] active:scale-[0.98] transition-all font-semibold shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer;
+    @apply bg-[#2563eb] text-white px-5 py-2.5 rounded-xl hover:bg-[#1d4ed8] active:scale-[0.98] transition-all font-semibold shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer;
   }
   .btn-secondary {
     @apply bg-[#f1f5f9] text-[#475569] px-5 py-2.5 rounded-xl hover:bg-[#e2e8f0] active:scale-[0.98] transition-all font-semibold cursor-pointer;
@@ -47,7 +47,7 @@
     @apply bg-white rounded-2xl border border-gray-200/50 p-6 shadow-[0_4px_20px_-2px_rgba(18,18,23,0.03)];
   }
   .input-field {
-    @apply w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#5e6ad2]/20 focus:border-[#5e6ad2] transition-all outline-none text-[#1e293b] placeholder-gray-400 bg-white/70 backdrop-blur-sm;
+    @apply w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2563eb]/20 focus:border-[#2563eb] transition-all outline-none text-[#1e293b] placeholder-gray-400 bg-white/70 backdrop-blur-sm;
   }
   .label {
     @apply block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5;
