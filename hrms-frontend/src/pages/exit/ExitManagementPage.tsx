@@ -13,7 +13,7 @@ export default function ExitManagementPage() {
   // Resignations
   const [resignations, setResignations] = useState<Resignation[]>([]);
   const [showResignModal, setShowResignModal] = useState(false);
-  const [resignForm, setResignForm] = useState({ employee_id: '', last_working_day: '', reason: '', notice_period_days: 30 });
+  const [resignForm, setResignForm] = useState({ employee_id: '', last_working_day: '', reason: '', notice_period_days: 30, force_exit: false });
   const [submitting, setSubmitting] = useState(false);
 
   // F&F
@@ -37,16 +37,16 @@ export default function ExitManagementPage() {
         api.get('/exit/fnf/'),
         api.get('/exit/experience-letters/'),
       ]);
-      setResignations(resignRes.data.data);
-      setFnfList(fnfRes.data.data);
-      setLetters(letterRes.data.data);
+      setResignations(resignRes.data.data || resignRes.data.results || []);
+      setFnfList(fnfRes.data.data || fnfRes.data.results || []);
+      setLetters(letterRes.data.data || letterRes.data.results || []);
     } catch (err) { console.error(err); } finally { setLoading(false); }
   };
 
   const fetchEmployees = async () => {
     try {
       const res = await api.get('/employees/');
-      setEmployees(res.data.data);
+      setEmployees(res.data.data || res.data.results || []);
     } catch (err) { console.error(err); }
   };
 
@@ -56,7 +56,7 @@ export default function ExitManagementPage() {
     try {
       await api.post('/exit/apply/', resignForm);
       setShowResignModal(false);
-      setResignForm({ employee_id: '', last_working_day: '', reason: '', notice_period_days: 30 });
+      setResignForm({ employee_id: '', last_working_day: '', reason: '', notice_period_days: 30, force_exit: false });
       fetchAll();
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to submit resignation');
@@ -337,6 +337,18 @@ export default function ExitManagementPage() {
               <div>
                 <label className="label">Reason *</label>
                 <textarea value={resignForm.reason} onChange={(e) => setResignForm({ ...resignForm, reason: e.target.value })} className="input-field" rows={3} placeholder="Reason for resignation" required />
+              </div>
+              <div className="flex items-center gap-2 pt-2">
+                <input
+                  type="checkbox"
+                  id="force_exit"
+                  checked={resignForm.force_exit}
+                  onChange={(e) => setResignForm({ ...resignForm, force_exit: e.target.checked })}
+                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4"
+                />
+                <label htmlFor="force_exit" className="text-sm font-semibold text-gray-700 cursor-pointer">
+                  Approve immediately (Force Exit)
+                </label>
               </div>
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowResignModal(false)} className="btn-secondary flex-1">Cancel</button>

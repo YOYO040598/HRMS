@@ -103,6 +103,8 @@ class ApplyResignationView(ResponseMixin, generics.GenericAPIView):
         if not last_working_day:
             return self.error_response('Last working day is required')
 
+        force_exit = request.data.get('force_exit', False)
+
         resignation, success, message = apply_resignation(
             employee=employee,
             last_working_day=last_working_day,
@@ -111,6 +113,14 @@ class ApplyResignationView(ResponseMixin, generics.GenericAPIView):
         )
 
         if success:
+            if force_exit and (request.user.is_superuser or getattr(request.user, 'is_staff', False) or request.user.role in ['ADMIN', 'HR_ADMIN', 'HR_EXECUTIVE']):
+                from django.utils import timezone
+                resignation.status = 'APPROVED'
+                resignation.approved_by = request.user
+                resignation.approved_date = timezone.now().date()
+                resignation.save(update_fields=['status', 'approved_by', 'approved_date'])
+                resignation.approvals.all().update(status='APPROVED', approved_at=timezone.now(), comments='Force exited by administrator.')
+            
             return self.created_response(
                 ResignationDetailSerializer(resignation).data, message
             )
