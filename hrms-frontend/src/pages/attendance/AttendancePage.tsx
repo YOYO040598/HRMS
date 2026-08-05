@@ -73,37 +73,40 @@ export default function AttendancePage() {
       </div>
 
       {/* Check In/Out Card */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-8 text-white">
+      <div className="bg-gradient-to-tr from-[#ea580c] to-[#f97316] rounded-2xl p-8 text-white shadow-lg shadow-orange-500/10">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div>
             <div className="text-6xl font-mono font-bold mb-2">
               {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
             </div>
-            <div className="text-xl text-indigo-100">
+            <div className="text-xl text-orange-100">
               {currentTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
             {!isCheckedIn && !isCheckedOut && (
-              <button onClick={handleCheckIn} disabled={actionLoading} className="flex items-center justify-center gap-2 bg-white text-indigo-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-indigo-50 transition-colors disabled:opacity-50">
+              <button onClick={handleCheckIn} disabled={actionLoading} className="flex items-center justify-center gap-2 bg-white text-[#ea580c] px-8 py-4 rounded-xl font-bold text-lg hover:bg-orange-50 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50">
                 <LogIn size={24} /> Check In
               </button>
             )}
             {isCheckedIn && (
               <>
-                <div className="flex items-center justify-center gap-2 bg-emerald-500/20 border border-emerald-300/30 px-6 py-4 rounded-xl">
-                  <CheckCircle size={20} />
-                  <span className="font-semibold">Checked in at {new Date(todayAttendance!.check_in!).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</span>
+                <div className="flex items-center justify-center gap-2 bg-white/10 border border-white/20 px-6 py-4 rounded-xl">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-400"></span>
+                  </span>
+                  <span className="font-semibold ml-2">Checked in at {new Date(todayAttendance!.check_in!).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</span>
                 </div>
-                <button onClick={handleCheckOut} disabled={actionLoading} className="flex items-center justify-center gap-2 bg-red-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-red-600 transition-colors disabled:opacity-50">
+                <button onClick={handleCheckOut} disabled={actionLoading} className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-xl font-bold text-lg active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50">
                   <LogOut size={24} /> Check Out
                 </button>
               </>
             )}
             {isCheckedOut && (
               <div className="flex items-center justify-center gap-2 bg-white/20 border border-white/30 px-6 py-4 rounded-xl">
-                <CheckCircle size={20} />
+                <CheckCircle size={20} className="text-emerald-300" />
                 <span className="font-semibold">Day completed - {todayAttendance!.total_hours}h worked</span>
               </div>
             )}
@@ -113,19 +116,19 @@ export default function AttendancePage() {
         {todayAttendance && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-              <div className="text-sm text-indigo-200">Status</div>
+              <div className="text-sm text-orange-200">Status</div>
               <div className="font-bold text-lg">{todayAttendance.status}</div>
             </div>
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-              <div className="text-sm text-indigo-200">Hours Worked</div>
+              <div className="text-sm text-orange-200">Hours Worked</div>
               <div className="font-bold text-lg">{todayAttendance.total_hours || 0}h</div>
             </div>
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-              <div className="text-sm text-indigo-200">Overtime</div>
+              <div className="text-sm text-orange-200">Overtime</div>
               <div className="font-bold text-lg">{todayAttendance.overtime_hours || 0}h</div>
             </div>
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-              <div className="text-sm text-indigo-200">Check Out</div>
+              <div className="text-sm text-orange-200">Check Out</div>
               <div className="font-bold text-lg">
                 {todayAttendance.check_out
                   ? new Date(todayAttendance.check_out).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })

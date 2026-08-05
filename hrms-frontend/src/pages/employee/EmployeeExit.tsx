@@ -99,7 +99,7 @@ export default function EmployeeExit() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ea580c]" />
       </div>
     );
   }
@@ -117,7 +117,7 @@ export default function EmployeeExit() {
         {!activeResignation && (
           <button
             onClick={() => setShowResignModal(true)}
-            className="btn-primary bg-emerald-600 hover:bg-emerald-700 flex items-center gap-2"
+            className="btn-primary flex items-center gap-2 cursor-pointer"
           >
             <Plus size={18} /> Submit Resignation
           </button>
@@ -235,7 +235,7 @@ export default function EmployeeExit() {
           </p>
           <button
             onClick={() => setShowResignModal(true)}
-            className="btn-primary bg-emerald-600 hover:bg-emerald-700 inline-flex items-center gap-2 text-sm"
+            className="btn-primary inline-flex items-center gap-2 text-sm cursor-pointer"
           >
             <Plus size={16} /> Submit Resignation Request
           </button>
@@ -333,7 +333,7 @@ export default function EmployeeExit() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="btn-primary bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+                  className="btn-primary text-white font-bold cursor-pointer"
                 >
                   {submitting ? 'Submitting...' : 'Submit Request'}
                 </button>
