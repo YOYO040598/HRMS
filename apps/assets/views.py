@@ -2,10 +2,11 @@ from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 
-from apps.assets.models import Asset, AssetAssignment, AssetReturn, AssetHistory
+from apps.assets.models import Asset, AssetAssignment, AssetReturn, AssetHistory, AssetRequest
 from apps.assets.serializers import (
     AssetSerializer, AssetAssignmentSerializer,
     AssetReturnSerializer, AssetHistorySerializer,
+    AssetRequestSerializer,
 )
 from apps.assets.filters import AssetFilter, AssetAssignmentFilter
 from apps.assets.services import (
@@ -187,4 +188,83 @@ class EmployeeAssetsView(ResponseMixin, generics.GenericAPIView):
         assets = get_employee_assets(employee)
         return self.success_response(
             AssetAssignmentSerializer(assets, many=True).data
+        )
+
+
+class AssetRequestViewSet(ResponseMixin, viewsets.ModelViewSet):
+    queryset = AssetRequest.objects.select_related('employee__user', 'approved_by', 'assigned_asset').all()
+    serializer_class = AssetRequestSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = StandardPagination
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role in ['ADMIN', 'HR_ADMIN', 'HR_EXECUTIVE']:
+            return self.queryset
+        try:
+            employee = user.employee_profile
+            return self.queryset.filter(employee=employee)
+        except Exception:
+            return self.queryset.none()
+
+    def perform_create(self, serializer):
+        try:
+            employee = self.request.user.employee_profile
+        except Exception:
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError("You must have an employee profile to request assets")
+        serializer.save(employee=employee, status='PENDING')
+
+    @action(detail=True, methods=['post'], permission_classes=[IsHROrAdmin], url_path='approve')
+    def approve(self, request, pk=None):
+        asset_request = self.get_object()
+        asset_id = request.data.get('asset_id')
+        comments = request.data.get('comments', '')
+
+        if asset_request.status != 'PENDING':
+            return self.error_response("This request has already been processed")
+
+        if not asset_id:
+            return self.error_response("Asset ID is required for approval")
+
+        try:
+            asset = Asset.objects.get(id=asset_id, status='AVAILABLE')
+        except Asset.DoesNotExist:
+            return self.error_response("Selected asset is not available")
+
+        from apps.assets.services import assign_asset
+        assignment, success, message = assign_asset(
+            asset.id, asset_request.employee, request.user, 'GOOD', f"Assigned via request approval. {comments}"
+        )
+
+        if not success:
+            return self.error_response(message)
+
+        asset_request.status = 'APPROVED'
+        asset_request.approved_by = request.user
+        asset_request.comments = comments
+        asset_request.assigned_asset = asset
+        asset_request.save()
+
+        return self.success_response(
+            AssetRequestSerializer(asset_request).data,
+            "Asset request approved and asset assigned"
+        )
+
+    @action(detail=True, methods=['post'], permission_classes=[IsHROrAdmin], url_path='reject')
+    def reject(self, request, pk=None):
+        asset_request = self.get_object()
+        comments = request.data.get('comments', '')
+
+        if asset_request.status != 'PENDING':
+            return self.error_response("This request has already been processed")
+
+        asset_request.status = 'REJECTED'
+        asset_request.approved_by = request.user
+        asset_request.comments = comments
+        asset_request.save()
+
+        return self.success_response(
+            AssetRequestSerializer(asset_request).data,
+            "Asset request rejected"
         )

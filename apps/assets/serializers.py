@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.assets.models import Asset, AssetAssignment, AssetReturn, AssetHistory
+from apps.assets.models import Asset, AssetAssignment, AssetReturn, AssetHistory, AssetRequest
 
 
 class AssetSerializer(serializers.ModelSerializer):
@@ -69,3 +69,20 @@ class AssetHistorySerializer(serializers.ModelSerializer):
         model = AssetHistory
         fields = ['id', 'asset', 'action', 'description', 'performed_by', 'performed_by_name', 'timestamp']
         read_only_fields = ['id', 'timestamp']
+
+
+class AssetRequestSerializer(serializers.ModelSerializer):
+    employee_name = serializers.CharField(source='employee.user.full_name', read_only=True)
+    employee_code = serializers.CharField(source='employee.employee_id', read_only=True)
+    assigned_asset_name = serializers.CharField(source='assigned_asset.name', read_only=True)
+    assigned_asset_code = serializers.CharField(source='assigned_asset.asset_code', read_only=True)
+    approved_by_name = serializers.CharField(source='approved_by.full_name', read_only=True)
+
+    class Meta:
+        model = AssetRequest
+        fields = [
+            'id', 'employee', 'employee_name', 'employee_code', 'asset_category',
+            'reason', 'request_date', 'status', 'approved_by', 'approved_by_name',
+            'comments', 'assigned_asset', 'assigned_asset_name', 'assigned_asset_code',
+        ]
+        read_only_fields = ['id', 'employee', 'request_date', 'status', 'approved_by', 'assigned_asset']

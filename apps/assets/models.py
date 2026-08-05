@@ -116,3 +116,30 @@ class AssetHistory(BaseModel):
 
     def __str__(self):
         return f'{self.asset} - {self.action}'
+
+
+class AssetRequest(BaseModel):
+    employee = models.ForeignKey('employees.Employee', on_delete=models.CASCADE, related_name='asset_requests')
+    asset_category = models.CharField(max_length=30, choices=Asset.Category.choices)
+    reason = models.TextField()
+    request_date = models.DateField(auto_now_add=True)
+    status = models.CharField(
+        max_length=20,
+        choices=[('PENDING', 'Pending'), ('APPROVED', 'Approved'), ('REJECTED', 'Rejected')],
+        default='PENDING'
+    )
+    approved_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_asset_requests'
+    )
+    comments = models.TextField(blank=True, default='')
+    assigned_asset = models.ForeignKey(
+        Asset, on_delete=models.SET_NULL, null=True, blank=True, related_name='requests'
+    )
+
+    class Meta:
+        verbose_name = 'Asset Request'
+        verbose_name_plural = 'Asset Requests'
+        ordering = ['-request_date']
+
+    def __str__(self):
+        return f'Request - {self.employee} ({self.asset_category})'

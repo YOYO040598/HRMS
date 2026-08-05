@@ -5,14 +5,15 @@ from apps.assets.views import (
     AssetViewSet, AssetAssignmentViewSet,
     AssetReturnViewSet, AssetHistoryViewSet,
     AssignAssetView, ReturnAssetView, TransferAssetView,
-    AssetStatsView, EmployeeAssetsView,
+    AssetStatsView, EmployeeAssetsView, AssetRequestViewSet,
 )
 
 router = DefaultRouter()
-router.register(r'', AssetViewSet)
+router.register(r'requests', AssetRequestViewSet)
 router.register(r'assignments', AssetAssignmentViewSet)
 router.register(r'returns', AssetReturnViewSet)
 router.register(r'history', AssetHistoryViewSet)
+router.register(r'', AssetViewSet)
 
 urlpatterns = [
     path('assign/', AssignAssetView.as_view(), name='asset-assign'),
