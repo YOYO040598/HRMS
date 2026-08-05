@@ -196,10 +196,14 @@ class AssetRequestViewSet(ResponseMixin, viewsets.ModelViewSet):
     serializer_class = AssetRequestSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = StandardPagination
+    filterset_fields = ['status', 'asset_category']
+    search_fields = ['employee__user__first_name', 'employee__user__last_name', 'employee__employee_id', 'reason']
 
     def get_queryset(self):
         user = self.request.user
-        if user.role in ['ADMIN', 'HR_ADMIN', 'HR_EXECUTIVE']:
+        if not user or not user.is_authenticated:
+            return self.queryset.none()
+        if user.is_superuser or getattr(user, 'is_staff', False) or user.role in ['ADMIN', 'HR_ADMIN', 'HR_EXECUTIVE']:
             return self.queryset
         try:
             employee = user.employee_profile
