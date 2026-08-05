@@ -503,9 +503,16 @@ export default function AssetManagementPage() {
                         <div className="text-[10px] text-gray-400 font-mono">{r.employee_code}</div>
                       </td>
                       <td className="table-cell">
-                        <div className="flex items-center gap-1.5 text-xs text-gray-700 capitalize font-medium">
-                          {getCategoryIcon(r.asset_category)}
-                          {r.asset_category.replace(/_/g, ' ').toLowerCase()}
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-1.5 text-xs text-gray-700 capitalize font-medium">
+                            {getCategoryIcon(r.asset_category)}
+                            {r.asset_category.replace(/_/g, ' ').toLowerCase()}
+                          </div>
+                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded self-start mt-0.5 ${
+                            r.request_type === 'RETURN' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'
+                          }`}>
+                            {r.request_type === 'RETURN' ? 'Return Request' : 'Allocation Request'}
+                          </span>
                         </div>
                       </td>
                       <td className="table-cell max-w-xs truncate text-xs text-gray-600" title={r.reason}>
@@ -526,12 +533,28 @@ export default function AssetManagementPage() {
                       <td className="table-cell">
                         {r.status === 'PENDING' && (
                           <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => handleOpenApproveModal(r)}
-                              className="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors shadow-sm"
-                            >
-                              <Check size={12} /> Approve
-                            </button>
+                            {r.request_type === 'RETURN' ? (
+                              <button
+                                onClick={() => {
+                                  if (r.assigned_asset) {
+                                    setReturnForm({ condition: 'GOOD', remarks: '', damage_report: '', is_damaged: false });
+                                    setShowReturnModal(r.assigned_asset);
+                                  } else {
+                                    alert("No assigned asset found on this return request");
+                                  }
+                                }}
+                                className="bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors shadow-sm"
+                              >
+                                <RotateCcw size={12} /> Process Return
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleOpenApproveModal(r)}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors shadow-sm"
+                              >
+                                <Check size={12} /> Approve
+                              </button>
+                            )}
                             <button
                               onClick={() => handleOpenRejectModal(r)}
                               className="bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors border border-rose-200"

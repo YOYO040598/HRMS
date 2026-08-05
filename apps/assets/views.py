@@ -135,6 +135,17 @@ class ReturnAssetView(ResponseMixin, generics.GenericAPIView):
         )
 
         if success:
+            from apps.assets.models import AssetRequest
+            AssetRequest.objects.filter(
+                employee=assignment.employee,
+                assigned_asset=assignment.asset,
+                request_type='RETURN',
+                status='PENDING'
+            ).update(
+                status='APPROVED',
+                approved_by=request.user,
+                comments=remarks
+            )
             return self.success_response(
                 AssetAssignmentSerializer(assignment).data, message
             )

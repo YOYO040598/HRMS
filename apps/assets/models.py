@@ -120,6 +120,11 @@ class AssetHistory(BaseModel):
 
 class AssetRequest(BaseModel):
     employee = models.ForeignKey('employees.Employee', on_delete=models.CASCADE, related_name='asset_requests')
+    request_type = models.CharField(
+        max_length=20,
+        choices=[('ALLOCATION', 'Allocation'), ('RETURN', 'Return')],
+        default='ALLOCATION'
+    )
     asset_category = models.CharField(max_length=30, choices=Asset.Category.choices)
     reason = models.TextField()
     request_date = models.DateField(auto_now_add=True)
@@ -142,4 +147,4 @@ class AssetRequest(BaseModel):
         ordering = ['-request_date']
 
     def __str__(self):
-        return f'Request - {self.employee} ({self.asset_category})'
+        return f'{self.request_type} Request - {self.employee} ({self.asset_category})'

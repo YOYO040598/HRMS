@@ -81,8 +81,8 @@ class AssetRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = AssetRequest
         fields = [
-            'id', 'employee', 'employee_name', 'employee_code', 'asset_category',
+            'id', 'employee', 'employee_name', 'employee_code', 'request_type', 'asset_category',
             'reason', 'request_date', 'status', 'approved_by', 'approved_by_name',
             'comments', 'assigned_asset', 'assigned_asset_name', 'assigned_asset_code',
         ]
-        read_only_fields = ['id', 'employee', 'request_date', 'status', 'approved_by', 'assigned_asset']
+        read_only_fields = ['id', 'employee', 'request_date', 'status', 'approved_by']

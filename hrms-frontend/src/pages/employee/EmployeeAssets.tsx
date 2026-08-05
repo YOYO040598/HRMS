@@ -114,6 +114,28 @@ export default function EmployeeAssets() {
     }
   };
 
+  const handleRequestReturn = async (a: AssetAssignment) => {
+    const reason = window.prompt("Please state the reason for replacement/return request:");
+    if (reason === null) return;
+    if (!reason.trim()) {
+      alert("A reason is required to submit a return request");
+      return;
+    }
+    try {
+      await api.post('/assets/requests/', {
+        request_type: 'RETURN',
+        asset_category: a.asset_category,
+        assigned_asset: a.asset,
+        reason: reason,
+      });
+      alert("Return request registered successfully. IT support will process the return check-off.");
+      fetchMyAssets();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to submit return request");
+    }
+  };
+
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'LAPTOP':
@@ -327,12 +349,7 @@ export default function EmployeeAssets() {
                     <div className="mt-5 pt-3 border-t border-gray-100 flex items-center justify-between">
                       <span className="text-[10px] text-gray-400">Confirmed: {a.acknowledged_at ? formatDate(a.acknowledged_at) : formatDate(a.assigned_date)}</span>
                       <button
-                        onClick={() => {
-                          const reason = window.prompt("Please state the reason for replacement/return request:");
-                          if (reason !== null) {
-                            alert("Return/replacement request registered successfully. IT support will reach out to schedule inspection.");
-                          }
-                        }}
+                        onClick={() => handleRequestReturn(a)}
                         className="text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors border border-gray-200"
                       >
                         Request Return

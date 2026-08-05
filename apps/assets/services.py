@@ -46,8 +46,12 @@ def return_asset(assignment_id, returned_by, condition, remarks='', is_damaged=F
     with transaction.atomic():
         try:
             assignment = AssetAssignment.objects.get(id=assignment_id, is_returned=False)
-        except AssetAssignment.DoesNotExist:
-            return None, False, 'Active assignment not found'
+        except Exception:
+            # Fallback: check if assignment_id was actually an asset_id
+            try:
+                assignment = AssetAssignment.objects.get(asset_id=assignment_id, is_returned=False)
+            except AssetAssignment.DoesNotExist:
+                return None, False, 'Active assignment not found'
 
         assignment.is_returned = True
         assignment.actual_return_date = timezone.now().date()
