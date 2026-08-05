@@ -77,7 +77,7 @@ export default function App() {
         <Route path="/payroll/reimbursements" element={<AdminRoute><ReimbursementPage /></AdminRoute>} />
         <Route path="/assets" element={<AdminRoute><AssetManagementPage /></AdminRoute>} />
         <Route path="/assets/manage" element={<AdminRoute><AssetManagementPage /></AdminRoute>} />
-        <Route path="/exit" element={<AdminRoute><ExitPage /></AdminRoute>} />
+        <Route path="/exit" element={<AdminRoute><ExitManagementPage /></AdminRoute>} />
         <Route path="/exit/manage" element={<AdminRoute><ExitManagementPage /></AdminRoute>} />
         <Route path="/notifications" element={<AdminRoute><NotificationsPage /></AdminRoute>} />
         <Route path="/organization" element={<AdminRoute><OrganizationPage /></AdminRoute>} />
