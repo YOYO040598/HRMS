@@ -20,6 +20,15 @@ export default function EmployeeLoginPage() {
     }
   };
 
+  const handleQuickLogin = async () => {
+    setEmployeeId('EMP001');
+    setPassword('Admin@123');
+    const result = await dispatch(employeeLogin({ employee_id: 'EMP001', password: 'Admin@123' }));
+    if (employeeLogin.fulfilled.match(result)) {
+      navigate('/emp');
+    }
+  };
+
   return (
     <div className="min-h-screen w-full relative flex items-center justify-center overflow-hidden bg-[#020403] p-4 sm:p-6">
       {/* CSS Animation Styles */}
@@ -54,16 +63,28 @@ export default function EmployeeLoginPage() {
       <div className="w-full max-w-[460px] relative z-10">
         <div className="bg-white/[0.03] backdrop-blur-[24px] -webkit-backdrop-blur-[24px] border border-white/[0.1] rounded-[32px] p-8 sm:p-10 shadow-[0_32px_64px_rgba(0,0,0,0.6)]">
           {/* Logo / Brand */}
-          <div className="flex items-center gap-3 mb-8 justify-center">
+          <div className="flex items-center gap-3 mb-6 justify-center">
             <div className="w-11 h-11 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-xl flex items-center justify-center font-bold text-white shadow-lg shadow-emerald-500/20">
               <span className="text-xl font-extrabold font-mono">H</span>
             </div>
             <span className="text-2xl font-bold tracking-tight text-white">HRMS <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 ml-1">Employee</span></span>
           </div>
 
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-extrabold text-white tracking-tight mb-2">Self Service</h2>
-            <p className="text-sm text-gray-400 font-medium">Log in to your employee self service portal</p>
+          {/* Toggle Tabs */}
+          <div className="flex bg-white/[0.02] p-1 rounded-2xl border border-white/[0.06] mb-8">
+            <button
+              type="button"
+              onClick={() => navigate('/login')}
+              className="flex-1 py-3 text-xs font-extrabold uppercase tracking-wider rounded-xl transition-all text-gray-400 hover:text-white cursor-pointer"
+            >
+              Admin / HR
+            </button>
+            <button
+              type="button"
+              className="flex-1 py-3 text-xs font-extrabold uppercase tracking-wider rounded-xl transition-all text-white bg-emerald-600 shadow-md shadow-emerald-500/20"
+            >
+              Employee
+            </button>
           </div>
 
           {error && (
@@ -122,17 +143,22 @@ export default function EmployeeLoginPage() {
             </button>
           </form>
 
-          {/* Guidelines */}
-          <div className="mt-8 p-4 bg-white/[0.02] rounded-2xl border border-white/[0.06] text-xs space-y-2">
-            <p className="font-bold text-emerald-300">Need your Employee ID?</p>
-            <p className="text-gray-400 font-medium leading-relaxed">
-              Your credentials are created and managed by your administrator. Contact the HR department to retrieve your ID and password.
-            </p>
-          </div>
+          {/* Quick Demo Login */}
+          <button
+            type="button"
+            onClick={handleQuickLogin}
+            className="w-full mt-6 py-3.5 bg-white/[0.03] hover:bg-white/[0.06] text-emerald-300 hover:text-white font-extrabold rounded-xl border border-white/[0.08] hover:border-white/[0.15] transition-all text-xs uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+          >
+            ⚡ Quick Demo Login (Employee)
+          </button>
 
-          <div className="mt-6 text-center text-xs">
-            <span className="text-gray-500 font-medium">Are you an Admin?</span>{' '}
-            <Link to="/login" className="text-emerald-400 font-bold hover:text-emerald-300 transition-colors uppercase tracking-wider ml-1">Sign in here</Link>
+          {/* Guidelines */}
+          <div className="mt-6 p-4 bg-white/[0.02] rounded-2xl border border-white/[0.06] text-xs space-y-2">
+            <p className="font-bold text-emerald-300">Default Employee Credentials:</p>
+            <div className="text-gray-400 font-medium">
+              <span className="font-semibold text-white">Employee ID:</span> EMP001<br />
+              <span className="font-semibold text-white">Password:</span> Admin@123
+            </div>
           </div>
         </div>
       </div>

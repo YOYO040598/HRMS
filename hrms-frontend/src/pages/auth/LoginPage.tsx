@@ -20,6 +20,15 @@ export default function LoginPage() {
     }
   };
 
+  const handleQuickLogin = async () => {
+    setEmail('admin@hrms.com');
+    setPassword('Admin@123');
+    const result = await dispatch(login({ email: 'admin@hrms.com', password: 'Admin@123' }));
+    if (login.fulfilled.match(result)) {
+      navigate('/');
+    }
+  };
+
   return (
     <div className="min-h-screen w-full relative flex items-center justify-center overflow-hidden bg-[#030306] p-4 sm:p-6">
       {/* CSS Animation Styles */}
@@ -54,16 +63,28 @@ export default function LoginPage() {
       <div className="w-full max-w-[460px] relative z-10">
         <div className="bg-white/[0.04] backdrop-blur-[24px] -webkit-backdrop-blur-[24px] border border-white/[0.12] rounded-[32px] p-8 sm:p-10 shadow-[0_32px_64px_rgba(0,0,0,0.5)]">
           {/* Logo / Brand */}
-          <div className="flex items-center gap-3 mb-8 justify-center">
+          <div className="flex items-center gap-3 mb-6 justify-center">
             <div className="w-11 h-11 bg-gradient-to-tr from-[#5e6ad2] to-[#818cf8] rounded-xl flex items-center justify-center font-bold text-white shadow-lg shadow-[#5e6ad2]/20">
               <span className="text-xl font-extrabold font-mono">H</span>
             </div>
             <span className="text-2xl font-bold tracking-tight text-white">HRMS <span className="text-xs font-semibold px-2 py-0.5 rounded bg-white/10 text-indigo-300 ml-1">Admin</span></span>
           </div>
 
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-extrabold text-white tracking-tight mb-2">Welcome Back</h2>
-            <p className="text-sm text-gray-400 font-medium">Sign in to your administrative dashboard</p>
+          {/* Toggle Tabs */}
+          <div className="flex bg-white/[0.02] p-1 rounded-2xl border border-white/[0.06] mb-8">
+            <button
+              type="button"
+              className="flex-1 py-3 text-xs font-extrabold uppercase tracking-wider rounded-xl transition-all text-white bg-[#5e6ad2] shadow-md shadow-[#5e6ad2]/20"
+            >
+              Admin / HR
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/emp/login')}
+              className="flex-1 py-3 text-xs font-extrabold uppercase tracking-wider rounded-xl transition-all text-gray-400 hover:text-white cursor-pointer"
+            >
+              Employee
+            </button>
           </div>
 
           {error && (
@@ -122,18 +143,22 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Demo credentials */}
-          <div className="mt-8 p-4 bg-white/[0.02] rounded-2xl border border-white/[0.06] text-xs space-y-2">
-            <p className="font-bold text-indigo-300">Default Demo Admin Account:</p>
+          {/* Quick Demo Login */}
+          <button
+            type="button"
+            onClick={handleQuickLogin}
+            className="w-full mt-6 py-3.5 bg-white/[0.03] hover:bg-white/[0.06] text-indigo-300 hover:text-white font-extrabold rounded-xl border border-white/[0.08] hover:border-white/[0.15] transition-all text-xs uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+          >
+            ⚡ Quick Demo Login (Admin)
+          </button>
+
+          {/* Demo info */}
+          <div className="mt-6 p-4 bg-white/[0.02] rounded-2xl border border-white/[0.06] text-xs space-y-2">
+            <p className="font-bold text-indigo-300">Default Admin Credentials:</p>
             <div className="text-gray-400 font-medium">
               <span className="font-semibold text-white">Email:</span> admin@hrms.com<br />
               <span className="font-semibold text-white">Password:</span> Admin@123
             </div>
-          </div>
-
-          <div className="mt-6 text-center text-xs">
-            <span className="text-gray-500 font-medium">Are you an Employee?</span>{' '}
-            <Link to="/emp/login" className="text-indigo-400 font-bold hover:text-indigo-300 transition-colors uppercase tracking-wider ml-1">Sign in here</Link>
           </div>
         </div>
       </div>
