@@ -20,14 +20,7 @@ export default function EmployeeLoginPage() {
     }
   };
 
-  const handleQuickLogin = async () => {
-    setEmployeeId('EMP001');
-    setPassword('Admin@123');
-    const result = await dispatch(employeeLogin({ employee_id: 'EMP001', password: 'Admin@123' }));
-    if (employeeLogin.fulfilled.match(result)) {
-      navigate('/emp');
-    }
-  };
+
 
   return (
     <div className="min-h-screen w-full relative flex items-center justify-center overflow-hidden bg-[#020403] p-4 sm:p-6">
@@ -143,14 +136,7 @@ export default function EmployeeLoginPage() {
             </button>
           </form>
 
-          {/* Quick Demo Login */}
-          <button
-            type="button"
-            onClick={handleQuickLogin}
-            className="w-full mt-6 py-3.5 bg-white/[0.03] hover:bg-white/[0.06] text-emerald-300 hover:text-white font-extrabold rounded-xl border border-white/[0.08] hover:border-white/[0.15] transition-all text-xs uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
-          >
-            ⚡ Quick Demo Login (Employee)
-          </button>
+
 
           {/* Guidelines */}
           <div className="mt-6 p-4 bg-white/[0.02] rounded-2xl border border-white/[0.06] text-xs space-y-2">
