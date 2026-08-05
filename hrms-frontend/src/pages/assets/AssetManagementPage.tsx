@@ -37,7 +37,7 @@ interface AssetRequest {
 
 const defaultAsset = {
   name: '', asset_code: '', category: 'LAPTOP', brand: '', model_name: '', serial_number: '',
-  purchase_date: '', purchase_price: 0, warranty_expiry: '', condition: 'NEW', company: '',
+  purchase_date: '', purchase_price: '', warranty_expiry: '', condition: 'NEW', company: '',
   specifications: {},
 };
 
@@ -615,7 +615,7 @@ export default function AssetManagementPage() {
                 </div>
                 <div>
                   <label className="label">Purchase Price (₹) *</label>
-                  <input type="number" step="0.01" value={assetForm.purchase_price} onChange={(e) => setAssetForm({ ...assetForm, purchase_price: Number(e.target.value) })} className="input-field" required />
+                  <input type="number" step="0.01" value={assetForm.purchase_price} onChange={(e) => setAssetForm({ ...assetForm, purchase_price: e.target.value === '' ? '' : Number(e.target.value) })} className="input-field" required />
                 </div>
                 <div>
                   <label className="label">Warranty Expiry</label>
