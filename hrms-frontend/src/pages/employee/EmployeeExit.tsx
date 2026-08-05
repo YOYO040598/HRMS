@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api/axios';
 import { formatDate } from '../../lib/utils';
-import { LogOut, Calendar, Clock, HelpCircle, CheckCircle, AlertTriangle, AlertCircle, X, Plus } from 'lucide-react';
+import { LogOut, Calendar, Clock, HelpCircle, CheckCircle, AlertTriangle, AlertCircle, XCircle, X, Plus } from 'lucide-react';
 
 interface ExitApproval {
   id: string;
