@@ -1,6 +1,7 @@
 from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.decorators import action
 
 from apps.notifications.models import Notification, NotificationTemplate, NotificationPreference
 from apps.notifications.serializers import (
@@ -23,6 +24,7 @@ class NotificationViewSet(ResponseMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         return Notification.objects.filter(user=self.request.user)
 
+    @action(detail=True, methods=['post'], url_path='mark-as-read')
     def mark_as_read(self, request, *args, **kwargs):
         notification = self.get_object()
         notification.is_read = True

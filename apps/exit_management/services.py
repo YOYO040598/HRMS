@@ -26,6 +26,22 @@ def apply_resignation(employee, last_working_day, reason, notice_period_days=30)
 
         create_exit_approval_chain(resignation, employee)
 
+        # Notify HR & active level 1 approver
+        try:
+            from apps.notifications.services import notify_resignation_applied, create_notification
+            notify_resignation_applied(resignation)
+            first_approval = resignation.approvals.filter(status='PENDING').order_by('level').first()
+            if first_approval:
+                create_notification(
+                    user=first_approval.approver,
+                    notification_type='EXIT',
+                    title='Resignation Approval Required',
+                    message=f'Exit clearance approval requested for {employee.user.full_name}.',
+                    action_url=f'/exit/resignations/{resignation.id}',
+                )
+        except Exception as e:
+            print("Failed to send resignation notification:", e)
+
         return resignation, True, 'Resignation submitted'
 
 
@@ -72,11 +88,33 @@ def approve_resignation(approval_id, approver, comments=''):
             status='PENDING',
         )
 
-        if not higher_approvals.exists():
-            resignation.status = 'APPROVED'
-            resignation.approved_by = approver
-            resignation.approved_date = timezone.now().date()
-            resignation.save(update_fields=['status', 'approved_by', 'approved_date'])
+        try:
+            from apps.notifications.services import create_notification
+            if not higher_approvals.exists():
+                resignation.status = 'APPROVED'
+                resignation.approved_by = approver
+                resignation.approved_date = timezone.now().date()
+                resignation.save(update_fields=['status', 'approved_by', 'approved_date'])
+                
+                create_notification(
+                    user=resignation.employee.user,
+                    notification_type='EXIT',
+                    title='Resignation Approved',
+                    message=f'Your resignation has been approved. Last working day: {resignation.last_working_day}',
+                    action_url='/emp/exit',
+                )
+            else:
+                next_approval = higher_approvals.order_by('level').first()
+                if next_approval:
+                    create_notification(
+                        user=next_approval.approver,
+                        notification_type='EXIT',
+                        title='Resignation Approval Required',
+                        message=f'Exit clearance approval requested for {resignation.employee.user.full_name}.',
+                        action_url=f'/exit/resignations/{resignation.id}',
+                    )
+        except Exception as e:
+            print("Failed to send approval notification:", e)
 
         return approval, True, 'Resignation approved'
 
@@ -98,6 +136,18 @@ def reject_resignation(approval_id, approver, comments=''):
         resignation = approval.resignation
         resignation.status = 'REJECTED'
         resignation.save(update_fields=['status'])
+
+        try:
+            from apps.notifications.services import create_notification
+            create_notification(
+                user=resignation.employee.user,
+                notification_type='EXIT',
+                title='Resignation Rejected',
+                message=f'Your resignation request was rejected. Remarks: {comments}',
+                action_url='/emp/exit',
+            )
+        except Exception as e:
+            print("Failed to send rejection notification:", e)
 
         return approval, True, 'Resignation rejected'
 

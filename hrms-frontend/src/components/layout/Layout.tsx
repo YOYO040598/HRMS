@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../hooks/useRedux';
 import { logout } from '../../store/authSlice';
+import api from '../../api/axios';
 import {
   LayoutDashboard, Users, Building2, Clock, CalendarDays, Wallet,
   Package, LogOut, Bell, Menu, X, ChevronDown, FileText, Settings,
@@ -30,11 +31,31 @@ const navItems = [
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const location = useLocation();
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
 
   const filteredNav = navItems.filter((item) => item.roles.includes(user?.role || 'EMPLOYEE'));
+
+  const fetchUnreadCount = async () => {
+    try {
+      const res = await api.get('/notifications/unread-count/');
+      setUnreadCount(res.data.data?.unread_count || 0);
+    } catch (err) {
+      console.error('Error fetching unread notification count:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchUnreadCount();
+    window.addEventListener('notifications-updated', fetchUnreadCount);
+    const interval = setInterval(fetchUnreadCount, 15000);
+    return () => {
+      window.removeEventListener('notifications-updated', fetchUnreadCount);
+      clearInterval(interval);
+    };
+  }, []);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -97,9 +118,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-4">
-            <Link to="/notifications" className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+            <Link to="/notifications" className="relative p-2 text-gray-500 hover:text-[#ea580c] hover:bg-orange-50/50 rounded-lg transition-colors">
               <Bell size={20} />
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full text-white text-[10px] flex items-center justify-center font-bold">3</span>
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#ea580c] rounded-full text-white text-[9px] flex items-center justify-center font-extrabold animate-pulse">
+                  {unreadCount}
+                </span>
+              )}
             </Link>
 
             <div className="relative">
