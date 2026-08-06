@@ -149,25 +149,81 @@ export default function EmployeeDetailPage() {
           </div>
         )}
 
-        {activeTab === 'personal' && employee.personal_info && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
-              ['Date of Birth', employee.personal_info.date_of_birth ? formatDate(employee.personal_info.date_of_birth) : '-'],
-              ['Gender', employee.personal_info.gender || '-'],
-              ['Marital Status', employee.personal_info.marital_status || '-'],
-              ['Nationality', employee.personal_info.nationality || '-'],
-              ['Blood Group', employee.personal_info.blood_group || '-'],
-              ['Father Name', employee.personal_info.father_name || '-'],
-              ['Mother Name', employee.personal_info.mother_name || '-'],
-              ['PAN Number', employee.personal_info.pan_number || '-'],
-              ['Aadhaar Number', employee.personal_info.aadhaar_number || '-'],
-              ['Passport', employee.personal_info.passport_number || '-'],
-            ].map(([label, value]) => (
-              <div key={label}>
-                <div className="text-sm text-gray-500">{label}</div>
-                <div className="mt-1 font-medium text-gray-800">{value}</div>
+        {activeTab === 'personal' && (
+          <div className="space-y-6">
+            {/* Personal Details */}
+            <div>
+              <h4 className="text-xs font-extrabold text-gray-400 uppercase tracking-wider mb-3">Personal Details</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 bg-gray-50/50 p-5 rounded-2xl border border-gray-150/40">
+                {[
+                  ['Date of Birth', employee.personal_info?.date_of_birth ? formatDate(employee.personal_info.date_of_birth) : '-'],
+                  ['Gender', employee.personal_info?.gender || '-'],
+                  ['Marital Status', employee.personal_info?.marital_status || '-'],
+                  ['Nationality', employee.personal_info?.nationality || '-'],
+                  ['Personal Email', employee.personal_info?.personal_email || '-'],
+                  ['Blood Group', employee.personal_info?.blood_group || '-'],
+                  ['Father Name', employee.personal_info?.father_name || '-'],
+                  ['Mother Name', employee.personal_info?.mother_name || '-'],
+                  ['PAN Number', employee.personal_info?.pan_number || '-'],
+                  ['Aadhaar Number', employee.personal_info?.aadhaar_number || '-'],
+                  ['Passport', employee.personal_info?.passport_number || '-'],
+                ].map(([label, value]) => (
+                  <div key={label}>
+                    <div className="text-xs font-bold text-gray-400">{label}</div>
+                    <div className="mt-1 font-semibold text-gray-700">{value}</div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+
+            {/* Address Details */}
+            <div>
+              <h4 className="text-xs font-extrabold text-gray-400 uppercase tracking-wider mb-3">Address Details</h4>
+              {!employee.addresses || employee.addresses.length === 0 ? (
+                <div className="text-sm text-gray-400 bg-gray-50/50 p-4 rounded-xl border border-dashed border-gray-200">No addresses registered</div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {employee.addresses.map((addr) => (
+                    <div key={addr.id} className="p-4 bg-gray-50/50 rounded-xl border border-gray-150/40 relative">
+                      <span className="absolute top-4 right-4 text-[9px] uppercase font-extrabold px-2 py-0.5 rounded bg-orange-100 text-[#ea580c]">
+                        {addr.address_type}
+                      </span>
+                      <div className="text-xs font-bold text-gray-400">Address</div>
+                      <div className="mt-1 text-sm font-semibold text-gray-700">
+                        {addr.address_line_1}
+                        {addr.address_line_2 && `, ${addr.address_line_2}`}
+                      </div>
+                      <div className="text-xs font-semibold text-gray-500 mt-1">
+                        {addr.city}, {addr.state}, {addr.country} - {addr.postal_code}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Emergency Contacts */}
+            <div>
+              <h4 className="text-xs font-extrabold text-gray-400 uppercase tracking-wider mb-3">Emergency Contacts</h4>
+              {!employee.emergency_contacts || employee.emergency_contacts.length === 0 ? (
+                <div className="text-sm text-gray-400 bg-gray-50/50 p-4 rounded-xl border border-dashed border-gray-200">No emergency contacts registered</div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {employee.emergency_contacts.map((contact) => (
+                    <div key={contact.id} className="p-4 bg-gray-50/50 rounded-xl border border-gray-150/40 flex items-center justify-between">
+                      <div>
+                        <div className="font-bold text-sm text-gray-700">{contact.name}</div>
+                        <div className="text-xs text-gray-400 font-bold uppercase mt-0.5">{contact.relationship}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-bold text-gray-700 flex items-center gap-1 justify-end"><Phone size={12} /> {contact.phone_number}</div>
+                        {contact.email && <div className="text-xs text-gray-400 font-medium mt-0.5">{contact.email}</div>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 

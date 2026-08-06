@@ -39,6 +39,7 @@ import EmployeePayslips from './pages/employee/EmployeePayslips';
 import EmployeeNotifications from './pages/employee/EmployeeNotifications';
 import EmployeeAssets from './pages/employee/EmployeeAssets';
 import EmployeeExit from './pages/employee/EmployeeExit';
+import EmployeeProfilePage from './pages/employee/EmployeeProfilePage';
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { user, tokens } = useSelector((state: RootState) => state.auth);
@@ -102,6 +103,7 @@ export default function App() {
         <Route path="/emp/assets" element={<EmployeeRoute><EmployeeAssets /></EmployeeRoute>} />
         <Route path="/emp/exit" element={<EmployeeRoute><EmployeeExit /></EmployeeRoute>} />
         <Route path="/emp/notifications" element={<EmployeeRoute><EmployeeNotifications /></EmployeeRoute>} />
+        <Route path="/emp/profile" element={<EmployeeRoute><EmployeeProfilePage /></EmployeeRoute>} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

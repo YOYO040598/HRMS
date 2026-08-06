@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../hooks/useRedux';
 import { logout } from '../../store/authSlice';
 import api from '../../api/axios';
-import { LayoutDashboard, Clock, CalendarDays, Wallet, Bell, LogOut, Menu, X, ChevronDown, CheckSquare, Package } from 'lucide-react';
+import { LayoutDashboard, Clock, CalendarDays, Wallet, Bell, LogOut, Menu, X, ChevronDown, CheckSquare, Package, User } from 'lucide-react';
 
 const allNavItems = [
   { path: '/emp', label: 'Dashboard', icon: LayoutDashboard, roles: ['EMPLOYEE', 'HR_ADMIN', 'HR_EXECUTIVE', 'ADMIN', 'MANAGER', 'TEAM_LEAD'] },
@@ -14,6 +14,7 @@ const allNavItems = [
   { path: '/emp/payslips', label: 'Payslips', icon: Wallet, roles: ['EMPLOYEE', 'HR_ADMIN', 'HR_EXECUTIVE', 'ADMIN', 'MANAGER', 'TEAM_LEAD'] },
   { path: '/emp/exit', label: 'Resignation', icon: LogOut, roles: ['EMPLOYEE', 'HR_ADMIN', 'HR_EXECUTIVE', 'ADMIN', 'MANAGER', 'TEAM_LEAD'] },
   { path: '/emp/notifications', label: 'Notifications', icon: Bell, roles: ['EMPLOYEE', 'HR_ADMIN', 'HR_EXECUTIVE', 'ADMIN', 'MANAGER', 'TEAM_LEAD'] },
+  { path: '/emp/profile', label: 'My Profile', icon: User, roles: ['EMPLOYEE', 'HR_ADMIN', 'HR_EXECUTIVE', 'ADMIN', 'MANAGER', 'TEAM_LEAD'] },
 ];
 
 export default function EmployeeLayout({ children }: { children: React.ReactNode }) {

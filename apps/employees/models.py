@@ -61,6 +61,7 @@ class EmployeePersonalInfo(BaseModel):
         blank=True, default=''
     )
     nationality = models.CharField(max_length=50, blank=True, default='')
+    personal_email = models.EmailField(blank=True, default='')
     blood_group = models.CharField(max_length=5, blank=True, default='')
     religion = models.CharField(max_length=50, blank=True, default='')
     father_name = models.CharField(max_length=255, blank=True, default='')

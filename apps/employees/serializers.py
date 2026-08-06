@@ -13,7 +13,7 @@ class EmployeePersonalInfoSerializer(serializers.ModelSerializer):
         model = EmployeePersonalInfo
         fields = [
             'id', 'employee', 'date_of_birth', 'gender', 'marital_status',
-            'nationality', 'blood_group', 'religion', 'father_name', 'mother_name',
+            'nationality', 'personal_email', 'blood_group', 'religion', 'father_name', 'mother_name',
             'spouse_name', 'pan_number', 'aadhaar_number', 'passport_number',
             'driving_license', 'photo',
         ]

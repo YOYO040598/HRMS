@@ -6,6 +6,7 @@ from apps.employees.views import (
     EmployeeAddressViewSet, EmployeeEmergencyContactViewSet,
     EmployeeEducationViewSet, EmployeeExperienceViewSet,
     EmployeeDocumentViewSet, GenerateEmployeeIDView,
+    EmployeeSelfProfileView,
 )
 
 router = DefaultRouter()
@@ -19,5 +20,6 @@ router.register(r'documents', EmployeeDocumentViewSet)
 
 urlpatterns = [
     path('generate-id/', GenerateEmployeeIDView.as_view(), name='employee-generate-id'),
+    path('my-profile/', EmployeeSelfProfileView.as_view(), name='employee-my-profile'),
     path('', include(router.urls)),
 ]
