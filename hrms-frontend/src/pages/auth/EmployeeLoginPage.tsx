@@ -133,15 +133,6 @@ export default function EmployeeLoginPage() {
               )}
             </button>
           </form>
-
-          {/* Guidelines */}
-          <div className="mt-6 p-4 bg-white/[0.02] rounded-2xl border border-white/[0.06] text-xs space-y-2">
-            <p className="font-bold text-orange-300">Default Employee Credentials:</p>
-            <div className="text-gray-400 font-medium">
-              <span className="font-semibold text-white">Employee ID:</span> EMP001<br />
-              <span className="font-semibold text-white">Password:</span> Admin@123
-            </div>
-          </div>
         </div>
       </div>
     </div>
