@@ -45,19 +45,19 @@
     @apply bg-amber-500 text-white px-5 py-2.5 rounded-xl hover:bg-amber-600 active:scale-[0.98] transition-all font-semibold cursor-pointer;
   }
   .card {
-    @apply bg-white rounded-2xl border border-[#e8e1d5]/60 p-6 shadow-[0_4px_20px_-2px_rgba(28,25,23,0.03)];
+    @apply bg-white/70 backdrop-blur-md rounded-2xl border border-white/50 p-6 shadow-[0_8px_32px_rgba(28,25,23,0.03)];
   }
   .input-field {
-    @apply w-full px-4 py-3 border border-[#e8e1d5] rounded-xl focus:ring-2 focus:ring-[#ea580c]/25 focus:border-[#ea580c] transition-all outline-none text-[#1c1917] placeholder-gray-400 bg-white/70 backdrop-blur-sm;
+    @apply w-full px-4 py-3 border border-[#e8e1d5]/80 rounded-xl focus:ring-2 focus:ring-[#ea580c]/25 focus:border-[#ea580c] transition-all outline-none text-[#1c1917] placeholder-gray-400 bg-white/50 backdrop-blur-md;
   }
   .label {
     @apply block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5;
   }
   .table-header {
-    @apply bg-[#f8fafc] text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100;
+    @apply bg-white/30 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-[#e8e1d5]/30;
   }
   .table-cell {
-    @apply px-6 py-4 whitespace-nowrap text-sm text-[#334155] font-medium;
+    @apply px-6 py-4 whitespace-nowrap text-sm text-[#334155] font-semibold;
   }
   .badge {
     @apply inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold border;

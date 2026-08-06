@@ -53,13 +53,16 @@ export default function EmployeeDashboard() {
       {/* Custom Styles for Spatial Bento Cards */}
       <style>{`
         .bento-card {
+          background: rgba(255, 255, 255, 0.7) !important;
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
           transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-          border: 1px solid rgba(226, 232, 240, 0.6);
+          border: 1px solid rgba(255, 255, 255, 0.5) !important;
         }
         .bento-card:hover {
           transform: translateY(-5px);
           box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05), 0 10px 20px -10px rgba(234, 88, 12, 0.05);
-          border-color: rgba(234, 88, 12, 0.3);
+          border-color: rgba(234, 88, 12, 0.3) !important;
         }
         @keyframes drift {
           0% { transform: translate(0px, 0px) scale(1); }
