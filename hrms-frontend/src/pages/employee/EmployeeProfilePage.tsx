@@ -84,7 +84,7 @@ export default function EmployeeProfilePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ea580c]" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#059669]" />
       </div>
     );
   }
@@ -95,7 +95,7 @@ export default function EmployeeProfilePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Profile Card Banner */}
-        <div className="lg:col-span-2 bg-gradient-to-br from-[#ea580c] to-[#f97316] rounded-3xl p-6 text-white shadow-lg relative overflow-hidden flex flex-col justify-between min-h-[220px]">
+        <div className="lg:col-span-2 bg-gradient-to-br from-[#059669] to-[#10b981] rounded-3xl p-6 text-white shadow-lg relative overflow-hidden flex flex-col justify-between min-h-[220px]">
           <div className="absolute right-0 bottom-0 translate-x-12 translate-y-12 opacity-10">
             <User size={260} />
           </div>
@@ -129,7 +129,7 @@ export default function EmployeeProfilePage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-5 py-2.5 bg-white text-[#ea580c] hover:bg-orange-50 font-bold text-sm rounded-xl flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+                className="px-5 py-2.5 bg-white text-[#059669] hover:bg-emerald-50 font-bold text-sm rounded-xl flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer disabled:opacity-50 border-none"
               >
                 {saving ? (
                   <><Loader2 size={16} className="animate-spin" /> Saving...</>
@@ -144,7 +144,7 @@ export default function EmployeeProfilePage() {
         {/* Quick Insights Bento Card */}
         <div className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl p-6 flex flex-col justify-between shadow-sm relative overflow-hidden">
           <div className="flex items-center justify-between mb-4">
-            <span className="w-10 h-10 rounded-xl bg-orange-100/50 border border-orange-200/20 flex items-center justify-center text-[#ea580c]">
+            <span className="w-10 h-10 rounded-xl bg-emerald-100/50 border border-emerald-200/20 flex items-center justify-center text-[#059669]">
               <Sparkles size={20} />
             </span>
             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Dashboard summary</span>
@@ -177,7 +177,7 @@ export default function EmployeeProfilePage() {
         {/* Bento: Personal Information */}
         <div className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl p-6 shadow-sm space-y-4">
           <div className="flex items-center gap-3 border-b border-gray-100/80 pb-3">
-            <span className="w-8 h-8 rounded-lg bg-orange-100/50 flex items-center justify-center text-[#ea580c]">
+            <span className="w-8 h-8 rounded-lg bg-emerald-100/50 flex items-center justify-center text-[#059669]">
               <User size={16} />
             </span>
             <h3 className="font-extrabold text-gray-800">Personal Information</h3>
@@ -296,7 +296,7 @@ export default function EmployeeProfilePage() {
           {/* Bento: Primary Address */}
           <div className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl p-6 shadow-sm space-y-4">
             <div className="flex items-center gap-3 border-b border-gray-100/80 pb-3">
-              <span className="w-8 h-8 rounded-lg bg-orange-100/50 flex items-center justify-center text-[#ea580c]">
+              <span className="w-8 h-8 rounded-lg bg-emerald-100/50 flex items-center justify-center text-[#059669]">
                 <MapPin size={16} />
               </span>
               <h3 className="font-extrabold text-gray-800">Primary Address</h3>
@@ -369,7 +369,7 @@ export default function EmployeeProfilePage() {
           {/* Bento: Emergency Contact */}
           <div className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl p-6 shadow-sm space-y-4">
             <div className="flex items-center gap-3 border-b border-gray-100/80 pb-3">
-              <span className="w-8 h-8 rounded-lg bg-orange-100/50 flex items-center justify-center text-[#ea580c]">
+              <span className="w-8 h-8 rounded-lg bg-emerald-100/50 flex items-center justify-center text-[#059669]">
                 <HeartHandshake size={16} />
               </span>
               <h3 className="font-extrabold text-gray-800">Emergency Contact</h3>

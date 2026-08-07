@@ -99,7 +99,7 @@ export default function EmployeeExit() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ea580c]" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#059669]" />
       </div>
     );
   }
@@ -117,7 +117,7 @@ export default function EmployeeExit() {
         {!activeResignation && (
           <button
             onClick={() => setShowResignModal(true)}
-            className="btn-primary flex items-center gap-2 cursor-pointer"
+            className="bg-[#059669] hover:bg-[#047857] text-white font-bold px-4 py-2 rounded-xl transition-all shadow-md flex items-center gap-2 text-sm cursor-pointer border-none"
           >
             <Plus size={18} /> Submit Resignation
           </button>

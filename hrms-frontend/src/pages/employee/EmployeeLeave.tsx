@@ -51,7 +51,7 @@ export default function EmployeeLeave() {
     } catch (err: any) { alert(err.response?.data?.message || 'Failed to cancel'); }
   };
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ea580c]" /></div>;
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#059669]" /></div>;
 
   return (
     <div className="space-y-8 p-1 sm:p-2">
@@ -63,14 +63,14 @@ export default function EmployeeLeave() {
         }
         .bento-card:hover {
           transform: translateY(-5px);
-          box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05), 0 10px 20px -10px rgba(234, 88, 12, 0.05);
-          border-color: rgba(234, 88, 12, 0.3);
+          box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05), 0 10px 20px -10px rgba(5, 150, 105, 0.05);
+          border-color: rgba(5, 150, 105, 0.3);
         }
         .history-row {
           transition: all 0.2s ease-in-out;
         }
         .history-row:hover {
-          background-color: rgba(250, 246, 237, 0.6);
+          background-color: rgba(240, 253, 250, 0.6);
           transform: translateX(2px);
         }
       `}</style>
@@ -78,7 +78,7 @@ export default function EmployeeLeave() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-bold text-[#ea580c] uppercase tracking-widest mb-1.5">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#059669] uppercase tracking-widest mb-1.5">
             <Sparkles size={14} /> Leave Management
           </div>
           <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">My Leaves</h2>
@@ -86,7 +86,7 @@ export default function EmployeeLeave() {
         </div>
         <button 
           onClick={() => setShowForm(true)} 
-          className="btn-primary flex items-center justify-center gap-2 px-6 py-3 cursor-pointer self-start sm:self-center"
+          className="bg-[#059669] hover:bg-[#047857] text-white font-bold px-6 py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm cursor-pointer border-none self-start sm:self-center"
         >
           <Plus size={18} /> Apply Leave
         </button>
@@ -103,13 +103,13 @@ export default function EmployeeLeave() {
             <div>
               <div className="w-full bg-gray-100 rounded-full h-1.5 mt-4 overflow-hidden">
                 <div 
-                  className="bg-gradient-to-r from-orange-500 to-[#ea580c] h-1.5 rounded-full transition-all duration-500" 
+                  className="bg-gradient-to-r from-emerald-500 to-[#059669] h-1.5 rounded-full transition-all duration-500" 
                   style={{ width: `${Math.max(0, Math.min(100, (Number(bal.used_days) / Number(bal.total_days)) * 100))}%` }} 
                 />
               </div>
               <div className="flex justify-between text-[10px] font-bold text-gray-400 uppercase mt-2">
                 <span>Used: {bal.used_days} / {bal.total_days}</span>
-                <span className="text-amber-600">Pending: {bal.pending_days}</span>
+                <span className="text-[#059669]">Pending: {bal.pending_days}</span>
               </div>
             </div>
           </div>
@@ -122,7 +122,7 @@ export default function EmployeeLeave() {
           <div className="bg-white rounded-3xl w-full max-w-lg p-8 shadow-2xl border border-[#e8e1d5]/60">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-                <CalendarDays className="text-[#ea580c]" /> Request Time Off
+                <CalendarDays className="text-[#059669]" /> Request Time Off
               </h3>
               <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"><XCircle size={24} /></button>
             </div>
@@ -154,13 +154,13 @@ export default function EmployeeLeave() {
                   id="emergency" 
                   checked={form.is_emergency} 
                   onChange={(e) => setForm({ ...form, is_emergency: e.target.checked })} 
-                  className="w-4 h-4 text-[#ea580c] focus:ring-[#ea580c] border-[#e8e1d5] rounded cursor-pointer" 
+                  className="w-4 h-4 text-[#059669] focus:ring-[#059669] border-[#e8e1d5] rounded cursor-pointer" 
                 />
                 <label htmlFor="emergency" className="text-xs font-bold uppercase tracking-wider text-gray-500 cursor-pointer">This is an emergency leave</label>
               </div>
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowForm(false)} className="btn-secondary flex-1">Cancel</button>
-                <button type="submit" disabled={submitting} className="btn-primary flex-1 flex items-center justify-center gap-2">
+                <button type="submit" disabled={submitting} className="bg-[#059669] hover:bg-[#047857] text-white font-bold py-3 rounded-xl transition-all shadow-md flex-1 flex items-center justify-center gap-2 text-sm cursor-pointer border-none">
                   {submitting ? <><Clock size={16} className="animate-spin" /> Processing...</> : 'Submit Application'}
                 </button>
               </div>

@@ -40,7 +40,7 @@ export default function EmployeeNotifications() {
   const getTypeIcon = (type: string) => {
     const icons: Record<string, string> = {
       LEAVE: 'bg-amber-150/50 text-amber-700 border border-amber-200/50',
-      ATTENDANCE: 'bg-orange-100/50 text-[#ea580c] border border-orange-200/30',
+      ATTENDANCE: 'bg-emerald-100/50 text-[#059669] border border-emerald-200/30',
       PAYROLL: 'bg-blue-100/50 text-blue-700 border border-blue-200/30',
       ASSET: 'bg-purple-100/50 text-purple-700 border border-purple-200/30',
       EXIT: 'bg-rose-100/50 text-rose-700 border border-rose-200/30',
@@ -61,25 +61,25 @@ export default function EmployeeNotifications() {
 
       <div className="card divide-y divide-gray-100/80 p-0 overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ea580c] mx-auto" /></div>
+          <div className="p-12 text-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#059669] mx-auto" /></div>
         ) : notifications.length === 0 ? (
           <div className="p-12 text-center text-gray-400 font-medium">No notifications yet</div>
         ) : notifications.map((n) => (
           <div 
             key={n.id} 
             onClick={() => !n.is_read && markAsRead(n.id)}
-            className={`p-5 flex items-start gap-4 hover:bg-[#faf6ed]/50 transition-all cursor-pointer ${!n.is_read ? 'bg-orange-50/20' : ''}`}
+            className={`p-5 flex items-start gap-4 hover:bg-emerald-50/20 transition-all cursor-pointer ${!n.is_read ? 'bg-emerald-50/10' : ''}`}
           >
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${getTypeIcon(n.notification_type)}`}>
               <Bell size={18} />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <h4 className={`text-sm font-bold ${!n.is_read ? 'text-[#ea580c]' : 'text-gray-700'}`}>{n.title}</h4>
+                <h4 className={`text-sm font-bold ${!n.is_read ? 'text-[#059669]' : 'text-gray-700'}`}>{n.title}</h4>
                 {!n.is_read && (
                   <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ea580c] opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#ea580c]"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#059669] opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#059669]"></span>
                   </span>
                 )}
               </div>

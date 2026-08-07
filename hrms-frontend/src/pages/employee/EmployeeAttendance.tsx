@@ -66,7 +66,7 @@ export default function EmployeeAttendance() {
   const isCheckedIn = todayAttendance?.check_in && !todayAttendance?.check_out;
   const isCheckedOut = todayAttendance?.check_out;
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ea580c]" /></div>;
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#059669]" /></div>;
 
   return (
     <div className="space-y-8 p-1 sm:p-2">
@@ -76,7 +76,7 @@ export default function EmployeeAttendance() {
           transition: all 0.2s ease-in-out;
         }
         .history-row:hover {
-          background-color: rgba(250, 246, 237, 0.6);
+          background-color: rgba(240, 253, 250, 0.6);
           transform: translateX(2px);
         }
         @keyframes pulse-ring {
@@ -92,7 +92,7 @@ export default function EmployeeAttendance() {
       {/* Title */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-bold text-[#ea580c] uppercase tracking-widest mb-1.5">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#059669] uppercase tracking-widest mb-1.5">
             <Sparkles size={14} /> Tracking Module
           </div>
           <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">My Attendance</h2>
@@ -101,7 +101,7 @@ export default function EmployeeAttendance() {
       </div>
 
       {/* Check In/Out Bento Card with Spatial Design */}
-      <div className="bg-gradient-to-tr from-[#ea580c] to-[#f97316] rounded-3xl p-8 text-white relative overflow-hidden shadow-lg shadow-[#ea580c]/15">
+      <div className="bg-gradient-to-tr from-[#059669] to-[#10b981] rounded-3xl p-8 text-white relative overflow-hidden shadow-lg shadow-[#059669]/15">
         <div className="absolute -top-12 -right-12 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
         
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 relative z-10">
@@ -109,7 +109,7 @@ export default function EmployeeAttendance() {
             <div className="text-5xl font-black font-mono tracking-tight mb-2">
               {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
             </div>
-            <div className="text-sm text-orange-100 font-bold uppercase tracking-widest flex items-center gap-2">
+            <div className="text-sm text-emerald-100 font-bold uppercase tracking-widest flex items-center gap-2">
               <Calendar size={16} />
               {currentTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
             </div>
@@ -120,7 +120,7 @@ export default function EmployeeAttendance() {
               <button 
                 onClick={handleCheckIn} 
                 disabled={actionLoading} 
-                className="flex items-center justify-center gap-2 bg-white text-[#ea580c] px-8 py-4 rounded-2xl font-bold text-base hover:bg-orange-50 active:scale-[0.98] transition-all shadow-md cursor-pointer disabled:opacity-50"
+                className="flex items-center justify-center gap-2 bg-white text-[#059669] px-8 py-4 rounded-2xl font-bold text-base hover:bg-emerald-50 active:scale-[0.98] transition-all shadow-md cursor-pointer disabled:opacity-50"
               >
                 <LogIn size={20} /> Check In
               </button>

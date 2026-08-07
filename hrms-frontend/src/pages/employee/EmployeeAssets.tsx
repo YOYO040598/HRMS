@@ -190,7 +190,7 @@ export default function EmployeeAssets() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ea580c]" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#059669]" />
       </div>
     );
   }
@@ -202,7 +202,7 @@ export default function EmployeeAssets() {
           <h2 className="text-2xl font-bold text-gray-800">My Assigned Assets</h2>
           <p className="text-gray-500 text-sm">View currently assigned equipment and request new hardware</p>
         </div>
-        <button onClick={() => setShowRequestModal(true)} className="btn-primary flex items-center gap-2">
+        <button onClick={() => setShowRequestModal(true)} className="bg-[#059669] hover:bg-[#047857] text-white font-bold px-4 py-2 rounded-xl transition-all shadow-md flex items-center gap-2 text-sm cursor-pointer border-none">
           <Plus size={18} /> Request Asset
         </button>
       </div>
@@ -230,7 +230,7 @@ export default function EmployeeAssets() {
           <button
             onClick={() => setActiveTab('inventory')}
             className={`pb-3 font-bold text-sm transition-colors border-b-2 ${
-              activeTab === 'inventory' ? 'border-[#ea580c] text-[#ea580c]' : 'border-transparent text-gray-400 hover:text-gray-600'
+              activeTab === 'inventory' ? 'border-[#059669] text-[#059669]' : 'border-transparent text-gray-400 hover:text-gray-600'
             }`}
           >
             Active Inventory ({assignments.length})
@@ -238,7 +238,7 @@ export default function EmployeeAssets() {
           <button
             onClick={() => setActiveTab('requests')}
             className={`pb-3 font-bold text-sm transition-colors border-b-2 ${
-              activeTab === 'requests' ? 'border-[#ea580c] text-[#ea580c]' : 'border-transparent text-gray-400 hover:text-gray-600'
+              activeTab === 'requests' ? 'border-[#059669] text-[#059669]' : 'border-transparent text-gray-400 hover:text-gray-600'
             }`}
           >
             My Requests ({requests.length})
@@ -288,7 +288,7 @@ export default function EmployeeAssets() {
                           setAckStatus('ACCEPTED');
                           setShowAckModal(a);
                         }}
-                        className="bg-[#ea580c] hover:bg-[#c2410c] text-white text-xs font-bold px-4 py-2 rounded-xl transition-all active:scale-[0.98] flex items-center gap-1.5 shadow-sm cursor-pointer"
+                        className="bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold px-4 py-2 rounded-xl transition-all active:scale-[0.98] flex items-center gap-1.5 shadow-sm cursor-pointer border-none"
                       >
                         <Check size={14} /> Verify & Confirm Receipt
                       </button>
@@ -314,7 +314,7 @@ export default function EmployeeAssets() {
                     <div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="p-2 bg-orange-50 rounded-lg">{getCategoryIcon(a.asset_category)}</div>
+                          <div className="p-2 bg-emerald-50 text-emerald-700 rounded-lg">{getCategoryIcon(a.asset_category)}</div>
                           <div>
                             <h4 className="font-bold text-gray-800 text-sm">{a.asset_name}</h4>
                             <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-mono font-medium">
@@ -350,7 +350,7 @@ export default function EmployeeAssets() {
                       <span className="text-[10px] text-gray-400">Confirmed: {a.acknowledged_at ? formatDate(a.acknowledged_at) : formatDate(a.assigned_date)}</span>
                       <button
                         onClick={() => handleRequestReturn(a)}
-                        className="text-gray-600 hover:text-[#ea580c] hover:bg-orange-50/50 text-xs font-bold px-3 py-1.5 rounded-xl transition-colors border border-[#e8e1d5] cursor-pointer"
+                        className="text-gray-600 hover:text-[#059669] hover:bg-emerald-50/50 text-xs font-bold px-3 py-1.5 rounded-xl transition-colors border border-[#e8e1d5] cursor-pointer"
                       >
                         Request Return
                       </button>
@@ -440,7 +440,7 @@ export default function EmployeeAssets() {
                     onClick={() => setAckStatus('ACCEPTED')}
                     className={`py-3 px-4 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
                       ackStatus === 'ACCEPTED'
-                        ? 'border-[#ea580c] bg-orange-50 text-orange-800 shadow-sm'
+                        ? 'border-[#059669] bg-emerald-50 text-emerald-800 shadow-sm'
                         : 'border-gray-200 hover:bg-gray-50 text-gray-600'
                     }`}
                   >
@@ -482,8 +482,8 @@ export default function EmployeeAssets() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className={`text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-sm cursor-pointer transition-colors ${
-                    ackStatus === 'ACCEPTED' ? 'bg-[#ea580c] hover:bg-[#c2410c]' : 'bg-rose-600 hover:bg-rose-700'
+                  className={`text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-sm cursor-pointer transition-colors border-none ${
+                    ackStatus === 'ACCEPTED' ? 'bg-[#059669] hover:bg-[#047857]' : 'bg-rose-600 hover:bg-rose-700'
                   }`}
                 >
                   {submitting ? 'Submitting...' : 'Submit Acknowledgement'}

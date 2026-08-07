@@ -62,12 +62,12 @@ export default function EmployeePayslips() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white rounded-3xl border border-[#e8e1d5]/60 p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
-              <Wallet size={20} className="text-[#ea580c]" />
+            <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
+              <Wallet size={20} className="text-[#059669]" />
             </div>
             <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Earned</span>
           </div>
-          <div className="text-3xl font-black text-[#ea580c]">{formatCurrency(totalEarned)}</div>
+          <div className="text-3xl font-black text-[#059669]">{formatCurrency(totalEarned)}</div>
         </div>
         <div className="bg-white rounded-3xl border border-[#e8e1d5]/60 p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-2">
@@ -80,8 +80,8 @@ export default function EmployeePayslips() {
         </div>
         <div className="bg-white rounded-3xl border border-[#e8e1d5]/60 p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
-              <FileText size={20} className="text-[#ea580c]" />
+            <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
+              <FileText size={20} className="text-[#059669]" />
             </div>
             <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Payslips</span>
           </div>
@@ -113,7 +113,7 @@ export default function EmployeePayslips() {
                 id="passwordProtect"
                 checked={passwordProtect}
                 onChange={(e) => setPasswordProtect(e.target.checked)}
-                className="h-4 w-4 text-[#ea580c] border-[#e8e1d5] rounded focus:ring-[#ea580c] cursor-pointer"
+                className="h-4 w-4 text-[#059669] border-[#e8e1d5] rounded focus:ring-[#059669] cursor-pointer"
               />
               <label htmlFor="pass_protect" className="text-sm font-medium text-gray-700">
                 Password-protect PDF Download
@@ -142,7 +142,7 @@ export default function EmployeePayslips() {
             <tbody className="divide-y divide-gray-100">
                {loading ? (
                 <tr><td colSpan={6} className="px-6 py-12 text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ea580c] mx-auto" />
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#059669] mx-auto" />
                 </td></tr>
               ) : payslips.length === 0 ? (
                 <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-400">No payslips found for this period</td></tr>
@@ -151,7 +151,7 @@ export default function EmployeePayslips() {
                   <td className="table-cell font-bold text-gray-900">{monthNames[p.month - 1]} {p.year}</td>
                   <td className="table-cell text-right font-semibold text-slate-800">{formatCurrency(p.gross_salary)}</td>
                   <td className="table-cell text-right font-semibold text-rose-600">{formatCurrency(p.total_deductions)}</td>
-                  <td className="table-cell text-right font-bold text-[#ea580c]">{formatCurrency(p.net_salary)}</td>
+                  <td className="table-cell text-right font-bold text-[#059669]">{formatCurrency(p.net_salary)}</td>
                   <td className="table-cell text-center">
                     <span className={getStatusColor(p.status)}>{p.status}</span>
                   </td>
@@ -165,7 +165,7 @@ export default function EmployeePayslips() {
                         <button
                           onClick={() => handleDownload(p.id)}
                           disabled={downloading === p.id}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-white bg-[#ea580c] rounded-xl hover:bg-[#c2410c] disabled:opacity-50 transition-all cursor-pointer shadow-sm"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-white bg-[#059669] hover:bg-[#047857] disabled:opacity-50 transition-all cursor-pointer shadow-sm border-none"
                         >
                           <Download size={14} />
                           {downloading === p.id ? 'Downloading...' : 'Download'}
@@ -191,16 +191,16 @@ export default function EmployeePayslips() {
                {viewPayslip.earnings && viewPayslip.earnings.length > 0 && (
                 <div className="mb-4">
                   <h4 className="text-sm font-semibold text-gray-700 mb-2">Earnings</h4>
-                  <div className="bg-orange-50/50 rounded-lg p-3 border border-orange-100">
+                  <div className="bg-emerald-50/50 rounded-lg p-3 border border-emerald-100">
                     {viewPayslip.earnings.map((e) => (
                       <div key={e.id} className="flex justify-between py-1 text-xs font-semibold">
                         <span className="text-gray-700">{e.name}</span>
-                        <span className="font-bold text-[#ea580c]">{formatCurrency(e.amount)}</span>
+                        <span className="font-bold text-[#059669]">{formatCurrency(e.amount)}</span>
                       </div>
                     ))}
-                    <div className="flex justify-between pt-2 mt-2 border-t border-orange-200 text-sm">
-                      <span className="font-bold text-orange-900">Gross Salary</span>
-                      <span className="font-black text-[#ea580c]">{formatCurrency(viewPayslip.gross_salary)}</span>
+                    <div className="flex justify-between pt-2 mt-2 border-t border-emerald-200 text-sm">
+                      <span className="font-bold text-emerald-900">Gross Salary</span>
+                      <span className="font-black text-[#059669]">{formatCurrency(viewPayslip.gross_salary)}</span>
                     </div>
                   </div>
                 </div>
