@@ -257,16 +257,20 @@ class DownloadPayslipView(ResponseMixin, generics.GenericAPIView):
         except Payslip.DoesNotExist:
             return self.error_response('Payslip not found')
         
+        # Auto-generate or convert to PDF if not already in PDF format
+        if not payslip.pdf_file or not payslip.pdf_file.name.lower().endswith('.pdf'):
+            from apps.payroll.services import _generate_payslip_file
+            _generate_payslip_file(payslip)
+            payslip.refresh_from_db()
+
         if payslip.pdf_file:
             from django.http import FileResponse
-            orig_name = payslip.pdf_file.name
-            ext = 'pdf' if orig_name.lower().endswith('.pdf') else 'txt'
-            filename = f'payslip_{employee.employee_id}_{payslip.month}_{payslip.year}.{ext}'
+            filename = f'payslip_{employee.employee_id}_{payslip.month}_{payslip.year}.pdf'
             
             password_protected = request.query_params.get('password_protected') == 'true'
             file_obj = payslip.pdf_file.open('rb')
             
-            if password_protected and ext == 'pdf':
+            if password_protected:
                 from apps.payroll.services import encrypt_pdf
                 from apps.employees.models import EmployeePersonalInfo
                 personal_info = getattr(employee, 'personal_info', None)
@@ -300,12 +304,16 @@ class AdminPayslipDownloadView(ResponseMixin, generics.GenericAPIView):
         except Payslip.DoesNotExist:
             return self.error_response('Payslip not found')
         
+        # Auto-generate or convert to PDF if not already in PDF format
+        if not payslip.pdf_file or not payslip.pdf_file.name.lower().endswith('.pdf'):
+            from apps.payroll.services import _generate_payslip_file
+            _generate_payslip_file(payslip)
+            payslip.refresh_from_db()
+
         if payslip.pdf_file:
             from django.http import FileResponse
             file_obj = payslip.pdf_file.open('rb')
-            orig_name = payslip.pdf_file.name
-            ext = 'pdf' if orig_name.lower().endswith('.pdf') else 'txt'
-            filename = f'payslip_{payslip.employee.employee_id if payslip.employee else "unmapped"}_{payslip.month}_{payslip.year}.{ext}'
+            filename = f'payslip_{payslip.employee.employee_id if payslip.employee else "unmapped"}_{payslip.month}_{payslip.year}.pdf'
             
             # Audit logging
             from apps.payroll.services import log_payslip_action
