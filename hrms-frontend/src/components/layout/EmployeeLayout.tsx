@@ -18,7 +18,7 @@ const allNavItems = [
 ];
 
 export default function EmployeeLayout({ children }: { children: React.ReactNode }) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const location = useLocation();
@@ -53,7 +53,11 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-gradient-to-b from-[#0f172a] to-[#0f172a] text-white border-r border-slate-800/40 transition-all duration-300 flex flex-col`}>
+      <aside 
+        onMouseEnter={() => setSidebarOpen(true)}
+        onMouseLeave={() => setSidebarOpen(false)}
+        className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-gradient-to-b from-[#0f172a] to-[#0f172a] text-white border-r border-slate-800/40 transition-all duration-300 flex flex-col`}
+      >
         <div className="p-4 flex items-center justify-between">
           {sidebarOpen && (
             <div className="flex items-center gap-2">
