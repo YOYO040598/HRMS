@@ -61,8 +61,8 @@ export default function EmployeeDashboard() {
         }
         .bento-card:hover {
           transform: translateY(-5px);
-          box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05), 0 10px 20px -10px rgba(234, 88, 12, 0.05);
-          border-color: rgba(234, 88, 12, 0.3) !important;
+          box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05), 0 10px 20px -10px rgba(5, 150, 105, 0.05);
+          border-color: rgba(5, 150, 105, 0.3) !important;
         }
         @keyframes drift {
           0% { transform: translate(0px, 0px) scale(1); }
@@ -75,7 +75,7 @@ export default function EmployeeDashboard() {
       {/* Top Bar Greeting */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-bold text-[#ea580c] uppercase tracking-widest mb-1.5">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#059669] uppercase tracking-widest mb-1.5">
             <Sparkles size={14} /> Employee Workspace
           </div>
           <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Welcome, {user?.first_name}!</h2>
@@ -90,24 +90,24 @@ export default function EmployeeDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-auto">
         
         {/* Welcome Banner Bento Card */}
-        <div className="md:col-span-2 bg-gradient-to-tr from-[#ea580c] to-[#f97316] rounded-3xl p-8 text-white relative overflow-hidden shadow-lg shadow-[#ea580c]/15 flex flex-col justify-between min-h-[220px]">
+        <div className="md:col-span-2 bg-gradient-to-tr from-[#059669] to-[#10b981] rounded-3xl p-8 text-white relative overflow-hidden shadow-lg shadow-[#059669]/15 flex flex-col justify-between min-h-[220px]">
           {/* Ambient Glow Bubbles */}
           <div className="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-2xl animate-drift pointer-events-none" />
           <div className="absolute -bottom-8 -left-8 w-36 h-36 bg-white/10 rounded-full blur-xl pointer-events-none" />
           
           <div className="relative z-10">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest bg-white/20 px-2.5 py-1 rounded-full text-indigo-100">Active Profile</span>
+            <span className="text-[10px] font-extrabold uppercase tracking-widest bg-white/20 px-2.5 py-1 rounded-full text-emerald-50">Active Profile</span>
             <h3 className="text-2xl font-bold mt-4 tracking-tight">{user?.first_name} {user?.last_name}</h3>
-            <p className="text-sm text-indigo-100 mt-1.5 opacity-90">{user?.email}</p>
+            <p className="text-sm text-emerald-50/90 mt-1.5 opacity-90">{user?.email}</p>
           </div>
 
           <div className="relative z-10 flex gap-6 mt-6 border-t border-white/10 pt-4">
             <div>
-              <div className="text-xs text-indigo-200 uppercase font-bold tracking-wider">Role</div>
+              <div className="text-xs text-emerald-100 uppercase font-bold tracking-wider">Role</div>
               <div className="text-sm font-semibold mt-0.5">{user?.role || 'Employee'}</div>
             </div>
             <div>
-              <div className="text-xs text-indigo-200 uppercase font-bold tracking-wider">Department</div>
+              <div className="text-xs text-emerald-100 uppercase font-bold tracking-wider">Department</div>
               <div className="text-sm font-semibold mt-0.5">{user?.department || 'Operations'}</div>
             </div>
           </div>
@@ -180,8 +180,8 @@ export default function EmployeeDashboard() {
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md">Quick Access</span>
           </div>
           <div className="grid grid-cols-3 gap-3">
-            <Link to="/emp/attendance" className="p-3 bg-gray-50 hover:bg-orange-50/50 hover:text-[#ea580c] rounded-2xl text-center transition-all border border-gray-100/50">
-              <Clock size={20} className="mx-auto mb-1.5 text-[#ea580c]" />
+            <Link to="/emp/attendance" className="p-3 bg-gray-50 hover:bg-emerald-50/50 hover:text-[#059669] rounded-2xl text-center transition-all border border-gray-100/50">
+              <Clock size={20} className="mx-auto mb-1.5 text-[#059669]" />
               <span className="text-xs font-bold block">Attendance</span>
             </Link>
             <Link to="/emp/leave" className="p-3 bg-gray-50 hover:bg-amber-50/50 hover:text-amber-600 rounded-2xl text-center transition-all border border-gray-100/50">
