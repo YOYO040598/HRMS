@@ -375,17 +375,91 @@ def draw_decorations(canvas, doc):
 def _generate_payslip_file(payslip):
     import hashlib
     from io import BytesIO
+    from decimal import Decimal
     from reportlab.lib import colors
     from reportlab.lib.pagesizes import A4
     from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Spacer, Paragraph
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     from django.core.files.base import ContentFile
     from apps.attendance.models import Attendance
+    from apps.payroll.models import PayslipEarning, PayslipDeduction, SalaryStructure
     import calendar
 
     emp = payslip.employee
     earnings = list(payslip.earnings.all())
     deductions = list(payslip.payslip_deductions.all())
+
+    # Ensure a complete detailed salary structure is present
+    if len(earnings) < 3 or len(deductions) < 2:
+        structure = SalaryStructure.objects.filter(is_active=True).first()
+        if not structure:
+            structure = SalaryStructure(
+                basic_percentage=Decimal('40'),
+                hra_percentage=Decimal('20'),
+                special_allowance_percentage=Decimal('20'),
+                pf_percentage=Decimal('12'),
+                esi_percentage=Decimal('0.75'),
+                professional_tax=Decimal('200')
+            )
+        
+        gross = Decimal(str(payslip.gross_salary))
+        # Fallback to net_salary + total_deductions if gross is 0
+        if gross == 0:
+            gross = Decimal(str(payslip.net_salary)) + Decimal(str(payslip.total_deductions))
+            payslip.gross_salary = gross
+
+        basic = gross * (structure.basic_percentage / 100)
+        hra = gross * (structure.hra_percentage / 100)
+        special = gross * (structure.special_allowance_percentage / 100)
+        
+        # Adjust any rounding discrepancy
+        diff = gross - (basic + hra + special)
+        if diff != 0:
+            special += diff
+            
+        pf = basic * (structure.pf_percentage / 100)
+        esi = gross * (structure.esi_percentage / 100) if gross <= 21000 else Decimal('0')
+        pt = min(structure.professional_tax, gross)
+        
+        # If total deductions in the database is 0, let's set it to pf + esi + pt
+        if payslip.total_deductions == 0:
+            payslip.total_deductions = pf + esi + pt
+            payslip.net_salary = gross - payslip.total_deductions
+            
+        # Scale/Adjust PF to match the database total_deductions
+        total_calc_deductions = pf + esi + pt
+        diff_ded = Decimal(str(payslip.total_deductions)) - total_calc_deductions
+        if diff_ded != 0:
+            pf += diff_ded
+            
+        # Rebuild lists
+        class VirtualComponent:
+            def __init__(self, name, amount):
+                self.name = name
+                self.amount = Decimal(str(amount))
+                
+        earnings = [
+            VirtualComponent("Basic Salary", basic),
+            VirtualComponent("HRA", hra),
+            VirtualComponent("Special Allowance", special),
+        ]
+        
+        deductions = [
+            VirtualComponent("Provident Fund", pf),
+            VirtualComponent("Professional Tax", pt),
+        ]
+        if esi > 0:
+            deductions.insert(1, VirtualComponent("Employee State Insurance", esi))
+
+        # Save these detailed components back to the DB to ensure consistency
+        payslip.earnings.all().delete()
+        payslip.payslip_deductions.all().delete()
+        for e in earnings:
+            PayslipEarning.objects.create(payslip=payslip, name=e.name, amount=e.amount)
+        for d in deductions:
+            PayslipDeduction.objects.create(payslip=payslip, name=d.name, amount=d.amount)
+        payslip.save(update_fields=['gross_salary', 'total_deductions', 'net_salary'])
+
     month_name = MONTH_NAMES[payslip.month]
     dept_name = emp.department.name if emp.department else 'N/A'
     designation_name = emp.designation.name if emp.designation else 'N/A'

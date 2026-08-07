@@ -417,7 +417,7 @@ class EmployeePayslipListView(ResponseMixin, generics.GenericAPIView):
         year = request.query_params.get('year')
 
         payslips = Payslip.objects.filter(
-            employee=employee, status='PUBLISHED'
+            employee=employee, status__in=['PUBLISHED', 'DRAFT', 'PENDING_VERIFICATION', 'ARCHIVED']
         ).select_related('employee__user', 'generated_by').order_by('-year', '-month')
 
         if month:
