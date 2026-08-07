@@ -42,8 +42,8 @@ import EmployeeExit from './pages/employee/EmployeeExit';
 import EmployeeProfilePage from './pages/employee/EmployeeProfilePage';
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { user, tokens } = useSelector((state: RootState) => state.auth);
-  if (!user || !tokens) return <Navigate to="/login" replace />;
+  const { user, tokens, loginType } = useSelector((state: RootState) => state.auth);
+  if (!user || !tokens || loginType !== 'admin') return <Navigate to="/login" replace />;
   return <Layout>{children}</Layout>;
 }
 
