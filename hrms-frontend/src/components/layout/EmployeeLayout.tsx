@@ -420,8 +420,8 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
       {/* 7-Layer Canvas Background Overlay */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-0" />
 
-      {/* Centered Top-Left Logo outside menu bar */}
-      <div className="absolute top-7 left-8 z-50 hidden lg:flex items-center gap-2 pointer-events-auto">
+      {/* 1. Left Corner Logo (Desktop Only) */}
+      <div className="absolute top-6 left-8 z-40 hidden lg:flex items-center gap-2 pointer-events-auto">
         <Link to="/emp" className="flex items-center gap-2">
           <div className="w-8 h-8 bg-gradient-to-br from-[#14B8A6] to-[#2DD4BF] text-[#060B16] rounded-full flex items-center justify-center font-bold text-base shadow-md shadow-[#14B8A6]/20">
             H
@@ -430,168 +430,214 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
         </Link>
       </div>
 
-      {/* Top Navbar Header */}
-      <header className="absolute top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl z-40 bg-[#0D1728]/70 backdrop-blur-md border border-[#1D3045]/60 h-16 rounded-full px-6 flex items-center justify-between shadow-2xl transition-all text-[#F8FAFC]">
-        {/* Left Side Spacer for balancing centered menu */}
-        <div className="w-20 hidden lg:block" />
-
-        {/* Center: Navigation Items (Names only) */}
-        <nav className="hidden md:flex items-center gap-1.5 mx-auto">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.path || (item.path !== '/emp' && location.pathname.startsWith(item.path));
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 ${
-                  isActive
-                    ? 'bg-[#14B8A6]/20 text-white border border-[#14B8A6]/30 shadow-md shadow-[#14B8A6]/10'
-                    : 'text-[#94A3B8] hover:bg-[#111D30]/60 hover:text-[#F8FAFC]'
-                }`}
-              >
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Right Action Icons */}
-        <div className="flex items-center gap-4">
-          {/* Search Box Input */}
-          <div className="hidden lg:flex items-center relative w-48">
-            <div 
-              onClick={() => setSearchOpen(true)}
-              className="flex items-center justify-between w-full bg-[#0D1728]/80 border border-[#1D3045] px-2.5 py-1.5 rounded-lg text-[11px] text-[#94A3B8] hover:border-[#2DD4BF]/50 cursor-pointer transition-all"
+      {/* 2. Centered Pill Navigation Menu (Desktop Only) */}
+      <nav className="absolute top-4 left-1/2 -translate-x-1/2 z-40 hidden md:flex items-center gap-1 bg-[#0D1728]/70 backdrop-blur-md border border-[#1D3045]/60 h-12 rounded-full px-4 shadow-xl transition-all pointer-events-auto">
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.path || (item.path !== '/emp' && location.pathname.startsWith(item.path));
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`flex items-center px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${
+                isActive
+                  ? 'bg-[#14B8A6]/25 text-white border border-[#14B8A6]/30 shadow-md shadow-[#14B8A6]/10'
+                  : 'text-[#94A3B8] hover:bg-[#111D30]/60 hover:text-[#F8FAFC]'
+              }`}
             >
-              <div className="flex items-center gap-1.5">
-                <Search size={12} className="text-[#64748B]" />
-                <span>Search...</span>
-              </div>
-              <kbd className="bg-[#111D30] text-[9px] text-[#64748B] px-1 py-0.2 rounded border border-[#1D3045]">⌘K</kbd>
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* 3. Top-Right Corner Actions (Desktop Only) */}
+      <div className="absolute top-4 right-8 z-40 hidden md:flex items-center gap-3 pointer-events-auto">
+        {/* Search Box Input */}
+        <div className="hidden lg:flex items-center relative w-44">
+          <div 
+            onClick={() => setSearchOpen(true)}
+            className="flex items-center justify-between w-full bg-[#0D1728]/70 border border-[#1D3045]/60 px-2.5 py-1.5 rounded-full text-[11px] text-[#94A3B8] hover:border-[#2DD4BF]/50 cursor-pointer transition-all shadow-md"
+          >
+            <div className="flex items-center gap-1.5">
+              <Search size={12} className="text-[#64748B]" />
+              <span>Search...</span>
             </div>
+            <kbd className="bg-[#111D30] text-[9px] text-[#64748B] px-1 py-0.2 rounded border border-[#1D3045]">⌘K</kbd>
           </div>
+        </div>
+        
+        {/* Notification Bell Dropdown */}
+        <div className="relative">
+          <button 
+            onClick={() => setNotificationDropdownOpen(!notificationDropdownOpen)}
+            className="relative w-10 h-10 flex items-center justify-center text-[#94A3B8] hover:text-[#2DD4BF] bg-[#0D1728]/70 border border-[#1D3045]/60 rounded-full transition-colors cursor-pointer shadow-md"
+          >
+            <Bell size={17} />
+            {unreadCount > 0 && (
+              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[#EF4444] rounded-full animate-pulse" />
+            )}
+          </button>
           
-          {/* Notification Bell Dropdown */}
+          {notificationDropdownOpen && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setNotificationDropdownOpen(false)} />
+              <div className="absolute right-0 mt-2 w-72 bg-[#0D1728] border border-[#1D3045] rounded-xl shadow-xl z-20 overflow-hidden">
+                <div className="px-4 py-3 border-b border-[#1D3045] flex items-center justify-between">
+                  <span className="font-bold text-xs text-[#F8FAFC]">Notifications</span>
+                  {unreadCount > 0 && (
+                    <span className="text-[10px] text-[#EF4444] bg-[#EF4444]/10 border border-[#EF4444]/25 px-1.5 py-0.2 rounded font-semibold">
+                      {unreadCount} Unread
+                    </span>
+                  )}
+                </div>
+                <div className="divide-y divide-[#1D3045]/60 text-xs text-[#94A3B8]">
+                  {notifications.length === 0 ? (
+                    <div className="p-4 text-center text-[#64748B]">No recent notifications</div>
+                  ) : (
+                    notifications.map((n) => (
+                      <div key={n.id} className="p-3 hover:bg-[#111D30]/50 transition-all flex items-start gap-2.5 text-left">
+                        <span className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
+                          n.title?.toLowerCase().includes('approved') ? 'bg-[#22C55E]' :
+                          n.title?.toLowerCase().includes('marked') ? 'bg-[#22D3EE]' :
+                          n.title?.toLowerCase().includes('payslip') ? 'bg-[#F59E0B]' :
+                          'bg-[#38BDF8]'
+                        }`} />
+                        <div>
+                          <p className="font-bold text-[#F8FAFC]">{n.title}</p>
+                          <p className="text-[10px] text-[#64748B] mt-0.5">{n.message}</p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+                <Link 
+                  to="/emp/notifications" 
+                  onClick={() => setNotificationDropdownOpen(false)}
+                  className="block text-center py-2 text-[10px] font-bold text-[#2DD4BF] hover:bg-[#111D30]/70 border-t border-[#1D3045]/80"
+                >
+                  View all notifications →
+                </Link>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* User Profile dropdown */}
+        <div className="relative">
+          <button 
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            className="flex items-center gap-2 p-1 bg-[#0D1728]/70 border border-[#1D3045]/60 rounded-full transition-colors cursor-pointer shadow-md h-10 pr-2.5"
+          >
+            <div className="w-8 h-8 bg-gradient-to-br from-[#14B8A6] to-[#2DD4BF] text-[#060B16] rounded-full flex items-center justify-center font-bold text-xs shadow-inner">
+              {user?.first_name?.[0]}{user?.last_name?.[0]}
+            </div>
+            <div className="hidden xl:flex flex-col text-left shrink-0">
+              <span className="text-xs font-bold text-[#F8FAFC] leading-none">{user?.first_name} {user?.last_name}</span>
+            </div>
+            <ChevronDown size={12} className="text-[#64748B]" />
+          </button>
+
+          {dropdownOpen && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setDropdownOpen(false)} />
+              <div className="absolute right-0 mt-2 w-56 bg-[#0D1728] border border-[#1D3045] rounded-xl shadow-xl z-20 py-1 text-[#F8FAFC]">
+                <div className="px-4 py-2.5 border-b border-[#1D3045] text-left">
+                  <p className="font-bold text-sm text-[#F8FAFC] truncate">{user?.full_name}</p>
+                  <p className="text-[11px] text-[#94A3B8] truncate">{user?.email}</p>
+                  <span className="mt-1 inline-block px-1.5 py-0.5 text-[9px] bg-[#14B8A6]/10 text-[#14B8A6] border border-[#14B8A6]/20 rounded font-semibold uppercase">{user?.role?.replace('_', ' ')}</span>
+                </div>
+                
+                <Link 
+                  to="/emp/profile" 
+                  onClick={() => setDropdownOpen(false)}
+                  className="flex items-center gap-2 px-4 py-2 text-xs font-semibold hover:bg-[#111D30] hover:text-[#F8FAFC]"
+                >
+                  <User size={14} className="text-[#94A3B8]" /> My Profile
+                </Link>
+                <Link 
+                  to="/emp/profile" 
+                  onClick={() => setDropdownOpen(false)}
+                  className="flex items-center gap-2 px-4 py-2 text-xs font-semibold hover:bg-[#111D30] hover:text-[#F8FAFC]"
+                >
+                  <Settings size={14} className="text-[#94A3B8]" /> Settings
+                </Link>
+                <Link 
+                  to="/emp/profile" 
+                  onClick={() => setDropdownOpen(false)}
+                  className="flex items-center gap-2 px-4 py-2 text-xs font-semibold hover:bg-[#111D30] hover:text-[#F8FAFC]"
+                >
+                  <Shield size={14} className="text-[#94A3B8]" /> Security
+                </Link>
+                <Link 
+                  to="/emp/profile" 
+                  onClick={() => setDropdownOpen(false)}
+                  className="flex items-center gap-2 px-4 py-2 text-xs font-semibold hover:bg-[#111D30] hover:text-[#F8FAFC]"
+                >
+                  <Sun size={14} className="text-[#94A3B8]" /> Appearance
+                </Link>
+                
+                <div className="border-t border-[#1D3045] mt-1 pt-1">
+                  <button 
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-[#94A3B8] hover:bg-[#111D30] hover:text-[#F8FAFC] w-full text-left"
+                  >
+                    <LogOut size={14} className="text-[#64748B]" /> Logout
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* 4. Mobile/Tablet Navbar (Sticky Header style on top) */}
+      <header className="md:hidden bg-[#0A1120]/45 backdrop-blur-md border-b border-[#1D3045]/40 h-16 flex items-center justify-between px-6 z-40 relative text-[#F8FAFC]">
+        <Link to="/emp" className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-gradient-to-br from-[#14B8A6] to-[#2DD4BF] text-[#060B16] rounded-full flex items-center justify-center font-bold text-base shadow-md shadow-[#14B8A6]/20">
+            H
+          </div>
+        </Link>
+
+        <div className="flex items-center gap-3">
+          {/* Notification bell mobile */}
           <div className="relative">
             <button 
               onClick={() => setNotificationDropdownOpen(!notificationDropdownOpen)}
-              className="relative p-2 text-[#94A3B8] hover:text-[#2DD4BF] hover:bg-[#111D30]/60 rounded-lg transition-colors cursor-pointer"
+              className="relative p-2 text-[#94A3B8] hover:text-[#2DD4BF] rounded-lg transition-colors cursor-pointer"
             >
               <Bell size={18} />
               {unreadCount > 0 && (
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#EF4444] rounded-full animate-pulse" />
               )}
             </button>
-            
             {notificationDropdownOpen && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => setNotificationDropdownOpen(false)} />
-                <div className="absolute right-0 mt-2 w-72 bg-[#0D1728] border border-[#1D3045] rounded-xl shadow-xl z-20 overflow-hidden">
-                  <div className="px-4 py-3 border-b border-[#1D3045] flex items-center justify-between">
-                    <span className="font-bold text-xs text-[#F8FAFC]">Notifications</span>
-                    {unreadCount > 0 && (
-                      <span className="text-[10px] text-[#EF4444] bg-[#EF4444]/10 border border-[#EF4444]/25 px-1.5 py-0.2 rounded font-semibold">
-                        {unreadCount} Unread
-                      </span>
-                    )}
-                  </div>
-                  <div className="divide-y divide-[#1D3045]/60 text-xs text-[#94A3B8]">
-                    {notifications.length === 0 ? (
-                      <div className="p-4 text-center text-[#64748B]">No recent notifications</div>
-                    ) : (
-                      notifications.map((n) => (
-                        <div key={n.id} className="p-3 hover:bg-[#111D30]/50 transition-all flex items-start gap-2.5">
-                          <span className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
-                            n.title?.toLowerCase().includes('approved') ? 'bg-[#22C55E]' :
-                            n.title?.toLowerCase().includes('marked') ? 'bg-[#22D3EE]' :
-                            n.title?.toLowerCase().includes('payslip') ? 'bg-[#F59E0B]' :
-                            'bg-[#38BDF8]'
-                          }`} />
-                          <div>
-                            <p className="font-bold text-[#F8FAFC]">{n.title}</p>
-                            <p className="text-[10px] text-[#64748B] mt-0.5">{n.message}</p>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                  <Link 
-                    to="/emp/notifications" 
-                    onClick={() => setNotificationDropdownOpen(false)}
-                    className="block text-center py-2 text-[10px] font-bold text-[#2DD4BF] hover:bg-[#111D30]/70 border-t border-[#1D3045]/80"
-                  >
-                    View all notifications →
-                  </Link>
+              <div className="absolute right-0 mt-2 w-64 bg-[#0D1728] border border-[#1D3045] rounded-xl shadow-xl z-50 overflow-hidden text-xs text-[#94A3B8]">
+                <div className="px-4 py-2 border-b border-[#1D3045] text-[#F8FAFC] font-bold">Notifications</div>
+                <div className="divide-y divide-[#1D3045]/40 max-h-48 overflow-y-auto">
+                  {notifications.map((n) => (
+                    <div key={n.id} className="p-3 hover:bg-[#111D30]/40 text-left">
+                      <p className="font-bold text-[#F8FAFC]">{n.title}</p>
+                      <p className="text-[10px] text-[#64748B] mt-0.5">{n.message}</p>
+                    </div>
+                  ))}
                 </div>
-              </>
+              </div>
             )}
           </div>
 
-          {/* User Profile dropdown */}
+          {/* Profile Mobile */}
           <div className="relative">
             <button 
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-2.5 p-1 hover:bg-[#111D30] rounded-lg transition-colors cursor-pointer"
+              className="w-8 h-8 bg-gradient-to-br from-[#14B8A6] to-[#2DD4BF] text-[#060B16] rounded-full flex items-center justify-center font-bold text-xs shadow-md"
             >
-              <div className="w-8 h-8 bg-gradient-to-br from-[#14B8A6] to-[#2DD4BF] text-[#060B16] rounded-full flex items-center justify-center font-bold text-xs shadow-inner">
-                {user?.first_name?.[0]}{user?.last_name?.[0]}
-              </div>
-              <div className="hidden sm:flex flex-col text-left shrink-0">
-                <span className="text-xs font-bold text-[#F8FAFC] leading-none">{user?.first_name} {user?.last_name}</span>
-                <span className="text-[10px] text-[#94A3B8] mt-0.5 leading-none">{(user as any)?.department || 'Operations'}</span>
-              </div>
-              <ChevronDown size={12} className="text-[#64748B] hidden sm:inline" />
+              {user?.first_name?.[0]}{user?.last_name?.[0]}
             </button>
-
             {dropdownOpen && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => setDropdownOpen(false)} />
-                <div className="absolute right-0 mt-2 w-56 bg-[#0D1728] border border-[#1D3045] rounded-xl shadow-xl z-20 py-1 text-[#F8FAFC]">
-                  <div className="px-4 py-2.5 border-b border-[#1D3045]">
-                    <p className="font-bold text-sm text-[#F8FAFC] truncate">{user?.full_name}</p>
-                    <p className="text-[11px] text-[#94A3B8] truncate">{user?.email}</p>
-                    <span className="mt-1 inline-block px-1.5 py-0.5 text-[9px] bg-[#14B8A6]/10 text-[#14B8A6] border border-[#14B8A6]/20 rounded font-semibold uppercase">{user?.role?.replace('_', ' ')}</span>
-                  </div>
-                  
-                  <Link 
-                    to="/emp/profile" 
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-xs font-semibold hover:bg-[#111D30] hover:text-[#F8FAFC]"
-                  >
-                    <User size={14} className="text-[#94A3B8]" /> My Profile
-                  </Link>
-                  <Link 
-                    to="/emp/profile" 
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-xs font-semibold hover:bg-[#111D30] hover:text-[#F8FAFC]"
-                  >
-                    <Settings size={14} className="text-[#94A3B8]" /> Settings
-                  </Link>
-                  <Link 
-                    to="/emp/profile" 
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-xs font-semibold hover:bg-[#111D30] hover:text-[#F8FAFC]"
-                  >
-                    <Shield size={14} className="text-[#94A3B8]" /> Security
-                  </Link>
-                  <Link 
-                    to="/emp/profile" 
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-xs font-semibold hover:bg-[#111D30] hover:text-[#F8FAFC]"
-                  >
-                    <Sun size={14} className="text-[#94A3B8]" /> Appearance
-                  </Link>
-                  
-                  <div className="border-t border-[#1D3045] mt-1 pt-1">
-                    <button 
-                      onClick={handleLogout}
-                      className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-[#94A3B8] hover:bg-[#111D30] hover:text-[#F8FAFC] w-full text-left"
-                    >
-                      <LogOut size={14} className="text-[#64748B]" /> Logout
-                    </button>
-                  </div>
-                </div>
-              </>
+              <div className="absolute right-0 mt-2 w-48 bg-[#0D1728] border border-[#1D3045] rounded-xl shadow-xl z-50 py-1 text-xs text-left">
+                <Link to="/emp/profile" onClick={() => setDropdownOpen(false)} className="block px-4 py-2 hover:bg-[#111D30]">Profile</Link>
+                <button onClick={handleLogout} className="block w-full text-left px-4 py-2 hover:bg-[#111D30] text-rose-400 font-bold">Logout</button>
+              </div>
             )}
           </div>
         </div>
