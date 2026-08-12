@@ -311,7 +311,7 @@ export default function AnimatedIntro({ onComplete }: AnimatedIntroProps) {
               <path d="M 25 50 L 75 50" stroke="#14B8A6" strokeWidth="12" strokeLinecap="round" />
             </svg>
             <h1 className="text-xl font-extrabold tracking-widest text-[#F8FAFC] uppercase mt-2">
-              YOYO HRMS
+              HRMS
             </h1>
             <p className="text-xs text-[#2DD4BF] font-semibold mt-1">Enterprise Management Portal</p>
           </div>
