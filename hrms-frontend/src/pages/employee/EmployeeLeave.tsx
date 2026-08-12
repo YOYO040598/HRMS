@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/axios';
 import type { LeaveApplication, LeaveBalance, LeaveType } from '../../types';
-import { formatDate, getStatusColor } from '../../lib/utils';
-import { Plus, Clock, CheckCircle, XCircle, Trash2, Sparkles, CalendarDays } from 'lucide-react';
+import { formatDate } from '../../lib/utils';
+import { Plus, Clock, XCircle, Trash2, Sparkles, CalendarDays } from 'lucide-react';
 
 export default function EmployeeLeave() {
   const [applications, setApplications] = useState<LeaveApplication[]>([]);
@@ -39,6 +39,7 @@ export default function EmployeeLeave() {
       setShowForm(false);
       setForm({ leave_type: '', start_date: '', end_date: '', reason: '', is_emergency: false });
       fetchData();
+      window.dispatchEvent(new Event('leave-submitted'));
     } catch (err: any) { alert(err.response?.data?.message || 'Failed to submit'); }
     finally { setSubmitting(false); }
   };
@@ -51,42 +52,46 @@ export default function EmployeeLeave() {
     } catch (err: any) { alert(err.response?.data?.message || 'Failed to cancel'); }
   };
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#059669]" /></div>;
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#14B8A6]" /></div>;
 
   return (
-    <div className="space-y-8 p-1 sm:p-2">
+    <div className="space-y-8 p-1 sm:p-2 text-[#F8FAFC]">
       {/* Custom Styles */}
       <style>{`
+        .glass-card-premium {
+          background: rgba(13, 23, 40, 0.72);
+          backdrop-filter: blur(18px);
+          -webkit-backdrop-filter: blur(18px);
+          border: 1px solid rgba(148, 163, 184, 0.12);
+        }
         .bento-card {
           transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-          border: 1px solid rgba(226, 232, 240, 0.6);
         }
         .bento-card:hover {
           transform: translateY(-5px);
-          box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05), 0 10px 20px -10px rgba(5, 150, 105, 0.05);
-          border-color: rgba(5, 150, 105, 0.3);
+          border-color: rgba(20, 184, 166, 0.3) !important;
+          box-shadow: 0 10px 25px -5px rgba(20, 184, 166, 0.1);
         }
         .history-row {
           transition: all 0.2s ease-in-out;
         }
         .history-row:hover {
-          background-color: rgba(240, 253, 250, 0.6);
-          transform: translateX(2px);
+          background-color: rgba(20, 184, 166, 0.08);
         }
       `}</style>
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-bold text-[#059669] uppercase tracking-widest mb-1.5">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#2DD4BF] uppercase tracking-widest mb-1.5">
             <Sparkles size={14} /> Leave Management
           </div>
-          <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">My Leaves</h2>
-          <p className="text-sm text-gray-500 font-medium mt-1">Submit new leave applications and monitor your balance.</p>
+          <h2 className="text-3xl font-extrabold text-[#F8FAFC] tracking-tight">My Leaves</h2>
+          <p className="text-sm text-[#94A3B8] font-medium mt-1">Submit new leave applications and monitor your balance.</p>
         </div>
         <button 
           onClick={() => setShowForm(true)} 
-          className="bg-[#059669] hover:bg-[#047857] text-white font-bold px-6 py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm cursor-pointer border-none self-start sm:self-center"
+          className="bg-gradient-to-r from-[#14B8A6] to-[#2DD4BF] text-[#060B16] font-bold px-6 py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm cursor-pointer border-none self-start sm:self-center"
         >
           <Plus size={18} /> Apply Leave
         </button>
@@ -95,21 +100,21 @@ export default function EmployeeLeave() {
       {/* Balance Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {balances.map((bal) => (
-          <div key={bal.id} className="bento-card bg-white rounded-3xl p-6 flex flex-col justify-between min-h-[160px]">
+          <div key={bal.id} className="bento-card glass-card-premium rounded-3xl p-6 flex flex-col justify-between min-h-[160px] border border-[#1D3045]/40">
             <div>
-              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{bal.leave_type_name}</div>
-              <div className="text-3xl font-black text-gray-900">{bal.available_days} <span className="text-xs font-semibold text-gray-400">days left</span></div>
+              <div className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider mb-1">{bal.leave_type_name}</div>
+              <div className="text-3xl font-black text-[#F8FAFC]">{bal.available_days} <span className="text-xs font-semibold text-[#94A3B8]">days left</span></div>
             </div>
             <div>
-              <div className="w-full bg-gray-100 rounded-full h-1.5 mt-4 overflow-hidden">
+              <div className="w-full bg-[#1D3045]/40 rounded-full h-1.5 mt-4 overflow-hidden">
                 <div 
-                  className="bg-gradient-to-r from-emerald-500 to-[#059669] h-1.5 rounded-full transition-all duration-500" 
+                  className="bg-gradient-to-r from-[#14B8A6] to-[#2DD4BF] h-1.5 rounded-full transition-all duration-500 progress-bar-glow" 
                   style={{ width: `${Math.max(0, Math.min(100, (Number(bal.used_days) / Number(bal.total_days)) * 100))}%` }} 
                 />
               </div>
-              <div className="flex justify-between text-[10px] font-bold text-gray-400 uppercase mt-2">
+              <div className="flex justify-between text-[10px] font-bold text-[#94A3B8] uppercase mt-2">
                 <span>Used: {bal.used_days} / {bal.total_days}</span>
-                <span className="text-[#059669]">Pending: {bal.pending_days}</span>
+                <span className="text-[#2DD4BF]">Pending: {bal.pending_days}</span>
               </div>
             </div>
           </div>
@@ -118,35 +123,35 @@ export default function EmployeeLeave() {
 
       {/* Apply Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-lg p-8 shadow-2xl border border-[#e8e1d5]/60">
+        <div className="fixed inset-0 bg-[#060B16]/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-[#0D1728] rounded-3xl w-full max-w-lg p-8 shadow-2xl border border-[#1D3045]">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-                <CalendarDays className="text-[#059669]" /> Request Time Off
+              <h3 className="text-2xl font-black text-[#F8FAFC] tracking-tight flex items-center gap-2">
+                <CalendarDays className="text-[#2DD4BF]" /> Request Time Off
               </h3>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"><XCircle size={24} /></button>
+              <button onClick={() => setShowForm(false)} className="text-[#94A3B8] hover:text-[#F8FAFC] transition-colors cursor-pointer border-none bg-transparent"><XCircle size={24} /></button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="space-y-1.5">
-                <label className="label">Leave Type</label>
-                <select value={form.leave_type} onChange={(e) => setForm({ ...form, leave_type: e.target.value })} className="input-field cursor-pointer" required>
-                  <option value="">Select leave type</option>
-                  {leaveTypes.map((lt) => <option key={lt.id} value={lt.id}>{lt.name} ({lt.days_per_year} days/year)</option>)}
+              <div className="space-y-1.5 text-left">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8]">Leave Type</label>
+                <select value={form.leave_type} onChange={(e) => setForm({ ...form, leave_type: e.target.value })} className="w-full bg-[#111D30] border border-[#1D3045] rounded-xl px-4 py-3 text-xs text-[#F8FAFC] font-semibold focus:outline-none focus:border-[#2DD4BF]/50 cursor-pointer" required>
+                  <option value="" className="bg-[#0D1728]">Select leave type</option>
+                  {leaveTypes.map((lt) => <option key={lt.id} value={lt.id} className="bg-[#0D1728]">{lt.name} ({lt.days_per_year} days/year)</option>)}
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="label">Start Date</label>
-                  <input type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} className="input-field cursor-pointer" required />
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8]">Start Date</label>
+                  <input type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} className="w-full bg-[#111D30] border border-[#1D3045] rounded-xl px-4 py-3 text-xs text-[#F8FAFC] font-semibold focus:outline-none focus:border-[#2DD4BF]/50 cursor-pointer" required />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="label">End Date</label>
-                  <input type="date" value={form.end_date} onChange={(e) => setForm({ ...form, end_date: e.target.value })} className="input-field cursor-pointer" required />
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8]">End Date</label>
+                  <input type="date" value={form.end_date} onChange={(e) => setForm({ ...form, end_date: e.target.value })} className="w-full bg-[#111D30] border border-[#1D3045] rounded-xl px-4 py-3 text-xs text-[#F8FAFC] font-semibold focus:outline-none focus:border-[#2DD4BF]/50 cursor-pointer" required />
                 </div>
               </div>
-              <div className="space-y-1.5">
-                <label className="label">Reason</label>
-                <textarea value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} className="input-field" rows={3} placeholder="Provide details about your leave application" required />
+              <div className="space-y-1.5 text-left">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8]">Reason</label>
+                <textarea value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} className="w-full bg-[#111D30] border border-[#1D3045] rounded-xl px-4 py-3 text-xs text-[#F8FAFC] font-semibold focus:outline-none focus:border-[#2DD4BF]/50" rows={3} placeholder="Provide details about your leave application" required />
               </div>
               <div className="flex items-center gap-2 py-1">
                 <input 
@@ -154,13 +159,13 @@ export default function EmployeeLeave() {
                   id="emergency" 
                   checked={form.is_emergency} 
                   onChange={(e) => setForm({ ...form, is_emergency: e.target.checked })} 
-                  className="w-4 h-4 text-[#059669] focus:ring-[#059669] border-[#e8e1d5] rounded cursor-pointer" 
+                  className="w-4 h-4 text-[#14B8A6] focus:ring-[#14B8A6]/20 border-[#1D3045] bg-[#111D30] rounded cursor-pointer" 
                 />
-                <label htmlFor="emergency" className="text-xs font-bold uppercase tracking-wider text-gray-500 cursor-pointer">This is an emergency leave</label>
+                <label htmlFor="emergency" className="text-xs font-bold uppercase tracking-wider text-[#94A3B8] cursor-pointer">This is an emergency leave</label>
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setShowForm(false)} className="btn-secondary flex-1">Cancel</button>
-                <button type="submit" disabled={submitting} className="bg-[#059669] hover:bg-[#047857] text-white font-bold py-3 rounded-xl transition-all shadow-md flex-1 flex items-center justify-center gap-2 text-sm cursor-pointer border-none">
+                <button type="button" onClick={() => setShowForm(false)} className="flex-1 bg-transparent border border-[#1D3045] hover:bg-[#111D30] text-[#94A3B8] font-bold py-3 rounded-xl transition-all cursor-pointer">Cancel</button>
+                <button type="submit" disabled={submitting} className="bg-[#14B8A6] hover:bg-[#0d9488] text-[#060B16] font-bold py-3 rounded-xl transition-all shadow-md flex-1 flex items-center justify-center gap-2 text-sm cursor-pointer border-none">
                   {submitting ? <><Clock size={16} className="animate-spin" /> Processing...</> : 'Submit Application'}
                 </button>
               </div>
@@ -170,14 +175,14 @@ export default function EmployeeLeave() {
       )}
 
       {/* Applications Table Bento */}
-      <div className="bg-white rounded-3xl border border-[#e8e1d5]/60 overflow-hidden shadow-[0_4px_20px_-2px_rgba(28,25,23,0.03)]">
-        <h3 className="text-lg font-bold text-gray-900 p-6 pb-4 border-b border-gray-100 flex items-center gap-2">
-          <Clock size={18} className="text-gray-400" /> My Leave Requests
+      <div className="glass-card-premium rounded-3xl border border-[#1D3045]/40 overflow-hidden shadow-lg">
+        <h3 className="text-lg font-bold text-[#F8FAFC] p-6 pb-4 border-b border-[#1D3045]/40 flex items-center gap-2">
+          <Clock size={18} className="text-[#94A3B8]" /> My Leave Requests
         </h3>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="table-header">
+              <tr className="border-b border-[#1D3045]/40 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">
                 <th className="px-6 py-4">Type</th>
                 <th className="px-6 py-4">From</th>
                 <th className="px-6 py-4">To</th>
@@ -189,28 +194,34 @@ export default function EmployeeLeave() {
                 <th className="px-6 py-4">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-[#1D3045]/20 text-xs text-[#F8FAFC]">
               {applications.length === 0 ? (
-                <tr><td colSpan={9} className="px-6 py-12 text-center text-gray-400 text-sm font-medium">No leave requests found</td></tr>
+                <tr><td colSpan={9} className="px-6 py-12 text-center text-[#64748B] text-sm font-medium">No leave requests found</td></tr>
               ) : applications.map((app) => (
                 <tr key={app.id} className="history-row">
-                  <td className="table-cell font-bold text-slate-900">{app.leave_type_name}</td>
-                  <td className="table-cell font-semibold text-slate-500">{formatDate(app.start_date)}</td>
-                  <td className="table-cell font-semibold text-slate-500">{formatDate(app.end_date)}</td>
-                  <td className="table-cell font-bold text-slate-800">{app.total_days}</td>
-                  <td className="table-cell max-w-[200px]">
-                    <div className="truncate text-xs font-semibold text-slate-600" title={app.reason || ''}>
-                      {app.reason || <span className="text-gray-400 italic font-medium">-</span>}
+                  <td className="px-6 py-4 font-bold text-[#F8FAFC]">{app.leave_type_name}</td>
+                  <td className="px-6 py-4 font-semibold text-[#94A3B8]">{formatDate(app.start_date)}</td>
+                  <td className="px-6 py-4 font-semibold text-[#94A3B8]">{formatDate(app.end_date)}</td>
+                  <td className="px-6 py-4 font-bold text-[#F8FAFC]">{app.total_days}</td>
+                  <td className="px-6 py-4 max-w-[200px]">
+                    <div className="truncate text-xs font-semibold text-[#94A3B8]" title={app.reason || ''}>
+                      {app.reason || <span className="text-[#64748B] italic font-medium">-</span>}
                     </div>
                   </td>
-                  <td className="table-cell"><span className={`badge ${getStatusColor(app.status)}`}>{app.status}</span></td>
-                  <td className="table-cell text-xs font-bold text-slate-500">{app.is_emergency ? 'Yes' : 'No'}</td>
-                  <td className="table-cell text-[11px] font-bold text-gray-400">{formatDate(app.applied_at)}</td>
-                  <td className="table-cell">
+                  <td className="px-6 py-4">
+                    <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold ${
+                      app.status === 'APPROVED' ? 'bg-[#14B8A6]/10 text-[#2DD4BF] border border-[#14B8A6]/20' :
+                      app.status === 'PENDING' ? 'bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/20' :
+                      'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                    }`}>{app.status}</span>
+                  </td>
+                  <td className="px-6 py-4 text-xs font-bold text-[#94A3B8]">{app.is_emergency ? 'Yes' : 'No'}</td>
+                  <td className="px-6 py-4 text-[11px] font-bold text-[#64748B]">{formatDate(app.applied_at)}</td>
+                  <td className="px-6 py-4">
                     {app.status === 'PENDING' && (
                       <button
                         onClick={() => handleCancel(app.id)}
-                        className="text-[#dc2626] hover:text-[#b91c1c] p-1.5 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
+                        className="text-rose-400 hover:text-rose-300 p-1.5 rounded-lg hover:bg-rose-500/10 transition-colors cursor-pointer border-none bg-transparent"
                         title="Cancel Leave"
                       >
                         <Trash2 size={16} />
