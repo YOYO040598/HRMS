@@ -428,15 +428,15 @@ export default function AnimeCatAssistant() {
 
       {/* Bubble text */}
       {showBubble && (
-        <div className="absolute bottom-[68px] right-0 bg-[#0D1728]/95 border border-[#14B8A6]/40 text-[#F8FAFC] text-[10px] font-bold px-3 py-1.5 rounded-2xl shadow-lg backdrop-blur-md whitespace-nowrap animate-fadeIn z-50 text-left">
+        <div className="absolute bottom-[98px] right-0 bg-[#0D1728]/95 border border-[#14B8A6]/40 text-[#F8FAFC] text-[10px] font-bold px-3 py-1.5 rounded-2xl shadow-lg backdrop-blur-md whitespace-nowrap animate-fadeIn z-50 text-left">
           {bubbleText}
-          <div className="absolute top-full right-6 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-[#14B8A6]/40" />
+          <div className="absolute top-full right-8 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-[#14B8A6]/40" />
         </div>
       )}
 
       {/* Sleeping Zzz particles */}
       {pose === 'sleeping' && (
-        <div className="absolute -top-4 -left-2 text-[10px] font-extrabold text-[#2DD4BF] pointer-events-none select-none">
+        <div className="absolute -top-6 -left-3 text-[10px] font-extrabold text-[#2DD4BF] pointer-events-none select-none">
           <span className="absolute zzz-1">Z</span>
           <span className="absolute zzz-2">z</span>
           <span className="absolute zzz-3">z</span>
@@ -446,19 +446,19 @@ export default function AnimeCatAssistant() {
       {/* Celebration Star particles */}
       {(isCelebrating || pose === 'payslip_celebrate' || pose === 'leave_approved') && (
         <div className="absolute inset-0 pointer-events-none z-30">
-          <div className="absolute left-[5px] top-[-10px] text-yellow-300 celeb-star text-xs font-bold" style={{ '--sx': '-15px', '--sy': '-30px' } as React.CSSProperties}>★</div>
-          <div className="absolute left-[20px] top-[-15px] text-[#2DD4BF] celeb-star text-sm font-bold" style={{ '--sx': '0px', '--sy': '-45px' } as React.CSSProperties}>✦</div>
-          <div className="absolute left-[40px] top-[-10px] text-pink-400 celeb-star text-xs font-bold" style={{ '--sx': '15px', '--sy': '-35px' } as React.CSSProperties}>★</div>
+          <div className="absolute left-[8px] top-[-15px] text-yellow-300 celeb-star text-xs font-bold" style={{ '--sx': '-20px', '--sy': '-40px' } as React.CSSProperties}>★</div>
+          <div className="absolute left-[30px] top-[-20px] text-[#2DD4BF] celeb-star text-sm font-bold" style={{ '--sx': '0px', '--sy': '-60px' } as React.CSSProperties}>✦</div>
+          <div className="absolute left-[60px] top-[-15px] text-pink-400 celeb-star text-xs font-bold" style={{ '--sx': '20px', '--sy': '-50px' } as React.CSSProperties}>★</div>
         </div>
       )}
 
       {/* Cat Body Wrap */}
       <div
-        className={`w-16 h-16 flex items-center justify-center transition-transform duration-200 ${
+        className={`w-24 h-24 flex items-center justify-center transition-transform duration-200 ${
           facingLeft ? 'scale-x-100' : 'scale-x-[-1]'
         } ${pose === 'sleeping' ? 'cat-body-sleep' : ''}`}
       >
-        <svg viewBox="0 0 64 64" className="w-16 h-16 overflow-visible">
+        <svg viewBox="0 0 64 64" className="w-24 h-24 overflow-visible">
           {/* Shadows */}
           <ellipse cx="32" cy="54" rx="14" ry="3.5" fill="rgba(0, 0, 0, 0.35)" />
 
