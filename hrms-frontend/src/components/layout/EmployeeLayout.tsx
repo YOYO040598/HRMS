@@ -421,11 +421,11 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-0" />
 
       {/* Top Navbar Header */}
-      <header className="bg-[#0A1120]/40 backdrop-blur-md border-b border-[#1D3045]/40 h-16 flex items-center justify-between px-6 z-30 relative text-[#F8FAFC]">
+      <header className="absolute top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl z-40 bg-[#0D1728]/70 backdrop-blur-md border border-[#1D3045]/60 h-16 rounded-full px-6 flex items-center justify-between shadow-2xl transition-all text-[#F8FAFC]">
         {/* Left Brand & Top Nav Items */}
         <div className="flex items-center gap-6">
           <Link to="/emp" className="flex items-center gap-2 mr-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-[#14B8A6] to-[#2DD4BF] text-[#060B16] rounded-lg flex items-center justify-center font-bold text-base shadow-md shadow-[#14B8A6]/20">
+            <div className="w-8 h-8 bg-gradient-to-br from-[#14B8A6] to-[#2DD4BF] text-[#060B16] rounded-full flex items-center justify-center font-bold text-base shadow-md shadow-[#14B8A6]/20">
               H
             </div>
             <span className="text-lg font-bold tracking-tight text-[#F8FAFC]">HRMS</span>
@@ -439,9 +439,9 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${
                     isActive
-                      ? 'bg-[#14B8A6]/15 text-white border border-[#14B8A6]/20 shadow-sm shadow-[#14B8A6]/5'
+                      ? 'bg-[#14B8A6]/20 text-white border border-[#14B8A6]/30 shadow-md shadow-[#14B8A6]/10'
                       : 'text-[#94A3B8] hover:bg-[#111D30]/60 hover:text-[#F8FAFC]'
                   }`}
                 >
@@ -596,7 +596,7 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
       </header>
 
       {/* Main Body Grid */}
-      <div className="flex-1 flex overflow-hidden relative z-10">
+      <div className="flex-1 flex overflow-hidden relative z-10 pt-24">
         {/* Content Panel Area */}
         <main className="flex-1 overflow-y-auto p-6 pb-20 md:pb-6">
           <div className="max-w-7xl mx-auto">
