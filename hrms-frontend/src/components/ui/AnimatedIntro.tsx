@@ -1,51 +1,43 @@
 import { useState, useEffect } from 'react';
 
-type IntroPhase = 'prep-throw' | 'paint-flying' | 'logo-reveal' | 'card-morph' | 'complete';
+type IntroPhase = 'walking' | 'opening' | 'zooming' | 'complete';
 
 interface AnimatedIntroProps {
   onComplete: () => void;
 }
 
 export default function AnimatedIntro({ onComplete }: AnimatedIntroProps) {
-  const [phase, setPhase] = useState<IntroPhase>('prep-throw');
-  const [splatDrops, setSplatDrops] = useState<{ x: number; y: number; delay: number; color: string }[]>([]);
+  const [phase, setPhase] = useState<IntroPhase>('walking');
+  const [walkStep, setWalkStep] = useState(0);
 
   useEffect(() => {
-    // Generate some random splash drops for the logo-reveal phase
-    const drops = Array.from({ length: 14 }).map(() => {
-      const angle = Math.random() * Math.PI * 2;
-      const distance = 80 + Math.random() * 120;
-      const colors = ['#14B8A6', '#2DD4BF', '#06B6D4', '#0891B2', '#38BDF8'];
-      return {
-        x: Math.cos(angle) * distance,
-        y: Math.sin(angle) * distance,
-        delay: Math.random() * 0.4,
-        color: colors[Math.floor(Math.random() * colors.length)],
-      };
-    });
-    setSplatDrops(drops);
-  }, []);
+    // Leg swing cycle during walking phase
+    let walkTimer: NodeJS.Timeout;
+    if (phase === 'walking') {
+      walkTimer = setInterval(() => {
+        setWalkStep((prev) => (prev + 1) % 4);
+      }, 150);
+    }
+    return () => clearInterval(walkTimer);
+  }, [phase]);
 
   useEffect(() => {
-    // Phase timeline transitions:
-    // 0s - 1.5s: Character winds up
-    // 1.5s - 2.5s: Paint splash flies to screen
-    // 2.5s - 4.2s: Splat hits screen, forms organic splat, logo appears inside
-    // 4.2s - 5.8s: Splat morphs into login card, logo slides up
-    // 5.8s: Complete
+    // Sequence Timeline:
+    // 0s - 2.8s: Employee walks to futuristic door
+    // 2.8s - 4.0s: Employee reaches door, keypad beeps, doors slide open with portal glow
+    // 4.0s - 5.4s: Zooming through the door (zoom & scale-up)
+    // 5.4s: Complete & reveal login card
 
-    const flyTimer = setTimeout(() => setPhase('paint-flying'), 1500);
-    const splatTimer = setTimeout(() => setPhase('logo-reveal'), 2500);
-    const morphTimer = setTimeout(() => setPhase('card-morph'), 4200);
+    const openTimer = setTimeout(() => setPhase('opening'), 2800);
+    const zoomTimer = setTimeout(() => setPhase('zooming'), 4000);
     const completeTimer = setTimeout(() => {
       setPhase('complete');
       onComplete();
-    }, 5800);
+    }, 5400);
 
     return () => {
-      clearTimeout(flyTimer);
-      clearTimeout(splatTimer);
-      clearTimeout(morphTimer);
+      clearTimeout(openTimer);
+      clearTimeout(zoomTimer);
       clearTimeout(completeTimer);
     };
   }, [onComplete]);
@@ -58,76 +50,69 @@ export default function AnimatedIntro({ onComplete }: AnimatedIntroProps) {
   if (phase === 'complete') return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-[#070b12] flex items-center justify-center">
+    <div className="fixed inset-0 z-50 overflow-hidden bg-[#050811] flex items-center justify-center">
       <style>{`
-        @keyframes char-windup {
-          0% { transform: translate(-50px, 100px) rotate(0deg); }
-          50% { transform: translate(-30px, 110px) rotate(-15deg); }
-          100% { transform: translate(-30px, 110px) rotate(-20deg); }
+        @keyframes walk-accel {
+          0% { transform: translate(-140px, 80px) scale(0.65); }
+          100% { transform: translate(0px, 80px) scale(0.9); }
         }
-        @keyframes char-throw {
-          0% { transform: translate(-30px, 110px) rotate(-20deg); }
-          20% { transform: translate(10px, 90px) rotate(25deg); }
-          100% { transform: translate(20px, 150px) rotate(15deg); opacity: 0; }
+        @keyframes employee-bob {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-4px); }
         }
-        @keyframes brush-stroke {
-          0% { stroke-dashoffset: 100; opacity: 0; }
-          50% { stroke-dashoffset: 0; opacity: 1; }
-          100% { stroke-dashoffset: -100; opacity: 0; }
+        @keyframes door-left-open {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-78px); }
         }
-        @keyframes fly-splash {
-          0% { transform: translate(-35vw, 25vh) scale(0.1) rotate(0deg); opacity: 0.2; }
-          40% { opacity: 1; }
-          100% { transform: translate(0, 0) scale(1.6) rotate(180deg); opacity: 1; }
+        @keyframes door-right-open {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(78px); }
         }
-        @keyframes drop-splat {
-          0% { transform: translate(0, 0) scale(0); opacity: 0; }
-          30% { opacity: 1; }
-          100% { transform: translate(var(--dx), var(--dy)) scale(0.8); opacity: 0; }
+        @keyframes keypad-glow {
+          0%, 100% { fill: #EF4444; filter: drop-shadow(0 0 2px #EF4444); }
+          50% { fill: #10B981; filter: drop-shadow(0 0 8px #10B981); }
         }
-        @keyframes splat-grow {
-          0% { transform: scale(0.2); border-radius: 40% 60% 50% 50%; }
-          100% { transform: scale(1); border-radius: 43% 57% 65% 35% / 40% 45% 55% 60%; }
+        @keyframes portal-light-expand {
+          0% { opacity: 0; transform: scaleX(0); }
+          100% { opacity: 1; transform: scaleX(1); }
         }
-        @keyframes logo-pop {
-          0% { transform: scale(0) rotate(-45deg); opacity: 0; }
-          70% { transform: scale(1.1) rotate(5deg); opacity: 1; }
-          100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        @keyframes zoom-in-camera {
+          0% { transform: scale(1); opacity: 1; }
+          100% { transform: scale(5.5); opacity: 0; filter: blur(6px); }
         }
-        .character-wind {
-          animation: char-windup 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        @keyframes resolve-login-card {
+          0% { transform: scale(0.25); opacity: 0; }
+          100% { transform: scale(1); opacity: 1; }
         }
-        .character-slash {
-          animation: char-throw 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        .corridor-zoom {
+          animation: ${phase === 'zooming' ? 'zoom-in-camera 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards' : 'none'};
+          transform-origin: center center;
         }
-        .splash-blob {
-          animation: fly-splash 1.0s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        .employee-walk-cycle {
+          animation: walk-accel 2.8s linear forwards;
         }
-        .splat-base {
-          animation: splat-grow 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-          background: linear-gradient(135deg, #14B8A6 0%, #2DD4BF 50%, #06B6D4 100%);
-          box-shadow: 0 0 40px rgba(45, 212, 191, 0.4);
+        .employee-bobbing {
+          animation: employee-bob 0.3s ease-in-out infinite;
         }
-        .splat-drop {
-          animation: drop-splat 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        .door-slide-left {
+          animation: door-left-open 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         }
-        .logo-emblem {
-          animation: logo-pop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards;
+        .door-slide-right {
+          animation: door-right-open 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         }
-        .transition-card {
-          transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        .portal-glow {
+          animation: portal-light-expand 0.5s ease-out forwards;
+          background: radial-gradient(circle, rgba(45, 212, 191, 0.95) 0%, rgba(20, 184, 166, 0.5) 40%, rgba(5, 8, 17, 0) 70%);
+        }
+        .keypad-led {
+          animation: keypad-glow 1.5s infinite;
+        }
+        .card-resolve-box {
+          animation: resolve-login-card 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
       `}</style>
 
-      {/* Background Starry Sky */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0A1120] via-[#120F24] to-[#070b12] overflow-hidden select-none pointer-events-none">
-        <div className="absolute top-[10%] left-[20%] w-1 h-1 bg-white rounded-full animate-pulse" />
-        <div className="absolute top-[25%] left-[80%] w-1.5 h-1.5 bg-[#2DD4BF]/40 rounded-full animate-ping" />
-        <div className="absolute top-[15%] left-[45%] w-1 h-1 bg-cyan-200 rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-[40%] left-[65%] w-1 h-1 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.6s' }} />
-      </div>
-
-      {/* Skip button */}
+      {/* Skip Button */}
       <button
         onClick={handleSkip}
         className="absolute top-6 right-6 z-50 px-4 py-2 bg-black/40 hover:bg-black/60 border border-white/10 hover:border-white/30 text-white/80 hover:text-white text-xs font-bold rounded-full transition-all cursor-pointer shadow-lg"
@@ -135,156 +120,191 @@ export default function AnimatedIntro({ onComplete }: AnimatedIntroProps) {
         Skip Intro ➔
       </button>
 
-      {/* 👦 CHARACTER & BRUSH THROW */}
-      {['prep-throw', 'paint-flying'].includes(phase) && (
-        <div
-          className={`absolute bottom-0 left-0 z-20 ${
-            phase === 'paint-flying' ? 'character-slash' : 'character-wind'
-          }`}
-          style={{ transformOrigin: 'bottom center' }}
-        >
-          <svg viewBox="0 0 160 200" className="w-[200px] h-[250px] overflow-visible">
-            {/* Paint Bucket with splash */}
-            <g transform="translate(10, 110)">
-              <rect x="0" y="10" width="22" height="24" rx="2" fill="#475569" stroke="#1E293B" strokeWidth="1" />
-              <path d="M 0 10 Q 11 -2 22 10" fill="none" stroke="#64748B" strokeWidth="1.5" />
-              {/* Teal paint overflow */}
-              <path d="M -2 10 Q 11 16 24 10 L 22 15 Q 11 19 0 15 Z" fill="#2DD4BF" />
-              {/* Dripping paint drop */}
-              <circle cx="5" cy="22" r="2" fill="#2DD4BF" />
-            </g>
-
-            {/* Left Arm swinging bucket */}
-            <path
-              d={phase === 'paint-flying' ? 'M 60 90 Q 30 70 12 115' : 'M 60 90 Q 35 110 22 120'}
-              fill="none"
-              stroke="#2E1C0C"
-              strokeWidth="9"
-              strokeLinecap="round"
-            />
-
-            {/* Torso & Legs */}
-            <rect x="52" y="130" width="12" height="40" fill="#1E293B" rx="4" />
-            <rect x="74" y="130" width="12" height="40" fill="#1E293B" rx="4" />
-            <ellipse cx="56" cy="172" rx="9" ry="6" fill="#F8FAFC" />
-            <ellipse cx="82" cy="172" rx="9" ry="6" fill="#F8FAFC" />
-
-            <path d="M 46 85 L 86 85 L 80 132 L 52 132 Z" fill="#0D9488" /> {/* Teal painter overalls */}
-            <circle cx="66" cy="100" r="7" fill="#14B8A6" opacity="0.3" />
-
-            {/* Right Arm winding up brush */}
-            <path
-              d={phase === 'paint-flying' ? 'M 80 95 Q 110 80 130 50' : 'M 80 95 Q 105 115 125 125'}
-              fill="none"
-              stroke="#2E1C0C"
-              strokeWidth="9"
-              strokeLinecap="round"
-            />
-            {/* Paint brush in right hand */}
-            <g transform={phase === 'paint-flying' ? 'translate(125, 40) rotate(-45)' : 'translate(120, 115) rotate(45)'}>
-              <rect x="0" y="0" width="5" height="25" fill="#B45309" rx="1" />
-              <rect x="-2" y="20" width="9" height="8" fill="#94A3B8" />
-              <path d="M -2 28 Q 2.5 38 7 28" fill="#2DD4BF" />
-            </g>
-
-            {/* Neck & Head */}
-            <rect x="61" y="66" width="12" height="12" fill="#FDBA74" />
-            <circle cx="67" cy="52" r="22" fill="#FDBA74" />
-
-            {/* Cap/Hair */}
-            <path d="M 43 45 Q 67 22 91 45" fill="#1E293B" />
-            <rect x="42" y="42" width="50" height="4" fill="#14B8A6" rx="1" /> {/* Cap brim */}
-
-            {/* Eyes */}
-            <ellipse cx="58" cy="53" r="3" fill="#1E293B" />
-            <ellipse cx="76" cy="53" r="3" fill="#1E293B" />
-            <circle cx="59" cy="51.5" r="0.8" fill="#FFFFFF" />
-            <circle cx="77" cy="51.5" r="0.8" fill="#FFFFFF" />
-
-            {/* Happy Smile */}
-            <path d="M 64 61 Q 67 64 70 61" fill="none" stroke="#1E293B" strokeWidth="2.2" strokeLinecap="round" />
-          </svg>
-        </div>
-      )}
-
-      {/* 🎨 FLYING PAINT SPLASH */}
-      {phase === 'paint-flying' && (
-        <div className="absolute z-30 splash-blob pointer-events-none">
-          <svg viewBox="0 0 100 100" className="w-[120px] h-[120px]">
-            {/* Dynamic splash vector shape */}
-            <path
-              d="M 50 12 C 60 12, 68 25, 78 30 C 88 35, 98 48, 92 60 C 86 72, 70 76, 58 88 C 46 100, 32 98, 20 88 C 8 78, 2 64, 10 52 C 18 40, 25 35, 32 20 C 39 5, 40 12, 50 12 Z"
-              fill="url(#paintGrad)"
-            />
-            <defs>
-              <linearGradient id="paintGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#14B8A6" />
-                <stop offset="50%" stopColor="#2DD4BF" />
-                <stop offset="100%" stopColor="#06B6D4" />
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
-      )}
-
-      {/* 💥 SPLAT ON SCREEN & LOGO REVEAL */}
-      {phase === 'logo-reveal' && (
-        <div className="relative flex items-center justify-center z-30 select-none pointer-events-none">
-          {/* Splat Base Circle */}
-          <div className="w-[280px] h-[280px] splat-base flex items-center justify-center relative">
+      {/* 🚀 ZOOMING PORTAL WRAPPER */}
+      {phase !== 'zooming' ? (
+        <div className="absolute inset-0 flex items-center justify-center">
+          {/* Corridor & Door Scene */}
+          <div className="w-full h-full relative flex items-center justify-center">
             
-            {/* Floating HRMS Logo inside the Splat */}
-            <div className="logo-emblem flex flex-col items-center justify-center text-center">
-              <svg viewBox="0 0 100 100" className="w-24 h-24 filter drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]">
-                {/* Modern styled 'H' lettermark */}
-                <path d="M 25 15 L 25 85" stroke="#FFFFFF" strokeWidth="12" strokeLinecap="round" />
-                <path d="M 75 15 L 75 85" stroke="#FFFFFF" strokeWidth="12" strokeLinecap="round" />
-                <path d="M 25 50 L 75 50" stroke="#FFFFFF" strokeWidth="12" strokeLinecap="round" />
-                {/* Custom paint brush splash element overlay */}
-                <path d="M 12 30 C 18 15, 30 18, 25 35" stroke="#000000" strokeWidth="3" fill="none" opacity="0.1" />
+            {/* Corridor perspective lines background */}
+            <div className="absolute inset-0 bg-[#060a12]">
+              <svg viewBox="0 0 1000 600" className="w-full h-full opacity-35" preserveAspectRatio="none">
+                {/* Ceiling */}
+                <polygon points="0,0 1000,0 600,200 400,200" fill="#0B132B" />
+                {/* Floor */}
+                <polygon points="0,600 1000,600 600,400 400,400" fill="#0D1B2A" />
+                {/* Perspective guides */}
+                <line x1="0" y1="0" x2="400" y2="200" stroke="#1E293B" strokeWidth="2" />
+                <line x1="1000" y1="0" x2="600" y2="200" stroke="#1E293B" strokeWidth="2" />
+                <line x1="0" y1="600" x2="400" y2="400" stroke="#1E293B" strokeWidth="2" />
+                <line x1="1000" y1="600" x2="600" y2="400" stroke="#1E293B" strokeWidth="2" />
+                
+                {/* Floor grid gridlines */}
+                <line x1="200" y1="500" x2="800" y2="500" stroke="#14B8A6" strokeWidth="0.8" opacity="0.3" />
+                <line x1="300" y1="450" x2="700" y2="450" stroke="#14B8A6" strokeWidth="0.8" opacity="0.3" />
+                <line x1="380" y1="410" x2="620" y2="410" stroke="#14B8A6" strokeWidth="0.8" opacity="0.3" />
               </svg>
-              <h2 className="text-[#FFFFFF] text-2xl font-black tracking-widest mt-2 uppercase filter drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
-                YOYO HRMS
-              </h2>
             </div>
 
-          </div>
+            {/* Glowing Door Frame in the center */}
+            <div className="absolute z-10 w-[180px] h-[260px] flex items-center justify-center border-2 border-[#14B8A6]/60 shadow-[0_0_25px_rgba(20,184,166,0.3)] bg-[#050811] rounded-t-2xl overflow-hidden">
+              
+              {/* Portal Light (revealed when door opens) */}
+              {phase === 'opening' && (
+                <div className="absolute inset-0 portal-glow z-0 flex flex-col items-center justify-center">
+                  {/* Outer space HRMS Login title behind the doors */}
+                  <div className="text-center font-black tracking-widest text-[#FFFFFF] text-lg uppercase filter drop-shadow-[0_0_12px_rgba(255,255,255,0.8)] animate-pulse">
+                    HRMS LOGIN
+                  </div>
+                </div>
+              )}
 
-          {/* Decorative Splat Drop Particles bursting outwards */}
-          {splatDrops.map((d, i) => (
-            <div
-              key={i}
-              className="absolute w-5 h-5 rounded-full splat-drop"
-              style={{
-                backgroundColor: d.color,
-                '--dx': `${d.x}px`,
-                '--dy': `${d.y}px`,
-                animationDelay: `${d.delay}s`,
-                top: 'calc(50% - 10px)',
-                left: 'calc(50% - 10px)',
-              } as React.CSSProperties}
-            />
-          ))}
+              {/* Futuristic Keypad Card Reader next to door */}
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-7 bg-[#1E293B] border border-[#475569] rounded flex flex-col items-center justify-around py-1 z-25">
+                <circle cx="2" cy="2" r="1.2" className="keypad-led" />
+                <rect x="1" y="4" width="2" height="1.5" fill="#94A3B8" />
+              </div>
+
+              {/* Sliding door panels */}
+              <div className="absolute inset-0 flex z-20">
+                {/* Left Door Panel */}
+                <div className={`w-1/2 h-full bg-[#111A2E] border-r border-[#1D3045] flex items-center justify-end pr-2 ${
+                  phase === 'opening' ? 'door-slide-left' : ''
+                }`}>
+                  {/* Futuristic panel patterns */}
+                  <div className="h-[80%] w-3 bg-[#1E293B]/40 rounded-full mr-2" />
+                  <div className="h-[40%] w-1.5 bg-[#14B8A6]/20 rounded-full" />
+                </div>
+                {/* Right Door Panel */}
+                <div className={`w-1/2 h-full bg-[#111A2E] border-l border-[#1D3045] flex items-center justify-start pl-2 ${
+                  phase === 'opening' ? 'door-slide-right' : ''
+                }`}>
+                  <div className="h-[40%] w-1.5 bg-[#14B8A6]/20 rounded-full mr-2" />
+                  <div className="h-[80%] w-3 bg-[#1E293B]/40 rounded-full" />
+                </div>
+              </div>
+
+            </div>
+
+            {/* 🚶 CARTOON EMPLOYEE */}
+            {phase === 'walking' && (
+              <div className="absolute z-20 employee-walk-cycle flex flex-col items-center">
+                <div className="employee-bobbing">
+                  <svg viewBox="0 0 100 160" className="w-[80px] h-[128px] overflow-visible">
+                    {/* Head / Hair */}
+                    <circle cx="50" cy="35" r="16" fill="#FDBA74" />
+                    <path d="M 34 32 Q 50 12 66 32 Q 62 18 50 20 Q 38 18 34 32" fill="#1E1B4B" /> {/* Spike bangs */}
+                    
+                    {/* Backpack */}
+                    <rect x="28" y="55" width="12" height="28" rx="3" fill="#0E7490" stroke="#0891B2" strokeWidth="1" />
+                    
+                    {/* Torso / Business Suit Jacket */}
+                    <path d="M 38 52 L 62 52 L 58 95 L 42 95 Z" fill="#1E293B" /> {/* Navy Blazer */}
+                    <polygon points="50,52 45,72 50,78 55,72" fill="#FFFFFF" /> {/* White collar shirt */}
+                    <polygon points="49,70 51,70 50,88" fill="#EF4444" /> {/* Red tie */}
+
+                    {/* Arms (Swinging profile arm) */}
+                    <path
+                      d={
+                        walkStep % 2 === 0
+                          ? 'M 40 54 Q 30 75 22 88'
+                          : 'M 40 54 Q 45 75 52 88'
+                      }
+                      fill="none"
+                      stroke="#1E293B"
+                      strokeWidth="7"
+                      strokeLinecap="round"
+                    />
+
+                    {/* Legs walking scissor action */}
+                    {walkStep === 0 && (
+                      <>
+                        <line x1="44" y1="95" x2="32" y2="135" stroke="#1E293B" strokeWidth="8" strokeLinecap="round" />
+                        <line x1="56" y1="95" x2="68" y2="135" stroke="#111827" strokeWidth="8" strokeLinecap="round" />
+                      </>
+                    )}
+                    {walkStep === 1 && (
+                      <>
+                        <line x1="44" y1="95" x2="40" y2="135" stroke="#1E293B" strokeWidth="8" strokeLinecap="round" />
+                        <line x1="56" y1="95" x2="60" y2="135" stroke="#111827" strokeWidth="8" strokeLinecap="round" />
+                      </>
+                    )}
+                    {walkStep === 2 && (
+                      <>
+                        <line x1="44" y1="95" x2="60" y2="135" stroke="#1E293B" strokeWidth="8" strokeLinecap="round" />
+                        <line x1="56" y1="95" x2="36" y2="135" stroke="#111827" strokeWidth="8" strokeLinecap="round" />
+                      </>
+                    )}
+                    {walkStep === 3 && (
+                      <>
+                        <line x1="44" y1="95" x2="48" y2="135" stroke="#1E293B" strokeWidth="8" strokeLinecap="round" />
+                        <line x1="56" y1="95" x2="52" y2="135" stroke="#111827" strokeWidth="8" strokeLinecap="round" />
+                      </>
+                    )}
+
+                    {/* Shoes */}
+                    <ellipse cx={walkStep % 2 === 0 ? '30' : '44'} cy="136" rx="6" ry="4" fill="#0F172A" />
+                    <ellipse cx={walkStep % 2 === 0 ? '66' : '54'} cy="136" rx="6" ry="4" fill="#0F172A" />
+                  </svg>
+                </div>
+              </div>
+            )}
+
+            {/* Standing static employee at door tapping panel */}
+            {phase === 'opening' && (
+              <div className="absolute z-20 flex flex-col items-center" style={{ transform: 'translate(0px, 80px) scale(0.9)' }}>
+                <svg viewBox="0 0 100 160" className="w-[80px] h-[128px] overflow-visible">
+                  <circle cx="50" cy="35" r="16" fill="#FDBA74" />
+                  <path d="M 34 32 Q 50 12 66 32 Q 62 18 50 20 Q 38 18 34 32" fill="#1E1B4B" />
+                  <rect x="28" y="55" width="12" height="28" rx="3" fill="#0E7490" stroke="#0891B2" strokeWidth="1" />
+                  
+                  {/* Torso */}
+                  <path d="M 38 52 L 62 52 L 58 95 L 42 95 Z" fill="#1E293B" />
+                  <polygon points="50,52 45,72 50,78 55,72" fill="#FFFFFF" />
+                  <polygon points="49,70 51,70 50,88" fill="#EF4444" />
+
+                  {/* Arm raised tapping key card panel */}
+                  <path d="M 58 60 Q 72 52 82 56" fill="none" stroke="#1E293B" strokeWidth="7" strokeLinecap="round" />
+
+                  {/* Standing static legs */}
+                  <line x1="44" y1="95" x2="44" y2="135" stroke="#1E293B" strokeWidth="8" strokeLinecap="round" />
+                  <line x1="56" y1="95" x2="56" y2="135" stroke="#1E293B" strokeWidth="8" strokeLinecap="round" />
+                  <ellipse cx="44" cy="136" rx="6" ry="4" fill="#0F172A" />
+                  <ellipse cx="56" cy="136" rx="6" ry="4" fill="#0F172A" />
+                </svg>
+              </div>
+            )}
+
+          </div>
+        </div>
+      ) : (
+        /* 🎥 ZOOMING PORTAL SCENE */
+        <div className="absolute inset-0 flex items-center justify-center corridor-zoom">
+          {/* Sizable Portal gate scaling up rapidly to fly past camera */}
+          <div className="w-[180px] h-[260px] border-4 border-[#14B8A6] shadow-[0_0_50px_rgba(20,184,166,0.8)] rounded-t-2xl flex flex-col items-center justify-center bg-[#050811]">
+            <div className="text-center font-black tracking-widest text-[#FFFFFF] text-[10px] uppercase filter drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]">
+              HRMS LOGIN
+            </div>
+          </div>
         </div>
       )}
 
-      {/* 🎴 CARD MORPH PHASE */}
-      {phase === 'card-morph' && (
-        <div
-          className="transition-card flex flex-col items-center justify-center p-8 select-none pointer-events-none"
-          style={{
-            width: '420px',
-            height: '460px',
-            borderRadius: '24px',
-            background: 'rgba(13, 23, 40, 0.72)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            border: '1px solid rgba(45, 212, 191, 0.25)',
-            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
-          }}
-        >
-          {/* Logo slides up to the top */}
-          <div className="flex flex-col items-center animate-slideUp duration-1000">
+      {/* 🎴 FINAL RESOLVED LOGIN BOX INTERFACE (faded in once zoomed) */}
+      {phase === 'zooming' && (
+        <div className="absolute z-40 card-resolve-box flex flex-col items-center justify-center p-8">
+          <div
+            className="flex flex-col items-center justify-center p-8"
+            style={{
+              width: '420px',
+              height: '460px',
+              borderRadius: '24px',
+              background: 'rgba(13, 23, 40, 0.72)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              border: '1px solid rgba(45, 212, 191, 0.25)',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
+            }}
+          >
             <svg viewBox="0 0 100 100" className="w-16 h-16 animate-pulse">
               <path d="M 25 15 L 25 85" stroke="#2DD4BF" strokeWidth="12" strokeLinecap="round" />
               <path d="M 75 15 L 75 85" stroke="#2DD4BF" strokeWidth="12" strokeLinecap="round" />
@@ -295,9 +315,6 @@ export default function AnimatedIntro({ onComplete }: AnimatedIntroProps) {
             </h1>
             <p className="text-xs text-[#2DD4BF] font-semibold mt-1">Enterprise Management Portal</p>
           </div>
-
-          {/* Frosted glow rings expanding around card border */}
-          <div className="absolute inset-0 rounded-[24px] border border-cyan-400/20 opacity-30 blur-[2px] pointer-events-none" />
         </div>
       )}
     </div>
