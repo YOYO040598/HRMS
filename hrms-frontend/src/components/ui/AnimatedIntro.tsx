@@ -1,54 +1,54 @@
 import { useState, useEffect } from 'react';
 
-type IntroPhase = 'idle' | 'lighting' | 'boom' | 'complete';
+type IntroPhase = 'prep-throw' | 'paint-flying' | 'logo-reveal' | 'card-morph' | 'complete';
 
 interface AnimatedIntroProps {
   onComplete: () => void;
 }
 
 export default function AnimatedIntro({ onComplete }: AnimatedIntroProps) {
-  const [phase, setPhase] = useState<IntroPhase>('idle');
-  const [boyPos, setBoyPos] = useState({ x: 0, y: 0 });
-  const [sparkCount, setSparkCount] = useState<number>(0);
+  const [phase, setPhase] = useState<IntroPhase>('prep-throw');
+  const [splatDrops, setSplatDrops] = useState<{ x: number; y: number; delay: number; color: string }[]>([]);
 
   useEffect(() => {
-    // Phase Timeline:
-    // 0s - 3s: Idle
-    // 3s - 5s: Lighting fuse and stepping back
-    // 5s - 6.5s: Explosion (Boom) and flash
-    // 6.5s: Complete & reveal login card
+    // Generate some random splash drops for the logo-reveal phase
+    const drops = Array.from({ length: 14 }).map(() => {
+      const angle = Math.random() * Math.PI * 2;
+      const distance = 80 + Math.random() * 120;
+      const colors = ['#14B8A6', '#2DD4BF', '#06B6D4', '#0891B2', '#38BDF8'];
+      return {
+        x: Math.cos(angle) * distance,
+        y: Math.sin(angle) * distance,
+        delay: Math.random() * 0.4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+      };
+    });
+    setSplatDrops(drops);
+  }, []);
 
-    const lightingTimer = setTimeout(() => {
-      setPhase('lighting');
-      // Step back boy
-      setBoyPos({ x: -120, y: 0 });
-    }, 2800);
+  useEffect(() => {
+    // Phase timeline transitions:
+    // 0s - 1.5s: Character winds up
+    // 1.5s - 2.5s: Paint splash flies to screen
+    // 2.5s - 4.2s: Splat hits screen, forms organic splat, logo appears inside
+    // 4.2s - 5.8s: Splat morphs into login card, logo slides up
+    // 5.8s: Complete
 
-    const boomTimer = setTimeout(() => {
-      setPhase('boom');
-    }, 4800);
-
+    const flyTimer = setTimeout(() => setPhase('paint-flying'), 1500);
+    const splatTimer = setTimeout(() => setPhase('logo-reveal'), 2500);
+    const morphTimer = setTimeout(() => setPhase('card-morph'), 4200);
     const completeTimer = setTimeout(() => {
       setPhase('complete');
       onComplete();
-    }, 6500);
+    }, 5800);
 
     return () => {
-      clearTimeout(lightingTimer);
-      clearTimeout(boomTimer);
+      clearTimeout(flyTimer);
+      clearTimeout(splatTimer);
+      clearTimeout(morphTimer);
       clearTimeout(completeTimer);
     };
   }, [onComplete]);
-
-  // Create sparks during lighting phase
-  useEffect(() => {
-    if (phase === 'lighting') {
-      const interval = setInterval(() => {
-        setSparkCount((c) => (c + 1) % 12);
-      }, 80);
-      return () => clearInterval(interval);
-    }
-  }, [phase]);
 
   const handleSkip = () => {
     setPhase('complete');
@@ -60,94 +60,74 @@ export default function AnimatedIntro({ onComplete }: AnimatedIntroProps) {
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-[#070b12] flex items-center justify-center">
       <style>{`
-        @keyframes drift-clouds {
-          0% { transform: translateX(-10%); }
-          100% { transform: translateX(110%); }
+        @keyframes char-windup {
+          0% { transform: translate(-50px, 100px) rotate(0deg); }
+          50% { transform: translate(-30px, 110px) rotate(-15deg); }
+          100% { transform: translate(-30px, 110px) rotate(-20deg); }
         }
-        @keyframes boy-breathe {
-          0%, 100% { transform: translateY(0px) scaleY(1); }
-          50% { transform: translateY(-3px) scaleY(0.98); }
+        @keyframes char-throw {
+          0% { transform: translate(-30px, 110px) rotate(-20deg); }
+          20% { transform: translate(10px, 90px) rotate(25deg); }
+          100% { transform: translate(20px, 150px) rotate(15deg); opacity: 0; }
         }
-        @keyframes fuse-spark {
-          0%, 100% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.6); opacity: 0.6; }
+        @keyframes brush-stroke {
+          0% { stroke-dashoffset: 100; opacity: 0; }
+          50% { stroke-dashoffset: 0; opacity: 1; }
+          100% { stroke-dashoffset: -100; opacity: 0; }
         }
-        @keyframes explosion-expand {
-          0% { transform: scale(0); opacity: 0; }
-          10% { opacity: 1; }
-          40% { transform: scale(1.8) rotate(15deg); opacity: 1; }
-          100% { transform: scale(3.5) rotate(-10deg); opacity: 0; }
+        @keyframes fly-splash {
+          0% { transform: translate(-35vw, 25vh) scale(0.1) rotate(0deg); opacity: 0.2; }
+          40% { opacity: 1; }
+          100% { transform: translate(0, 0) scale(1.6) rotate(180deg); opacity: 1; }
         }
-        @keyframes screen-flash {
-          0% { opacity: 0; }
-          5% { opacity: 1; }
-          20% { opacity: 1; }
-          100% { opacity: 0; }
+        @keyframes drop-splat {
+          0% { transform: translate(0, 0) scale(0); opacity: 0; }
+          30% { opacity: 1; }
+          100% { transform: translate(var(--dx), var(--dy)) scale(0.8); opacity: 0; }
         }
-        @keyframes spark-fly {
-          0% { transform: translate(0, 0) scale(1); opacity: 1; }
-          100% { transform: translate(var(--dx), var(--dy)) scale(0.1); opacity: 0; }
+        @keyframes splat-grow {
+          0% { transform: scale(0.2); border-radius: 40% 60% 50% 50%; }
+          100% { transform: scale(1); border-radius: 43% 57% 65% 35% / 40% 45% 55% 60%; }
         }
-        .cloud-slow {
-          animation: drift-clouds 90s linear infinite;
+        @keyframes logo-pop {
+          0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+          70% { transform: scale(1.1) rotate(5deg); opacity: 1; }
+          100% { transform: scale(1) rotate(0deg); opacity: 1; }
         }
-        .boy-character {
-          animation: boy-breathe 2s ease-in-out infinite;
-          transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+        .character-wind {
+          animation: char-windup 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         }
-        .spark-node {
-          animation: spark-fly 0.6s ease-out forwards;
+        .character-slash {
+          animation: char-throw 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-        .explosion-cloud {
-          animation: explosion-expand 1.7s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        .splash-blob {
+          animation: fly-splash 1.0s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-        .flash-overlay {
-          animation: screen-flash 0.8s ease-out forwards;
+        .splat-base {
+          animation: splat-grow 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          background: linear-gradient(135deg, #14B8A6 0%, #2DD4BF 50%, #06B6D4 100%);
+          box-shadow: 0 0 40px rgba(45, 212, 191, 0.4);
+        }
+        .splat-drop {
+          animation: drop-splat 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .logo-emblem {
+          animation: logo-pop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards;
+        }
+        .transition-card {
+          transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
       `}</style>
 
-      {/* 🏙️ Dark Evening / Colorful Town Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0A1120] via-[#120F24] to-[#1E122A] overflow-hidden">
-        {/* Twinkling Stars */}
-        <div className="absolute inset-0 opacity-40">
-          <div className="absolute top-[10%] left-[20%] w-1 h-1 bg-white rounded-full animate-ping" />
-          <div className="absolute top-[25%] left-[80%] w-1.5 h-1.5 bg-yellow-200 rounded-full animate-pulse" />
-          <div className="absolute top-[15%] left-[45%] w-1 h-1 bg-cyan-200 rounded-full animate-ping" style={{ animationDelay: '1.2s' }} />
-          <div className="absolute top-[40%] left-[65%] w-1 h-1 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.6s' }} />
-          <div className="absolute top-[30%] left-[10%] w-1.5 h-1.5 bg-pink-200 rounded-full animate-ping" style={{ animationDelay: '2s' }} />
-        </div>
-
-        {/* Slow Drifting Silhouette Clouds */}
-        <div className="absolute top-[15%] left-0 right-0 h-24 opacity-10 pointer-events-none">
-          <div className="absolute w-[350px] h-12 bg-white rounded-full blur-md cloud-slow" />
-          <div className="absolute w-[280px] h-10 bg-white rounded-full blur-md cloud-slow" style={{ animationDelay: '-30s', top: '20px' }} />
-        </div>
-
-        {/* Colorful Town Silhouette */}
-        <div className="absolute bottom-0 left-0 right-0 h-[35vh] flex items-end justify-between pointer-events-none select-none z-10">
-          <svg viewBox="0 0 1440 320" className="w-full h-full text-[#111625]" preserveAspectRatio="none">
-            {/* Background Layer (Distant town) */}
-            <path
-              fill="#181432"
-              d="M0,220 L60,200 L60,260 L120,240 L180,240 L180,290 L240,280 L300,210 L300,260 L360,250 L420,200 L420,270 L480,260 L540,230 L600,210 L600,280 L660,260 L720,240 L780,220 L780,290 L840,270 L900,230 L960,220 L960,280 L1020,260 L1080,210 L1140,230 L1200,240 L1200,290 L1260,270 L1320,220 L1380,240 L1440,210 L1440,320 L0,320 Z"
-            />
-            {/* Midground Layer (Closer town silhouette + glowing windows) */}
-            <path
-              fill="#0F0D1E"
-              d="M0,250 L80,230 L160,240 L160,290 L240,270 L320,250 L400,220 L400,290 L480,270 L560,260 L640,230 L640,280 L720,260 L800,250 L880,220 L880,290 L960,270 L1040,250 L1120,240 L1200,210 L1280,250 L1360,240 L1440,230 L1440,320 L0,320 Z"
-            />
-          </svg>
-
-          {/* Glowing Town Windows */}
-          <div className="absolute bottom-12 left-[15%] w-3 h-5 bg-amber-400/30 rounded blur-[1px] shadow-lg shadow-amber-400/50" />
-          <div className="absolute bottom-20 left-[25%] w-4 h-4 bg-teal-400/40 rounded blur-[1px] shadow-lg shadow-teal-400/50" />
-          <div className="absolute bottom-16 left-[48%] w-3 h-6 bg-purple-400/30 rounded blur-[1px]" />
-          <div className="absolute bottom-24 left-[75%] w-5 h-4 bg-amber-400/40 rounded blur-[1px]" />
-          <div className="absolute bottom-14 left-[88%] w-3 h-5 bg-emerald-400/30 rounded blur-[1px]" />
-        </div>
+      {/* Background Starry Sky */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0A1120] via-[#120F24] to-[#070b12] overflow-hidden select-none pointer-events-none">
+        <div className="absolute top-[10%] left-[20%] w-1 h-1 bg-white rounded-full animate-pulse" />
+        <div className="absolute top-[25%] left-[80%] w-1.5 h-1.5 bg-[#2DD4BF]/40 rounded-full animate-ping" />
+        <div className="absolute top-[15%] left-[45%] w-1 h-1 bg-cyan-200 rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-[40%] left-[65%] w-1 h-1 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.6s' }} />
       </div>
 
-      {/* Skip Intro Button */}
+      {/* Skip button */}
       <button
         onClick={handleSkip}
         className="absolute top-6 right-6 z-50 px-4 py-2 bg-black/40 hover:bg-black/60 border border-white/10 hover:border-white/30 text-white/80 hover:text-white text-xs font-bold rounded-full transition-all cursor-pointer shadow-lg"
@@ -155,139 +135,169 @@ export default function AnimatedIntro({ onComplete }: AnimatedIntroProps) {
         Skip Intro ➔
       </button>
 
-      {/* 💥 EXPLOSION SCENE (Boom overlay) */}
-      {phase === 'boom' && (
-        <>
-          {/* Flash overlay */}
-          <div className="fixed inset-0 bg-white z-40 flash-overlay pointer-events-none" />
-
-          {/* Explosive Cloud Group */}
-          <div className="absolute z-40 flex items-center justify-center">
-            {/* Outer Sparks / Spikes */}
-            <svg viewBox="0 0 200 200" className="w-[500px] h-[500px] overflow-visible pointer-events-none">
-              {/* Central expanding cloud */}
-              <circle cx="100" cy="100" r="28" fill="#FF7E21" className="explosion-cloud" style={{ animationDelay: '0s' }} />
-              <circle cx="112" cy="90" r="24" fill="#FFB71C" className="explosion-cloud" style={{ animationDelay: '0.1s' }} />
-              <circle cx="88" cy="110" r="26" fill="#FF3B30" className="explosion-cloud" style={{ animationDelay: '0.05s' }} />
-              <circle cx="95" cy="85" r="22" fill="#FFE266" className="explosion-cloud" style={{ animationDelay: '0.15s' }} />
-              
-              {/* Ring / Shockwave */}
-              <circle cx="100" cy="100" r="50" fill="none" stroke="#2DD4BF" strokeWidth="8" className="explosion-cloud opacity-40" style={{ animationDelay: '0.1s' }} />
-
-              {/* Spikes */}
-              <path
-                d="M 100 30 L 110 80 L 170 60 L 120 100 L 160 150 L 100 120 L 40 150 L 80 100 L 30 60 L 90 80 Z"
-                fill="#FFE266"
-                className="explosion-cloud opacity-80"
-                style={{ animationDelay: '0.05s' }}
-              />
-            </svg>
-          </div>
-        </>
-      )}
-
-      {/* 👦 ANIME BOY CHARACTER & FIRECRACKER */}
-      {phase !== 'boom' && (
+      {/* 👦 CHARACTER & BRUSH THROW */}
+      {['prep-throw', 'paint-flying'].includes(phase) && (
         <div
-          className="absolute bottom-2 z-20 flex flex-col items-center boy-character"
-          style={{
-            left: 'calc(50% + 50px)',
-            transform: `translate(${boyPos.x}px, ${boyPos.y}px)`,
-          }}
+          className={`absolute bottom-0 left-0 z-20 ${
+            phase === 'paint-flying' ? 'character-slash' : 'character-wind'
+          }`}
+          style={{ transformOrigin: 'bottom center' }}
         >
-          {/* Spark Particles from Firecracker */}
-          {phase === 'lighting' && (
-            <div className="absolute left-[-22px] top-[40px] pointer-events-none z-30">
-              {Array.from({ length: 6 }).map((_, i) => {
-                const angle = (i * 60 + sparkCount * 30) * (Math.PI / 180);
-                const distance = 15 + Math.random() * 25;
-                const dx = Math.cos(angle) * distance;
-                const dy = Math.sin(angle) * distance - 8;
-                return (
-                  <div
-                    key={i}
-                    className="absolute w-2 h-2 rounded-full bg-gradient-to-r from-amber-400 to-red-500 spark-node"
-                    style={{
-                      '--dx': `${dx}px`,
-                      '--dy': `${dy}px`,
-                    } as React.CSSProperties}
-                  />
-                );
-              })}
-              {/* Central glowing fuse node */}
-              <div className="absolute -left-1 -top-1 w-2.5 h-2.5 rounded-full bg-yellow-300 animate-ping" />
-            </div>
-          )}
+          <svg viewBox="0 0 160 200" className="w-[200px] h-[250px] overflow-visible">
+            {/* Paint Bucket with splash */}
+            <g transform="translate(10, 110)">
+              <rect x="0" y="10" width="22" height="24" rx="2" fill="#475569" stroke="#1E293B" strokeWidth="1" />
+              <path d="M 0 10 Q 11 -2 22 10" fill="none" stroke="#64748B" strokeWidth="1.5" />
+              {/* Teal paint overflow */}
+              <path d="M -2 10 Q 11 16 24 10 L 22 15 Q 11 19 0 15 Z" fill="#2DD4BF" />
+              {/* Dripping paint drop */}
+              <circle cx="5" cy="22" r="2" fill="#2DD4BF" />
+            </g>
 
-          {/* Cartoon Character SVG */}
-          <svg viewBox="0 0 120 180" className="w-[180px] h-[270px] overflow-visible">
-            {/* Firecracker */}
-            {phase !== 'boom' && (
-              <g className="transition-transform duration-200">
-                {/* Fuse string */}
-                <path d="M 12 110 Q 5 105 2 112" fill="none" stroke="#64748B" strokeWidth="1.5" />
-                {/* Red body */}
-                <rect x="12" y="105" width="8" height="15" rx="1" fill="#EF4444" stroke="#7F1D1D" strokeWidth="1" />
-                <rect x="12" y="110" width="8" height="3" fill="#FBBF24" /> {/* Gold ring */}
-              </g>
-            )}
-
-            {/* Arms */}
-            {/* Left Arm holding match/lighter */}
+            {/* Left Arm swinging bucket */}
             <path
-              d={phase === 'lighting' ? 'M 60 90 Q 35 98 12 110' : 'M 60 90 Q 40 110 32 120'}
+              d={phase === 'paint-flying' ? 'M 60 90 Q 30 70 12 115' : 'M 60 90 Q 35 110 22 120'}
               fill="none"
               stroke="#2E1C0C"
-              strokeWidth="10"
+              strokeWidth="9"
               strokeLinecap="round"
             />
-            {/* Right Arm */}
-            <path d="M 80 90 Q 95 110 98 125" fill="none" stroke="#2E1C0C" strokeWidth="10" strokeLinecap="round" />
 
-            {/* Legs */}
-            <rect x="52" y="130" width="12" height="40" fill="#2563EB" rx="4" /> {/* Left Leg */}
-            <rect x="74" y="130" width="12" height="40" fill="#2563EB" rx="4" /> {/* Right Leg */}
-            {/* Sneakers */}
+            {/* Torso & Legs */}
+            <rect x="52" y="130" width="12" height="40" fill="#1E293B" rx="4" />
+            <rect x="74" y="130" width="12" height="40" fill="#1E293B" rx="4" />
             <ellipse cx="56" cy="172" rx="9" ry="6" fill="#F8FAFC" />
             <ellipse cx="82" cy="172" rx="9" ry="6" fill="#F8FAFC" />
 
-            {/* Torso / Clothes */}
-            <path d="M 46 85 L 86 85 L 80 132 L 52 132 Z" fill="#D97706" /> {/* Mustard Hoodie */}
-            <circle cx="66" cy="100" r="7" fill="#F59E0B" /> {/* Pocket */}
+            <path d="M 46 85 L 86 85 L 80 132 L 52 132 Z" fill="#0D9488" /> {/* Teal painter overalls */}
+            <circle cx="66" cy="100" r="7" fill="#14B8A6" opacity="0.3" />
 
-            {/* Neck */}
-            <rect x="61" y="66" width="12" height="12" fill="#FDBA74" />
-
-            {/* Cute Head */}
-            <circle cx="67" cy="52" r="22" fill="#FDBA74" /> {/* Face skin */}
-
-            {/* Anime Hair (Black/Espresso spiked style) */}
+            {/* Right Arm winding up brush */}
             <path
-              d="M 42 48 Q 50 25 72 26 Q 90 28 92 48 Q 98 40 88 32 Q 72 20 54 26 Q 40 32 42 48"
-              fill="#1E1B4B"
+              d={phase === 'paint-flying' ? 'M 80 95 Q 110 80 130 50' : 'M 80 95 Q 105 115 125 125'}
+              fill="none"
+              stroke="#2E1C0C"
+              strokeWidth="9"
+              strokeLinecap="round"
             />
-            <path d="M 45 42 L 54 50 L 58 44 L 66 52 L 72 45 L 78 52 L 85 44" fill="#1E1B4B" /> {/* Bangs */}
+            {/* Paint brush in right hand */}
+            <g transform={phase === 'paint-flying' ? 'translate(125, 40) rotate(-45)' : 'translate(120, 115) rotate(45)'}>
+              <rect x="0" y="0" width="5" height="25" fill="#B45309" rx="1" />
+              <rect x="-2" y="20" width="9" height="8" fill="#94A3B8" />
+              <path d="M -2 28 Q 2.5 38 7 28" fill="#2DD4BF" />
+            </g>
+
+            {/* Neck & Head */}
+            <rect x="61" y="66" width="12" height="12" fill="#FDBA74" />
+            <circle cx="67" cy="52" r="22" fill="#FDBA74" />
+
+            {/* Cap/Hair */}
+            <path d="M 43 45 Q 67 22 91 45" fill="#1E293B" />
+            <rect x="42" y="42" width="50" height="4" fill="#14B8A6" rx="1" /> {/* Cap brim */}
 
             {/* Eyes */}
-            {phase === 'lighting' ? (
-              // Focused squinty eyes
-              <>
-                <path d="M 52 52 Q 56 50 60 52" fill="none" stroke="#0F172A" strokeWidth="2.5" strokeLinecap="round" />
-                <path d="M 72 52 Q 76 50 80 52" fill="none" stroke="#0F172A" strokeWidth="2.5" strokeLinecap="round" />
-              </>
-            ) : (
-              // Big curious eyes
-              <>
-                <circle cx="56" cy="53" r="3.5" fill="#0F172A" />
-                <circle cx="76" cy="53" r="3.5" fill="#0F172A" />
-                <circle cx="57" cy="51.5" r="1" fill="#FFFFFF" />
-                <circle cx="77" cy="51.5" r="1" fill="#FFFFFF" />
-              </>
-            )}
+            <ellipse cx="58" cy="53" r="3" fill="#1E293B" />
+            <ellipse cx="76" cy="53" r="3" fill="#1E293B" />
+            <circle cx="59" cy="51.5" r="0.8" fill="#FFFFFF" />
+            <circle cx="77" cy="51.5" r="0.8" fill="#FFFFFF" />
 
-            {/* Mouth */}
-            <path d="M 63 60 Q 66 63 69 60" fill="none" stroke="#0F172A" strokeWidth="2" strokeLinecap="round" />
+            {/* Happy Smile */}
+            <path d="M 64 61 Q 67 64 70 61" fill="none" stroke="#1E293B" strokeWidth="2.2" strokeLinecap="round" />
           </svg>
+        </div>
+      )}
+
+      {/* 🎨 FLYING PAINT SPLASH */}
+      {phase === 'paint-flying' && (
+        <div className="absolute z-30 splash-blob pointer-events-none">
+          <svg viewBox="0 0 100 100" className="w-[120px] h-[120px]">
+            {/* Dynamic splash vector shape */}
+            <path
+              d="M 50 12 C 60 12, 68 25, 78 30 C 88 35, 98 48, 92 60 C 86 72, 70 76, 58 88 C 46 100, 32 98, 20 88 C 8 78, 2 64, 10 52 C 18 40, 25 35, 32 20 C 39 5, 40 12, 50 12 Z"
+              fill="url(#paintGrad)"
+            />
+            <defs>
+              <linearGradient id="paintGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#14B8A6" />
+                <stop offset="50%" stopColor="#2DD4BF" />
+                <stop offset="100%" stopColor="#06B6D4" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+      )}
+
+      {/* 💥 SPLAT ON SCREEN & LOGO REVEAL */}
+      {phase === 'logo-reveal' && (
+        <div className="relative flex items-center justify-center z-30 select-none pointer-events-none">
+          {/* Splat Base Circle */}
+          <div className="w-[280px] h-[280px] splat-base flex items-center justify-center relative">
+            
+            {/* Floating HRMS Logo inside the Splat */}
+            <div className="logo-emblem flex flex-col items-center justify-center text-center">
+              <svg viewBox="0 0 100 100" className="w-24 h-24 filter drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]">
+                {/* Modern styled 'H' lettermark */}
+                <path d="M 25 15 L 25 85" stroke="#FFFFFF" strokeWidth="12" strokeLinecap="round" />
+                <path d="M 75 15 L 75 85" stroke="#FFFFFF" strokeWidth="12" strokeLinecap="round" />
+                <path d="M 25 50 L 75 50" stroke="#FFFFFF" strokeWidth="12" strokeLinecap="round" />
+                {/* Custom paint brush splash element overlay */}
+                <path d="M 12 30 C 18 15, 30 18, 25 35" stroke="#000000" strokeWidth="3" fill="none" opacity="0.1" />
+              </svg>
+              <h2 className="text-[#FFFFFF] text-2xl font-black tracking-widest mt-2 uppercase filter drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
+                YOYO HRMS
+              </h2>
+            </div>
+
+          </div>
+
+          {/* Decorative Splat Drop Particles bursting outwards */}
+          {splatDrops.map((d, i) => (
+            <div
+              key={i}
+              className="absolute w-5 h-5 rounded-full splat-drop"
+              style={{
+                backgroundColor: d.color,
+                '--dx': `${d.x}px`,
+                '--dy': `${d.y}px`,
+                animationDelay: `${d.delay}s`,
+                top: 'calc(50% - 10px)',
+                left: 'calc(50% - 10px)',
+              } as React.CSSProperties}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* 🎴 CARD MORPH PHASE */}
+      {phase === 'card-morph' && (
+        <div
+          className="transition-card flex flex-col items-center justify-center p-8 select-none pointer-events-none"
+          style={{
+            width: '420px',
+            height: '460px',
+            borderRadius: '24px',
+            background: 'rgba(13, 23, 40, 0.72)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: '1px solid rgba(45, 212, 191, 0.25)',
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
+          }}
+        >
+          {/* Logo slides up to the top */}
+          <div className="flex flex-col items-center animate-slideUp duration-1000">
+            <svg viewBox="0 0 100 100" className="w-16 h-16 animate-pulse">
+              <path d="M 25 15 L 25 85" stroke="#2DD4BF" strokeWidth="12" strokeLinecap="round" />
+              <path d="M 75 15 L 75 85" stroke="#2DD4BF" strokeWidth="12" strokeLinecap="round" />
+              <path d="M 25 50 L 75 50" stroke="#14B8A6" strokeWidth="12" strokeLinecap="round" />
+            </svg>
+            <h1 className="text-xl font-extrabold tracking-widest text-[#F8FAFC] uppercase mt-2">
+              YOYO HRMS
+            </h1>
+            <p className="text-xs text-[#2DD4BF] font-semibold mt-1">Enterprise Management Portal</p>
+          </div>
+
+          {/* Frosted glow rings expanding around card border */}
+          <div className="absolute inset-0 rounded-[24px] border border-cyan-400/20 opacity-30 blur-[2px] pointer-events-none" />
         </div>
       )}
     </div>
