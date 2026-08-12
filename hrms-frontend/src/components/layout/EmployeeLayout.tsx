@@ -420,38 +420,40 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
       {/* 7-Layer Canvas Background Overlay */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-0" />
 
+      {/* Centered Top-Left Logo outside menu bar */}
+      <div className="absolute top-7 left-8 z-50 hidden lg:flex items-center gap-2 pointer-events-auto">
+        <Link to="/emp" className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-gradient-to-br from-[#14B8A6] to-[#2DD4BF] text-[#060B16] rounded-full flex items-center justify-center font-bold text-base shadow-md shadow-[#14B8A6]/20">
+            H
+          </div>
+          <span className="text-lg font-bold tracking-tight text-[#F8FAFC]">HRMS</span>
+        </Link>
+      </div>
+
       {/* Top Navbar Header */}
       <header className="absolute top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl z-40 bg-[#0D1728]/70 backdrop-blur-md border border-[#1D3045]/60 h-16 rounded-full px-6 flex items-center justify-between shadow-2xl transition-all text-[#F8FAFC]">
-        {/* Left Brand & Top Nav Items */}
-        <div className="flex items-center gap-6">
-          <Link to="/emp" className="flex items-center gap-2 mr-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-[#14B8A6] to-[#2DD4BF] text-[#060B16] rounded-full flex items-center justify-center font-bold text-base shadow-md shadow-[#14B8A6]/20">
-              H
-            </div>
-            <span className="text-lg font-bold tracking-tight text-[#F8FAFC]">HRMS</span>
-          </Link>
+        {/* Left Side Spacer for balancing centered menu */}
+        <div className="w-20 hidden lg:block" />
 
-          {/* Navigation Items directly in Top Bar */}
-          <nav className="hidden md:flex items-center gap-1.5">
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.path || (item.path !== '/emp' && location.pathname.startsWith(item.path));
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${
-                    isActive
-                      ? 'bg-[#14B8A6]/20 text-white border border-[#14B8A6]/30 shadow-md shadow-[#14B8A6]/10'
-                      : 'text-[#94A3B8] hover:bg-[#111D30]/60 hover:text-[#F8FAFC]'
-                  }`}
-                >
-                  <item.icon size={13} className={isActive ? 'text-[#2DD4BF]' : 'text-[#94A3B8]'} />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
+        {/* Center: Navigation Items (Names only) */}
+        <nav className="hidden md:flex items-center gap-1.5 mx-auto">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path || (item.path !== '/emp' && location.pathname.startsWith(item.path));
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex items-center px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 ${
+                  isActive
+                    ? 'bg-[#14B8A6]/20 text-white border border-[#14B8A6]/30 shadow-md shadow-[#14B8A6]/10'
+                    : 'text-[#94A3B8] hover:bg-[#111D30]/60 hover:text-[#F8FAFC]'
+                }`}
+              >
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
 
         {/* Right Action Icons */}
         <div className="flex items-center gap-4">
