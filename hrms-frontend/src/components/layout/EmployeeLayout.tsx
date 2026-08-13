@@ -451,13 +451,9 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
       ],
     },
     {
-      type: 'dropdown',
-      label: 'Documents',
-      id: 'documents',
-      items: [
-        { label: 'Payslips', path: '/emp/payslips?tab=payslips' },
-        { label: 'Other Documents', path: '/emp/payslips?tab=documents' },
-      ],
+      type: 'link',
+      label: 'Payslips',
+      path: '/emp/payslips',
     }
   ];
 
@@ -816,7 +812,7 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
           }`}
         >
           <Wallet size={18} />
-          <span className="text-[10px] font-semibold">Documents</span>
+          <span className="text-[10px] font-semibold">Payslips</span>
         </Link>
 
         <button 
