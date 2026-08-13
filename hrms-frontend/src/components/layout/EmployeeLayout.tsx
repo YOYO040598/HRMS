@@ -436,7 +436,7 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
       id: 'requests',
       items: [
         { label: 'Leave', path: '/emp/leave' },
-        { label: 'My Requests', path: '/emp/attendance' },
+        { label: 'Attendance', path: '/emp/attendance' },
         ...(hasLeaveApprovals ? [{ label: 'Leave Approvals', path: '/emp/leave-approvals' }] : []),
         { label: 'Resignation', path: '/emp/exit' },
       ],
