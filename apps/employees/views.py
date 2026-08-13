@@ -89,8 +89,24 @@ class EmployeeExperienceViewSet(ResponseMixin, viewsets.ModelViewSet):
 class EmployeeDocumentViewSet(ResponseMixin, viewsets.ModelViewSet):
     queryset = EmployeeDocuments.objects.all()
     serializer_class = EmployeeDocumentSerializer
-    permission_classes = [IsHROrAdmin]
+    permission_classes = [IsAuthenticated]
     filterset_fields = ['employee', 'document_type']
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff or user.role in ['ADMIN', 'HR_ADMIN', 'HR_EXECUTIVE']:
+            return EmployeeDocuments.objects.all()
+        if hasattr(user, 'employee_profile'):
+            return EmployeeDocuments.objects.filter(employee=user.employee_profile)
+        return EmployeeDocuments.objects.none()
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        if not (user.is_staff or user.role in ['ADMIN', 'HR_ADMIN', 'HR_EXECUTIVE']):
+            if hasattr(user, 'employee_profile'):
+                serializer.save(employee=user.employee_profile)
+                return
+        serializer.save()
 
 
 class GenerateEmployeeIDView(ResponseMixin, generics.GenericAPIView):

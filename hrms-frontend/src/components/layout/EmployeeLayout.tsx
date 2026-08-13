@@ -34,6 +34,31 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const dropdownTimeoutRef = useRef<number | null>(null);
+
+  const handleMouseEnter = (menu: string) => {
+    if (dropdownTimeoutRef.current) {
+      window.clearTimeout(dropdownTimeoutRef.current);
+      dropdownTimeoutRef.current = null;
+    }
+    setActiveDropdown(menu);
+  };
+
+  const handleMouseLeave = () => {
+    dropdownTimeoutRef.current = window.setTimeout(() => {
+      setActiveDropdown(null);
+    }, 150);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (dropdownTimeoutRef.current) {
+        window.clearTimeout(dropdownTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const fetchUnreadCount = async () => {
     try {
       const res = await api.get('/notifications/unread-count/');
@@ -397,6 +422,45 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
 
   const navItems = allNavItems.filter((item) => item.roles.includes(user?.role || 'EMPLOYEE'));
 
+  const hasLeaveApprovals = ['HR_ADMIN', 'HR_EXECUTIVE', 'ADMIN', 'MANAGER', 'TEAM_LEAD'].includes(user?.role || '');
+
+  const menuConfig = [
+    {
+      type: 'link',
+      label: 'Dashboard',
+      path: '/emp',
+    },
+    {
+      type: 'dropdown',
+      label: 'Requests',
+      id: 'requests',
+      items: [
+        { label: 'Leave', path: '/emp/leave' },
+        { label: 'My Requests', path: '/emp/attendance' },
+        ...(hasLeaveApprovals ? [{ label: 'Leave Approvals', path: '/emp/leave-approvals' }] : []),
+        { label: 'Resignation', path: '/emp/exit' },
+      ],
+    },
+    {
+      type: 'dropdown',
+      label: 'Resources',
+      id: 'resources',
+      items: [
+        { label: 'My Assets', path: '/emp/assets?tab=inventory' },
+        { label: 'Asset History', path: '/emp/assets?tab=requests' },
+      ],
+    },
+    {
+      type: 'dropdown',
+      label: 'Documents',
+      id: 'documents',
+      items: [
+        { label: 'Payslips', path: '/emp/payslips?tab=payslips' },
+        { label: 'Other Documents', path: '/emp/payslips?tab=documents' },
+      ],
+    }
+  ];
+
   const handleLogout = () => {
     dispatch(logout());
     window.location.href = '/emp/login';
@@ -432,21 +496,81 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
 
       {/* 2. Centered Pill Navigation Menu (Desktop Only) */}
       <nav className="absolute top-4 left-1/2 -translate-x-1/2 z-40 hidden md:flex items-center gap-1 bg-[#0D1728]/70 backdrop-blur-md border border-[#1D3045]/60 h-12 rounded-full px-4 shadow-xl transition-all pointer-events-auto">
-        {navItems.map((item) => {
-          const isActive = location.pathname === item.path || (item.path !== '/emp' && location.pathname.startsWith(item.path));
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex items-center px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${
-                isActive
-                  ? 'bg-[#14B8A6]/25 text-white border border-[#14B8A6]/30 shadow-md shadow-[#14B8A6]/10'
-                  : 'text-[#94A3B8] hover:bg-[#111D30]/60 hover:text-[#F8FAFC]'
-              }`}
-            >
-              <span>{item.label}</span>
-            </Link>
-          );
+        {menuConfig.map((menu) => {
+          if (menu.type === 'link') {
+            const isActive = location.pathname === menu.path;
+            return (
+              <Link
+                key={menu.path}
+                to={menu.path}
+                className={`flex items-center px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${
+                  isActive
+                    ? 'bg-[#14B8A6]/20 text-white border border-[#14B8A6]/30 shadow-md shadow-[#14B8A6]/10'
+                    : 'text-[#94A3B8] hover:bg-[#111D30]/60 hover:text-[#F8FAFC]'
+                }`}
+              >
+                <span>{menu.label}</span>
+              </Link>
+            );
+          } else {
+            const isOpen = activeDropdown === menu.id;
+            const hasActiveChild = menu.items?.some(child => {
+              const childPath = child.path.split('?')[0];
+              const activeQuery = child.path.includes('?tab=') ? child.path.split('?tab=')[1] : null;
+              const pathMatches = location.pathname === childPath;
+              if (!pathMatches) return false;
+              if (activeQuery) {
+                const urlQuery = new URLSearchParams(location.search).get('tab');
+                return urlQuery === activeQuery;
+              }
+              return true;
+            });
+
+            return (
+              <div
+                key={menu.id}
+                className="relative"
+                onMouseEnter={() => handleMouseEnter(menu.id)}
+                onMouseLeave={handleMouseLeave}
+              >
+                <button
+                  className={`flex items-center gap-1 px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer border-none bg-transparent ${
+                    hasActiveChild
+                      ? 'bg-[#14B8A6]/20 text-white border border-[#14B8A6]/30 shadow-md shadow-[#14B8A6]/10'
+                      : 'text-[#94A3B8] hover:bg-[#111D30]/60 hover:text-[#F8FAFC]'
+                  }`}
+                >
+                  <span>{menu.label}</span>
+                  <ChevronDown size={11} className={`transform transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isOpen && (
+                  <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-44 bg-[#0D1728]/95 backdrop-blur-lg border border-[#1D3045]/60 rounded-2xl shadow-2xl py-1.5 z-50 text-left animate-fadeIn">
+                    {menu.items?.map((subItem) => {
+                      const subPathOnly = subItem.path.split('?')[0];
+                      const activeQuery = subItem.path.includes('?tab=') ? subItem.path.split('?tab=')[1] : null;
+                      const isSubActive = location.pathname === subPathOnly && (!activeQuery || new URLSearchParams(location.search).get('tab') === activeQuery);
+
+                      return (
+                        <Link
+                          key={subItem.path}
+                          to={subItem.path}
+                          onClick={() => setActiveDropdown(null)}
+                          className={`block px-4 py-2 text-xs font-semibold transition-all ${
+                            isSubActive
+                              ? 'text-[#2DD4BF] bg-[#14B8A6]/10 font-bold'
+                              : 'text-[#94A3B8] hover:bg-[#111D30] hover:text-[#F8FAFC]'
+                          }`}
+                        >
+                          {subItem.label}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          }
         })}
       </nav>
 
@@ -655,21 +779,46 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
 
       {/* Bottom Nav on Mobile screen size */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#0A1120]/95 backdrop-blur-lg border-t border-[#1D3045] flex items-center justify-around z-30 px-2 text-[#94A3B8]">
-        {navItems.slice(0, 4).map((item) => {
-          const isActive = location.pathname === item.path || (item.path !== '/emp' && location.pathname.startsWith(item.path));
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-lg ${
-                isActive ? 'text-[#2DD4BF]' : 'text-[#94A3B8] hover:text-[#F8FAFC]'
-              }`}
-            >
-              <item.icon size={18} />
-              <span className="text-[10px] font-semibold">{item.label}</span>
-            </Link>
-          );
-        })}
+        <Link
+          to="/emp"
+          className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-lg ${
+            location.pathname === '/emp' ? 'text-[#2DD4BF]' : 'text-[#94A3B8] hover:text-[#F8FAFC]'
+          }`}
+        >
+          <LayoutDashboard size={18} />
+          <span className="text-[10px] font-semibold">Dashboard</span>
+        </Link>
+
+        <Link
+          to="/emp/leave"
+          className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-lg ${
+            location.pathname.startsWith('/emp/leave') || location.pathname.startsWith('/emp/attendance') ? 'text-[#2DD4BF]' : 'text-[#94A3B8] hover:text-[#F8FAFC]'
+          }`}
+        >
+          <Clock size={18} />
+          <span className="text-[10px] font-semibold">Requests</span>
+        </Link>
+
+        <Link
+          to="/emp/assets"
+          className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-lg ${
+            location.pathname.startsWith('/emp/assets') ? 'text-[#2DD4BF]' : 'text-[#94A3B8] hover:text-[#F8FAFC]'
+          }`}
+        >
+          <Package size={18} />
+          <span className="text-[10px] font-semibold">Resources</span>
+        </Link>
+
+        <Link
+          to="/emp/payslips"
+          className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-lg ${
+            location.pathname.startsWith('/emp/payslips') ? 'text-[#2DD4BF]' : 'text-[#94A3B8] hover:text-[#F8FAFC]'
+          }`}
+        >
+          <Wallet size={18} />
+          <span className="text-[10px] font-semibold">Documents</span>
+        </Link>
+
         <button 
           onClick={() => setSearchOpen(true)}
           className="flex flex-col items-center gap-1 py-1.5 px-3 rounded-lg text-[#94A3B8] hover:text-[#F8FAFC]"

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import api from '../../api/axios';
 import { formatDate } from '../../lib/utils';
 import { Package, AlertCircle, ThumbsUp, ThumbsDown, Check, X, ShieldAlert, Cpu, Laptop, Smartphone, Wifi, CreditCard, Box, MessageSquare, Plus, CheckCircle, AlertTriangle } from 'lucide-react';
@@ -38,10 +39,24 @@ interface AssetRequest {
 const CATEGORIES = ['LAPTOP', 'DESKTOP', 'MOBILE', 'SIM_CARD', 'ID_CARD', 'ACCESSORIES'];
 
 export default function EmployeeAssets() {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const initialTab = searchParams.get('tab') === 'requests' ? 'requests' : 'inventory';
+
   const [assignments, setAssignments] = useState<AssetAssignment[]>([]);
   const [requests, setRequests] = useState<AssetRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'inventory' | 'requests'>('inventory');
+  const [activeTab, setActiveTab] = useState<'inventory' | 'requests'>(initialTab);
+
+  // Sync tab with URL search parameter
+  useEffect(() => {
+    const tabParam = new URLSearchParams(location.search).get('tab');
+    if (tabParam === 'requests') {
+      setActiveTab('requests');
+    } else {
+      setActiveTab('inventory');
+    }
+  }, [location.search]);
 
   // Acknowledgement State
   const [showAckModal, setShowAckModal] = useState<AssetAssignment | null>(null);
