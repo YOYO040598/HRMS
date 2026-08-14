@@ -18,6 +18,9 @@ if DATABASE_URL:
             'PASSWORD': url.password,
             'HOST': url.hostname,
             'PORT': url.port or 5432,
+            'OPTIONS': {
+                'sslmode': 'require',
+            }
         }
     }
 elif os.environ.get('DB_NAME'):
@@ -29,6 +32,9 @@ elif os.environ.get('DB_NAME'):
             'PASSWORD': os.environ.get('DB_PASSWORD'),
             'HOST': os.environ.get('DB_HOST'),
             'PORT': os.environ.get('DB_PORT', '5432'),
+            'OPTIONS': {
+                'sslmode': 'require',
+            } if 'postgresql' in os.environ.get('DB_ENGINE', 'postgresql') else {}
         }
     }
 else:
