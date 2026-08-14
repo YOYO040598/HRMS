@@ -8,13 +8,18 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 
 def frontend_view(request):
-    frontend_index = settings.BASE_DIR / 'hrms-frontend' / 'dist' / 'index.html'
-    if frontend_index.exists():
-        try:
-            with open(frontend_index, 'r', encoding='utf-8') as f:
-                return HttpResponse(f.read(), content_type='text/html')
-        except Exception:
-            pass
+    possible_paths = [
+        settings.BASE_DIR / 'staticfiles' / 'index.html',
+        settings.BASE_DIR / 'hrms-frontend' / 'dist' / 'index.html',
+        settings.STATIC_ROOT / 'index.html',
+    ]
+    for p in possible_paths:
+        if p.exists():
+            try:
+                with open(p, 'r', encoding='utf-8') as f:
+                    return HttpResponse(f.read(), content_type='text/html')
+            except Exception:
+                pass
     return redirect('/api/docs/')
 
 
