@@ -15,27 +15,32 @@ class Command(BaseCommand):
         desig, _ = Designation.objects.get_or_create(department=dept, name='Software Engineer', defaults={'slug': 'software-engineer'})
 
         users_data = [
-            {'email': 'admin@hrms.com', 'first_name': 'Admin', 'last_name': 'User', 'role': 'ADMIN', 'emp_id': 'EMP001', 'is_staff': True, 'is_superuser': True},
-            {'email': 'hr@hrms.com', 'first_name': 'HR', 'last_name': 'Admin', 'role': 'HR_ADMIN', 'emp_id': 'EMP002', 'is_staff': True, 'is_superuser': False},
-            {'email': 'manager@hrms.com', 'first_name': 'Manager', 'last_name': 'User', 'role': 'MANAGER', 'emp_id': 'EMP003', 'is_staff': False, 'is_superuser': False},
-            {'email': 'employee@hrms.com', 'first_name': 'John', 'last_name': 'Doe', 'role': 'EMPLOYEE', 'emp_id': 'EMP004', 'is_staff': False, 'is_superuser': False},
+            {'email': 'admin1@hrms.com', 'first_name': 'Admin', 'last_name': 'One', 'role': 'ADMIN', 'emp_id': 'admin1', 'is_staff': True, 'is_superuser': True, 'pass': 'admin12345!'},
+            {'email': 'admin1', 'first_name': 'Admin', 'last_name': 'One', 'role': 'ADMIN', 'emp_id': 'admin1', 'is_staff': True, 'is_superuser': True, 'pass': 'admin1'},
+            {'email': 'admin@hrms.com', 'first_name': 'Admin', 'last_name': 'User', 'role': 'ADMIN', 'emp_id': 'EMP001', 'is_staff': True, 'is_superuser': True, 'pass': 'admin1'},
+            {'email': 'hr@hrms.com', 'first_name': 'HR', 'last_name': 'Admin', 'role': 'HR_ADMIN', 'emp_id': 'EMP002', 'is_staff': True, 'is_superuser': False, 'pass': 'admin1'},
+            {'email': 'empy1@hrms.com', 'first_name': 'John', 'last_name': 'Doe', 'role': 'EMPLOYEE', 'emp_id': 'empy1', 'is_staff': False, 'is_superuser': False, 'pass': 'employee12345!'},
+            {'email': 'empy1', 'first_name': 'John', 'last_name': 'Doe', 'role': 'EMPLOYEE', 'emp_id': 'empy1', 'is_staff': False, 'is_superuser': False, 'pass': 'employee1'},
+            {'email': 'employee@hrms.com', 'first_name': 'John', 'last_name': 'Doe', 'role': 'EMPLOYEE', 'emp_id': 'EMP004', 'is_staff': False, 'is_superuser': False, 'pass': 'employee1'},
         ]
 
         for item in users_data:
-            user, created = User.objects.get_or_create(
-                email=item['email'],
-                defaults={
-                    'first_name': item['first_name'],
-                    'last_name': item['last_name'],
-                    'role': item['role'],
-                    'is_staff': item['is_staff'],
-                    'is_superuser': item['is_superuser'],
-                    'is_active': True,
-                }
-            )
-            if created or not user.check_password('password123'):
-                user.set_password('password123')
-                user.save()
+            user = User.objects.filter(email__iexact=item['email']).first()
+            if not user:
+                user = User.objects.create(
+                    email=item['email'],
+                    first_name=item['first_name'],
+                    last_name=item['last_name'],
+                    role=item['role'],
+                    is_staff=item['is_staff'],
+                    is_superuser=item['is_superuser'],
+                    is_active=True,
+                )
+            user.role = item['role']
+            user.is_staff = item['is_staff']
+            user.is_superuser = item['is_superuser']
+            user.set_password(item['pass'])
+            user.save()
             
             Employee.objects.get_or_create(
                 user=user,
@@ -49,4 +54,4 @@ class Command(BaseCommand):
                     'date_of_joining': '2024-01-01',
                 }
             )
-            self.stdout.write(self.style.SUCCESS(f"User {item['email']} (Employee ID: {item['emp_id']}) ready."))
+            self.stdout.write(self.style.SUCCESS(f"User {item['email']} (Role: {item['role']}) ready."))
