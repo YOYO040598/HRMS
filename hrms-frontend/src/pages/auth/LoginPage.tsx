@@ -142,10 +142,6 @@ export default function LoginPage() {
                   </div>
                 </div>
 
-                <div className="p-3 bg-orange-500/10 border border-orange-500/20 rounded-xl text-orange-300 text-xs text-center font-mono">
-                  🔑 <b>Admin Demo:</b> User: <code className="bg-white/10 px-1 rounded">admin1</code> | Pass: <code className="bg-white/10 px-1 rounded">admin1</code>
-                </div>
-
                 <button
                   type="submit"
                   disabled={loading}

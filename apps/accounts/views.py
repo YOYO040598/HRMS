@@ -71,12 +71,17 @@ def ensure_demo_users():
                     is_superuser=item['is_superuser'],
                     is_active=True,
                 )
-            u.role = item['role']
-            u.is_staff = item['is_staff']
-            u.is_superuser = item['is_superuser']
-            u.set_password(item['pass'])
-            u.is_active = True
-            u.save()
+                u.set_password(item['pass'])
+                u.save(update_fields=['password', 'updated_at'])
+            # Do not re-hash and overwrite every demo password on every login.
+            # Besides making login slow, that behaviour could unexpectedly reset
+            # a password changed by an administrator.
+            if u.role != item['role'] or u.is_staff != item['is_staff'] or u.is_superuser != item['is_superuser'] or not u.is_active:
+                u.role = item['role']
+                u.is_staff = item['is_staff']
+                u.is_superuser = item['is_superuser']
+                u.is_active = True
+                u.save(update_fields=['role', 'is_staff', 'is_superuser', 'is_active', 'updated_at'])
 
             emp = Employee.objects.filter(user=u).first() or Employee.objects.filter(employee_id__iexact=item['emp_id']).first()
             if not emp:
@@ -304,6 +309,9 @@ class EmployeeLoginView(ResponseMixin, generics.GenericAPIView):
 
         if not user:
             return self.error_response('Invalid employee ID or password', status_code=status.HTTP_400_BAD_REQUEST)
+
+        if user.role != 'EMPLOYEE':
+            return self.error_response('Use the Admin / HR login for this account', status_code=status.HTTP_403_FORBIDDEN)
 
         if not user.check_password(password):
             return self.error_response('Invalid employee ID or password', status_code=status.HTTP_400_BAD_REQUEST)

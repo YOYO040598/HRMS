@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const baseAPIUrl = import.meta.env.VITE_API_URL || 'https://hrms-1-onby.onrender.com/api';
+// Use the Vite proxy locally and the current Django host for the combined
+// deployment.  A deployed standalone frontend can still override this value.
+const baseAPIUrl = import.meta.env.VITE_API_URL || '/api';
 
 const api = axios.create({
   baseURL: baseAPIUrl,

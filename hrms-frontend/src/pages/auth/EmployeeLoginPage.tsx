@@ -142,10 +142,6 @@ export default function EmployeeLoginPage() {
                   </div>
                 </div>
 
-                <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-300 text-xs text-center font-mono">
-                  🔑 <b>Employee Demo:</b> ID: <code className="bg-white/10 px-1 rounded">empy1</code> | Pass: <code className="bg-white/10 px-1 rounded">employee1</code>
-                </div>
-
                 <button
                   type="submit"
                   disabled={loading}
