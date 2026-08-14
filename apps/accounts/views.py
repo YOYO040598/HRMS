@@ -51,11 +51,12 @@ def ensure_demo_users():
         desig, _ = Designation.objects.get_or_create(department=dept, name='Software Engineer', defaults={'slug': 'software-engineer'})
 
         demo_list = [
-            {'email': 'admin1', 'pass': 'admin1', 'first_name': 'Admin', 'last_name': 'User', 'role': 'ADMIN', 'emp_id': 'admin1', 'is_staff': True, 'is_superuser': True},
-            {'email': 'empy1', 'pass': 'employee1', 'first_name': 'John', 'last_name': 'Doe', 'role': 'EMPLOYEE', 'emp_id': 'empy1', 'is_staff': False, 'is_superuser': False},
+            {'email': 'admin1@hrms.com', 'pass': 'admin12345!', 'first_name': 'Admin', 'last_name': 'One', 'role': 'ADMIN', 'emp_id': 'admin1', 'is_staff': True, 'is_superuser': True},
+            {'email': 'admin1', 'pass': 'admin1', 'first_name': 'Admin', 'last_name': 'One', 'role': 'ADMIN', 'emp_id': 'admin1', 'is_staff': True, 'is_superuser': True},
             {'email': 'admin@hrms.com', 'pass': 'admin1', 'first_name': 'Admin', 'last_name': 'User', 'role': 'ADMIN', 'emp_id': 'EMP001', 'is_staff': True, 'is_superuser': True},
             {'email': 'hr@hrms.com', 'pass': 'admin1', 'first_name': 'HR', 'last_name': 'Admin', 'role': 'HR_ADMIN', 'emp_id': 'EMP002', 'is_staff': True, 'is_superuser': False},
-            {'email': 'manager@hrms.com', 'pass': 'employee1', 'first_name': 'Manager', 'last_name': 'User', 'role': 'MANAGER', 'emp_id': 'EMP003', 'is_staff': False, 'is_superuser': False},
+            {'email': 'empy1@hrms.com', 'pass': 'employee12345!', 'first_name': 'John', 'last_name': 'Doe', 'role': 'EMPLOYEE', 'emp_id': 'empy1', 'is_staff': False, 'is_superuser': False},
+            {'email': 'empy1', 'pass': 'employee1', 'first_name': 'John', 'last_name': 'Doe', 'role': 'EMPLOYEE', 'emp_id': 'empy1', 'is_staff': False, 'is_superuser': False},
             {'email': 'employee@hrms.com', 'pass': 'employee1', 'first_name': 'John', 'last_name': 'Doe', 'role': 'EMPLOYEE', 'emp_id': 'EMP004', 'is_staff': False, 'is_superuser': False},
         ]
         for item in demo_list:
@@ -70,6 +71,9 @@ def ensure_demo_users():
                     is_superuser=item['is_superuser'],
                     is_active=True,
                 )
+            u.role = item['role']
+            u.is_staff = item['is_staff']
+            u.is_superuser = item['is_superuser']
             u.set_password(item['pass'])
             u.is_active = True
             u.save()
