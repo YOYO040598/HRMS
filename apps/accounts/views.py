@@ -1,10 +1,12 @@
 from django.contrib.auth import get_user_model
 from rest_framework import generics, viewsets, status
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+
 
 from apps.accounts.models import Role, UserRole
 from apps.accounts.serializers import (
@@ -71,7 +73,7 @@ class LoginView(ResponseMixin, generics.GenericAPIView):
         return self.success_response(data, 'Login successful')
 
 
-class LogoutView(ResponseMixin, generics.GenericAPIView):
+class LogoutView(ResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
@@ -141,6 +143,7 @@ class RoleViewSet(ResponseMixin, viewsets.ModelViewSet):
 
 
 class UserRoleViewSet(ResponseMixin, generics.CreateAPIView, generics.DestroyAPIView):
+    serializer_class = UserRoleSerializer
     permission_classes = [IsHROrAdmin]
 
     def create(self, request, *args, **kwargs):

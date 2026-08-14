@@ -1,6 +1,7 @@
 from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from apps.dashboard.models import DashboardWidget, DashboardLayout
 from apps.dashboard.serializers import DashboardWidgetSerializer, DashboardLayoutSerializer
@@ -35,7 +36,7 @@ class DashboardLayoutViewSet(ResponseMixin, viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-class DashboardStatsView(ResponseMixin, generics.GenericAPIView):
+class DashboardStatsView(ResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
@@ -45,7 +46,7 @@ class DashboardStatsView(ResponseMixin, generics.GenericAPIView):
         return self.success_response(stats, 'Dashboard statistics loaded')
 
 
-class DepartmentBreakdownView(ResponseMixin, generics.GenericAPIView):
+class DepartmentBreakdownView(ResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
@@ -55,7 +56,7 @@ class DepartmentBreakdownView(ResponseMixin, generics.GenericAPIView):
         return self.success_response(breakdown, 'Department breakdown loaded')
 
 
-class AttendanceTrendView(ResponseMixin, generics.GenericAPIView):
+class AttendanceTrendView(ResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
@@ -65,7 +66,7 @@ class AttendanceTrendView(ResponseMixin, generics.GenericAPIView):
         return self.success_response(trend, 'Attendance trend loaded')
 
 
-class LeaveDistributionView(ResponseMixin, generics.GenericAPIView):
+class LeaveDistributionView(ResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
@@ -75,7 +76,7 @@ class LeaveDistributionView(ResponseMixin, generics.GenericAPIView):
         return self.success_response(distribution, 'Leave distribution loaded')
 
 
-class PayrollTrendView(ResponseMixin, generics.GenericAPIView):
+class PayrollTrendView(ResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
