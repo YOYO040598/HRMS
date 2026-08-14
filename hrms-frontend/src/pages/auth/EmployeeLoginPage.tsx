@@ -105,7 +105,7 @@ export default function EmployeeLoginPage() {
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <label className="block text-[11px] font-bold text-emerald-300 uppercase tracking-wider">Employee ID</label>
+                  <label className="block text-[11px] font-bold text-emerald-300 uppercase tracking-wider">Employee ID / Email</label>
                   <div className="relative">
                     <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
@@ -113,7 +113,7 @@ export default function EmployeeLoginPage() {
                       value={employeeId}
                       onChange={(e) => { setEmployeeId(e.target.value); dispatch(clearError()); }}
                       className="w-full pl-12 pr-4 py-3.5 bg-white/[0.02] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#059669]/40 focus:border-[#059669] transition-all outline-none text-white placeholder-gray-500 text-sm font-medium"
-                      placeholder="e.g. EMP001"
+                      placeholder="empy1"
                       required
                     />
                   </div>
@@ -130,13 +130,17 @@ export default function EmployeeLoginPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="w-full pl-12 pr-12 py-3.5 bg-white/[0.02] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#059669]/40 focus:border-[#059669] transition-all outline-none text-white placeholder-gray-500 text-sm font-medium"
-                      placeholder="••••••••"
+                      placeholder="employee1"
                       required
                     />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors">
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
+                </div>
+
+                <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-300 text-xs text-center font-mono">
+                  🔑 <b>Employee Demo:</b> ID: <code className="bg-white/10 px-1 rounded">empy1</code> | Pass: <code className="bg-white/10 px-1 rounded">employee1</code>
                 </div>
 
                 <button

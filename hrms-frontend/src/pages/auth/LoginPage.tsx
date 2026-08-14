@@ -105,15 +105,15 @@ export default function LoginPage() {
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <label className="block text-[11px] font-bold text-orange-300 uppercase tracking-wider">Email Address</label>
+                  <label className="block text-[11px] font-bold text-orange-300 uppercase tracking-wider">Admin Username / Email</label>
                   <div className="relative">
                     <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
-                      type="email"
+                      type="text"
                       value={email}
                       onChange={(e) => { setEmail(e.target.value); dispatch(clearError()); }}
                       className="w-full pl-12 pr-4 py-3.5 bg-white/[0.02] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#ea580c]/40 focus:border-[#ea580c] transition-all outline-none text-white placeholder-gray-500 text-sm font-medium"
-                      placeholder="name@company.com"
+                      placeholder="admin1"
                       required
                     />
                   </div>
@@ -130,13 +130,17 @@ export default function LoginPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="w-full pl-12 pr-12 py-3.5 bg-white/[0.02] border border-white/[0.08] rounded-xl focus:ring-2 focus:ring-[#ea580c]/40 focus:border-[#ea580c] transition-all outline-none text-white placeholder-gray-500 text-sm font-medium"
-                      placeholder="••••••••"
+                      placeholder="admin1"
                       required
                     />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors">
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
+                </div>
+
+                <div className="p-3 bg-orange-500/10 border border-orange-500/20 rounded-xl text-orange-300 text-xs text-center font-mono">
+                  🔑 <b>Admin Demo:</b> User: <code className="bg-white/10 px-1 rounded">admin1</code> | Pass: <code className="bg-white/10 px-1 rounded">admin1</code>
                 </div>
 
                 <button
