@@ -32,7 +32,9 @@ export const login = createAsyncThunk(
   async ({ email, password }: { email: string; password: string }, { rejectWithValue }) => {
     try {
       const res = await api.post('/accounts/login/', { email, password });
-      return { ...res.data.data, loginType: 'admin' as const };
+      const user = res.data.data.user;
+      const loginType = user?.role === 'EMPLOYEE' ? ('employee' as const) : ('admin' as const);
+      return { ...res.data.data, loginType };
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message || 'Login failed');
     }
@@ -44,7 +46,9 @@ export const employeeLogin = createAsyncThunk(
   async ({ employee_id, password }: { employee_id: string; password: string }, { rejectWithValue }) => {
     try {
       const res = await api.post('/accounts/employee-login/', { employee_id, password });
-      return { ...res.data.data, loginType: 'employee' as const };
+      const user = res.data.data.user;
+      const loginType = user?.role === 'EMPLOYEE' ? ('employee' as const) : ('admin' as const);
+      return { ...res.data.data, loginType };
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message || 'Login failed');
     }

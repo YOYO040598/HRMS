@@ -43,13 +43,14 @@ import EmployeeProfilePage from './pages/employee/EmployeeProfilePage';
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { user, tokens, loginType } = useSelector((state: RootState) => state.auth);
-  if (!user || !tokens || loginType !== 'admin') return <Navigate to="/login" replace />;
+  if (!user || !tokens) return <Navigate to="/login" replace />;
+  if (user.role === 'EMPLOYEE' || loginType === 'employee') return <Navigate to="/emp" replace />;
   return <Layout>{children}</Layout>;
 }
 
 function EmployeeRoute({ children }: { children: React.ReactNode }) {
-  const { user, tokens, loginType } = useSelector((state: RootState) => state.auth);
-  if (!user || !tokens || loginType !== 'employee') return <Navigate to="/emp/login" replace />;
+  const { user, tokens } = useSelector((state: RootState) => state.auth);
+  if (!user || !tokens) return <Navigate to="/emp/login" replace />;
   return <EmployeeLayout>{children}</EmployeeLayout>;
 }
 
