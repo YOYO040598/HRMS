@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const baseAPIUrl = import.meta.env.VITE_API_URL || '/api';
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: baseAPIUrl,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -24,7 +26,10 @@ api.interceptors.response.use(
         const loginType = localStorage.getItem('login_type');
         const redirectUrl = loginType === 'employee' ? '/emp/login' : '/login';
         try {
-          const res = await axios.post('/api/accounts/token/refresh/', { refresh: refreshToken });
+          const refreshURL = baseAPIUrl.endsWith('/api')
+            ? `${baseAPIUrl}/accounts/token/refresh/`
+            : `${baseAPIUrl}/api/accounts/token/refresh/`;
+          const res = await axios.post(refreshURL, { refresh: refreshToken });
           localStorage.setItem('access_token', res.data.access);
           if (res.data.refresh) localStorage.setItem('refresh_token', res.data.refresh);
           error.config.headers.Authorization = `Bearer ${res.data.access}`;

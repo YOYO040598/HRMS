@@ -1,0 +1,53 @@
+services:
+  # Django Backend Service
+  - type: web
+    name: hrms-backend-service
+    env: python
+    buildCommand: pip install -r requirements/base.txt && python manage.py collectstatic --noinput && python manage.py migrate
+    startCommand: gunicorn config.wsgi:application
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DB_ENGINE
+        value: django.db.backends.postgresql
+      - key: DB_NAME
+        fromDatabase:
+          name: hrms-postgres-database
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: hrms-postgres-database
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: hrms-postgres-database
+          property: password
+      - key: DB_HOST
+        fromDatabase:
+          name: hrms-postgres-database
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: hrms-postgres-database
+          property: port
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://hrms-frontend-service.onrender.com"
+
+  # React Frontend Service
+  - type: web
+    name: hrms-frontend-service
+    env: static
+    buildCommand: npm run build
+    publishDir: dist
+    rootDir: hrms-frontend
+    envVars:
+      - key: VITE_API_URL
+        value: "https://hrms-backend-service.onrender.com/api"
+
+databases:
+  - name: hrms-postgres-database
+    databaseName: hrms
+    user: hrms_user
+    plan: free
