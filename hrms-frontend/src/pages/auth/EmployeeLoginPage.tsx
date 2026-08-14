@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../hooks/useRedux';
-import { employeeLogin, clearError } from '../../store/authSlice';
+import { employeeLogin, logout, clearError } from '../../store/authSlice';
 import { Eye, EyeOff, User, Lock, Loader2, ArrowRight } from 'lucide-react';
 import AnimatedIntro from '../../components/ui/AnimatedIntro';
 
@@ -10,20 +10,23 @@ export default function EmployeeLoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [introComplete, setIntroComplete] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { loading, error } = useAppSelector((state) => state.auth);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLocalError(null);
     const result = await dispatch(employeeLogin({ employee_id: employeeId, password }));
     if (employeeLogin.fulfilled.match(result)) {
       const role = result.payload?.user?.role;
-      if (role === 'EMPLOYEE' || result.payload?.loginType === 'employee') {
-        navigate('/emp');
-      } else {
-        navigate('/');
+      if (role !== 'EMPLOYEE') {
+        dispatch(logout());
+        setLocalError('This is an Admin/HR account. Please click the ADMIN / HR tab to sign in.');
+        return;
       }
+      navigate('/emp');
     }
   };
 
@@ -96,10 +99,10 @@ export default function EmployeeLoginPage() {
                 </button>
               </div>
 
-              {error && (
+              {(localError || error) && (
                 <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-300 text-xs font-semibold flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0" />
-                  {error}
+                  {localError || error}
                 </div>
               )}
 
