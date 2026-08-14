@@ -12,17 +12,13 @@ from pathlib import Path
 
 
 def frontend_view(request):
-    cwd = Path(os.getcwd())
     possible_paths = [
-        cwd / 'hrms-frontend' / 'dist' / 'index.html',
-        cwd / 'staticfiles' / 'index.html',
+        Path(settings.BASE_DIR) / 'hrms-frontend' / 'dist' / 'index.html',
+        Path(settings.BASE_DIR) / 'staticfiles' / 'index.html',
         Path('/opt/render/project/src/hrms-frontend/dist/index.html'),
         Path('/opt/render/project/src/staticfiles/index.html'),
         Path('/app/hrms-frontend/dist/index.html'),
         Path('/app/staticfiles/index.html'),
-        settings.BASE_DIR / 'hrms-frontend' / 'dist' / 'index.html',
-        settings.BASE_DIR / 'staticfiles' / 'index.html',
-        settings.STATIC_ROOT / 'index.html',
     ]
     for p in possible_paths:
         if p.exists():
@@ -31,6 +27,8 @@ def frontend_view(request):
                     return HttpResponse(f.read(), content_type='text/html')
             except Exception as e:
                 print(f"Error reading frontend index at {p}: {e}")
+        else:
+            print(f"[FRONTEND VIEW] Path does not exist: {p}")
     return redirect('/api/docs/')
 
 
