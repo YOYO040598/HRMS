@@ -28,8 +28,16 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 
 class UserLoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    email = serializers.CharField(required=False, allow_blank=True)
+    employee_id = serializers.CharField(required=False, allow_blank=True)
     password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        login_input = attrs.get('email') or attrs.get('employee_id')
+        if not login_input:
+            raise serializers.ValidationError({'login_input': 'Email or Employee ID is required.'})
+        attrs['login_input'] = login_input.strip()
+        return attrs
 
 
 class UserListSerializer(serializers.ModelSerializer):
