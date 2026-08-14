@@ -15,7 +15,7 @@ router.register(r'roles', RoleViewSet)
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', LoginView.as_view(), name='login'),
-    path('employee-login/', EmployeeLoginView.as_view(), name='employee-login'),
+    path('employee-login/', LoginView.as_view(), name='employee-login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('profile/', UserProfileView.as_view(), name='profile'),
