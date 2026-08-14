@@ -3,7 +3,32 @@ from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.shortcuts import redirect
-from django.http import HttpResponse, FileResponse
+from django.http import HttpResponse, FileResponse, JsonResponse
+
+
+def test_login_view(request):
+    try:
+        from apps.accounts.views import ensure_demo_users
+        ensure_demo_users()
+        from django.contrib.auth import get_user_model
+        from apps.employees.models import Employee
+        User = get_user_model()
+        users = list(User.objects.values('email', 'role', 'is_active'))
+        employees = list(Employee.objects.values('employee_id', 'user__email'))
+        
+        u = User.objects.filter(email__iexact='admin@hrms.com').first()
+        pass_ok = u.check_password('password123') if u else False
+        
+        return JsonResponse({
+            'users_count': len(users),
+            'users': users,
+            'employees_count': len(employees),
+            'employees': employees,
+            'admin_pass_ok': pass_ok,
+        })
+    except Exception as e:
+        import traceback
+        return JsonResponse({'error': str(e), 'traceback': traceback.format_exc()})
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 
@@ -48,6 +73,7 @@ def static_schema_view(request):
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/test-login/', test_login_view, name='test-login'),
     path('api/schema/', static_schema_view, name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/accounts/', include('apps.accounts.urls')),
