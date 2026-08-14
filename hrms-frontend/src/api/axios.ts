@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseAPIUrl = import.meta.env.VITE_API_URL || '/api';
+const baseAPIUrl = import.meta.env.VITE_API_URL || 'https://hrms-1-onby.onrender.com/api';
 
 const api = axios.create({
   baseURL: baseAPIUrl,
