@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field, extend_schema_serializer
 from apps.assets.models import Asset, AssetAssignment, AssetReturn, AssetHistory, AssetRequest
 
 
@@ -16,6 +17,7 @@ class AssetSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id']
 
+    @extend_schema_field(serializers.CharField(allow_null=True))
     def get_assigned_to_name(self, obj):
         if obj.status == 'ASSIGNED':
             assignment = obj.assignments.filter(is_returned=False).first()
@@ -23,6 +25,7 @@ class AssetSerializer(serializers.ModelSerializer):
                 return assignment.employee.user.full_name
         return None
 
+    @extend_schema_field(serializers.CharField(allow_null=True))
     def get_acceptance_status(self, obj):
         if obj.status == 'ASSIGNED':
             assignment = obj.assignments.filter(is_returned=False).first()
@@ -71,6 +74,7 @@ class AssetHistorySerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'timestamp']
 
 
+@extend_schema_serializer(component_name='AssetRequestDetail')
 class AssetRequestSerializer(serializers.ModelSerializer):
     employee_name = serializers.CharField(source='employee.user.full_name', read_only=True)
     employee_code = serializers.CharField(source='employee.employee_id', read_only=True)

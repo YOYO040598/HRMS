@@ -157,6 +157,14 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,
+    'ENUM_NAME_OVERRIDES': {
+        'AssetStatusEnum': 'apps.assets.models.Asset.Status',
+        'AssetCategoryEnum': 'apps.assets.models.Asset.Category',
+        'ResignationStatusEnum': 'apps.exit_management.models.Resignation.Status',
+        'LeaveApplicationStatusEnum': 'apps.leave_management.models.LeaveApplication.Status',
+        'PayrollStatusEnum': 'apps.payroll.models.Payroll.Status',
+        'AttendanceStatusEnum': 'apps.attendance.models.Attendance.Status',
+    },
     'TAGS': [
         {'name': 'Accounts', 'description': 'Authentication & User Management'},
         {'name': 'Organization', 'description': 'Company, Department, Designation, Team'},

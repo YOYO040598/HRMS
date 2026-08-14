@@ -1,5 +1,7 @@
-from rest_framework import viewsets, generics, status
+from rest_framework import viewsets, generics, status, serializers
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema, inline_serializer
 
 from apps.employees.models import (
     Employee, EmployeePersonalInfo, EmployeeAddress,
@@ -112,6 +114,7 @@ class EmployeeDocumentViewSet(ResponseMixin, viewsets.ModelViewSet):
 class GenerateEmployeeIDView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsHROrAdmin]
 
+    @extend_schema(request=None, responses={200: inline_serializer('GenerateEmployeeIDResponse', fields={'employee_id': serializers.CharField()})})
     def get(self, request, *args, **kwargs):
         last_employee = Employee.objects.order_by('-employee_id').first()
         if last_employee and last_employee.employee_id:
@@ -123,11 +126,31 @@ class GenerateEmployeeIDView(ResponseMixin, generics.GenericAPIView):
         return self.success_response({'employee_id': next_id})
 
 
-from rest_framework.views import APIView
-
-class EmployeeSelfProfileView(ResponseMixin, APIView):
+class EmployeeSelfProfileView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = EmployeeDetailSerializer
+    queryset = Employee.objects.none()
 
+    @extend_schema(request=None, responses={200: inline_serializer('EmployeeSelfProfileResponse', fields={
+        'first_name': serializers.CharField(),
+        'last_name': serializers.CharField(),
+        'phone_number': serializers.CharField(),
+        'email': serializers.CharField(),
+        'personal_email': serializers.CharField(),
+        'date_of_birth': serializers.DateField(),
+        'gender': serializers.CharField(),
+        'marital_status': serializers.CharField(),
+        'blood_group': serializers.CharField(),
+        'address_line_1': serializers.CharField(),
+        'address_line_2': serializers.CharField(),
+        'city': serializers.CharField(),
+        'state': serializers.CharField(),
+        'country': serializers.CharField(),
+        'postal_code': serializers.CharField(),
+        'emergency_contact_name': serializers.CharField(),
+        'emergency_contact_relationship': serializers.CharField(),
+        'emergency_contact_phone': serializers.CharField(),
+    })})
     def get(self, request, *args, **kwargs):
         try:
             employee = request.user.employee_profile
@@ -163,6 +186,25 @@ class EmployeeSelfProfileView(ResponseMixin, APIView):
         }
         return self.success_response(data)
 
+    @extend_schema(request=inline_serializer('EmployeeSelfProfileUpdateRequest', fields={
+        'first_name': serializers.CharField(required=False),
+        'last_name': serializers.CharField(required=False),
+        'phone_number': serializers.CharField(required=False),
+        'personal_email': serializers.CharField(required=False),
+        'date_of_birth': serializers.DateField(required=False),
+        'gender': serializers.CharField(required=False),
+        'marital_status': serializers.CharField(required=False),
+        'blood_group': serializers.CharField(required=False),
+        'address_line_1': serializers.CharField(required=False),
+        'address_line_2': serializers.CharField(required=False),
+        'city': serializers.CharField(required=False),
+        'state': serializers.CharField(required=False),
+        'country': serializers.CharField(required=False),
+        'postal_code': serializers.CharField(required=False),
+        'emergency_contact_name': serializers.CharField(required=False),
+        'emergency_contact_relationship': serializers.CharField(required=False),
+        'emergency_contact_phone': serializers.CharField(required=False),
+    }))
     def put(self, request, *args, **kwargs):
         try:
             employee = request.user.employee_profile

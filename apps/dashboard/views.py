@@ -1,7 +1,8 @@
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema, inline_serializer
 
 from apps.dashboard.models import DashboardWidget, DashboardLayout
 from apps.dashboard.serializers import DashboardWidgetSerializer, DashboardLayoutSerializer
@@ -36,6 +37,7 @@ class DashboardLayoutViewSet(ResponseMixin, viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
+@extend_schema(request=None, responses={200: inline_serializer('DashboardStatsResponse', fields={'total_employees': serializers.IntegerField()})})
 class DashboardStatsView(ResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
@@ -46,6 +48,7 @@ class DashboardStatsView(ResponseMixin, APIView):
         return self.success_response(stats, 'Dashboard statistics loaded')
 
 
+@extend_schema(request=None, responses={200: inline_serializer('DepartmentBreakdownResponse', fields={'departments': serializers.ListField()})})
 class DepartmentBreakdownView(ResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
@@ -56,6 +59,7 @@ class DepartmentBreakdownView(ResponseMixin, APIView):
         return self.success_response(breakdown, 'Department breakdown loaded')
 
 
+@extend_schema(request=None, responses={200: inline_serializer('AttendanceTrendResponse', fields={'trend': serializers.ListField()})})
 class AttendanceTrendView(ResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
@@ -66,6 +70,7 @@ class AttendanceTrendView(ResponseMixin, APIView):
         return self.success_response(trend, 'Attendance trend loaded')
 
 
+@extend_schema(request=None, responses={200: inline_serializer('LeaveDistributionResponse', fields={'distribution': serializers.ListField()})})
 class LeaveDistributionView(ResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
@@ -76,6 +81,7 @@ class LeaveDistributionView(ResponseMixin, APIView):
         return self.success_response(distribution, 'Leave distribution loaded')
 
 
+@extend_schema(request=None, responses={200: inline_serializer('PayrollTrendResponse', fields={'trend': serializers.ListField()})})
 class PayrollTrendView(ResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 

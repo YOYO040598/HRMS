@@ -63,8 +63,8 @@ class UserRoleModelTest(TestCase):
             last_name='User',
             password='testpass123',
         )
-        self.role = Role.objects.create(name='Employee', slug='employee')
-        self.user_role = UserRole.objects.create(user=self.user, role=self.role)
+        self.role, _ = Role.objects.get_or_create(name='Test Role 2', slug='test-role-2')
+        self.user_role, _ = UserRole.objects.get_or_create(user=self.user, role=self.role)
 
     def test_user_role_str(self):
-        self.assertEqual(str(self.user_role), 'test@example.com - Employee')
+        self.assertEqual(str(self.user_role), 'test@example.com - Test Role 2')

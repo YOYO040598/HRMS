@@ -1,7 +1,8 @@
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.utils import timezone
+from drf_spectacular.utils import extend_schema, inline_serializer
 
 from apps.reports.models import Report
 from apps.reports.serializers import ReportSerializer
@@ -27,7 +28,15 @@ class ReportViewSet(ResponseMixin, viewsets.ModelViewSet):
 
 class GenerateReportView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsHROrAdmin]
+    serializer_class = ReportSerializer
 
+    @extend_schema(
+        request=inline_serializer('GenerateReportRequest', fields={
+            'report_type': serializers.CharField(),
+            'parameters': serializers.JSONField(required=False, default=dict),
+        }),
+        responses={200: ReportSerializer}
+    )
     def post(self, request, *args, **kwargs):
         report_type = request.data.get('report_type')
         parameters = request.data.get('parameters', {})

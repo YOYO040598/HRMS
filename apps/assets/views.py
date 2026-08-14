@@ -1,6 +1,7 @@
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
+from drf_spectacular.utils import extend_schema, inline_serializer
 
 from apps.assets.models import Asset, AssetAssignment, AssetReturn, AssetHistory, AssetRequest
 from apps.assets.serializers import (
@@ -96,7 +97,17 @@ class AssetHistoryViewSet(ResponseMixin, viewsets.ModelViewSet):
 
 class AssignAssetView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsHROrAdmin]
+    serializer_class = AssetAssignmentSerializer
 
+    @extend_schema(
+        request=inline_serializer('AssignAssetRequest', fields={
+            'asset_id': serializers.UUIDField(),
+            'employee_id': serializers.UUIDField(),
+            'condition': serializers.CharField(required=False, default='Good'),
+            'notes': serializers.CharField(required=False, default=''),
+        }),
+        responses={201: AssetAssignmentSerializer}
+    )
     def post(self, request, *args, **kwargs):
         from apps.employees.models import Employee
         asset_id = request.data.get('asset_id')
@@ -122,7 +133,18 @@ class AssignAssetView(ResponseMixin, generics.GenericAPIView):
 
 class ReturnAssetView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsHROrAdmin]
+    serializer_class = AssetAssignmentSerializer
 
+    @extend_schema(
+        request=inline_serializer('ReturnAssetRequest', fields={
+            'assignment_id': serializers.UUIDField(),
+            'condition': serializers.CharField(required=False, default='Good'),
+            'remarks': serializers.CharField(required=False, default=''),
+            'is_damaged': serializers.BooleanField(required=False, default=False),
+            'damage_report': serializers.CharField(required=False, default=''),
+        }),
+        responses={200: AssetAssignmentSerializer}
+    )
     def post(self, request, *args, **kwargs):
         assignment_id = request.data.get('assignment_id')
         condition = request.data.get('condition', 'Good')
@@ -154,7 +176,16 @@ class ReturnAssetView(ResponseMixin, generics.GenericAPIView):
 
 class TransferAssetView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsHROrAdmin]
+    serializer_class = AssetAssignmentSerializer
 
+    @extend_schema(
+        request=inline_serializer('TransferAssetRequest', fields={
+            'asset_id': serializers.UUIDField(),
+            'employee_id': serializers.UUIDField(),
+            'notes': serializers.CharField(required=False, default=''),
+        }),
+        responses={200: AssetAssignmentSerializer}
+    )
     def post(self, request, *args, **kwargs):
         from apps.employees.models import Employee
         asset_id = request.data.get('asset_id')
@@ -180,6 +211,16 @@ class TransferAssetView(ResponseMixin, generics.GenericAPIView):
 class AssetStatsView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        request=None,
+        responses={200: inline_serializer('AssetStatsResponse', fields={
+            'total_assets': serializers.IntegerField(),
+            'assigned': serializers.IntegerField(),
+            'available': serializers.IntegerField(),
+            'maintenance': serializers.IntegerField(),
+            'retired': serializers.IntegerField(),
+        })}
+    )
     def get(self, request, *args, **kwargs):
         company = getattr(request.user, 'employee_profile', None)
         company = company.company if company else None
@@ -189,7 +230,10 @@ class AssetStatsView(ResponseMixin, generics.GenericAPIView):
 
 class EmployeeAssetsView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = AssetAssignmentSerializer
+    queryset = AssetAssignment.objects.none()
 
+    @extend_schema(request=None, responses={200: AssetAssignmentSerializer(many=True)})
     def get(self, request, *args, **kwargs):
         try:
             employee = request.user.employee_profile

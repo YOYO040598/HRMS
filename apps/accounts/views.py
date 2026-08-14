@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
-from rest_framework import generics, viewsets, status
+from rest_framework import generics, viewsets, status, serializers
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -73,6 +73,7 @@ class LoginView(ResponseMixin, generics.GenericAPIView):
         return self.success_response(data, 'Login successful')
 
 
+@extend_schema(request=None, responses={200: inline_serializer('LogoutResponse', fields={'message': serializers.CharField()})})
 class LogoutView(ResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
@@ -144,8 +145,10 @@ class RoleViewSet(ResponseMixin, viewsets.ModelViewSet):
 
 class UserRoleViewSet(ResponseMixin, generics.CreateAPIView, generics.DestroyAPIView):
     serializer_class = UserRoleSerializer
+    queryset = UserRole.objects.none()
     permission_classes = [IsHROrAdmin]
 
+    @extend_schema(request=inline_serializer('UserRoleAssignRequest', fields={'user_id': serializers.UUIDField(), 'role_id': serializers.UUIDField()}), responses={201: UserRoleSerializer})
     def create(self, request, *args, **kwargs):
         user_id = request.data.get('user_id')
         role_id = request.data.get('role_id')
@@ -166,6 +169,7 @@ class UserRoleViewSet(ResponseMixin, generics.CreateAPIView, generics.DestroyAPI
             return self.created_response(UserRoleSerializer(user_role).data, 'Role assigned')
         return self.error_response('User already has this role')
 
+    @extend_schema(request=inline_serializer('UserRoleRemoveRequest', fields={'user_id': serializers.UUIDField(), 'role_id': serializers.UUIDField()}))
     def delete(self, request, *args, **kwargs):
         user_id = request.data.get('user_id')
         role_id = request.data.get('role_id')
@@ -178,9 +182,12 @@ class UserRoleViewSet(ResponseMixin, generics.CreateAPIView, generics.DestroyAPI
             return self.error_response('UserRole not found')
 
 
-class EmployeeLoginView(ResponseMixin, APIView):
+class EmployeeLoginView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [AllowAny]
+    serializer_class = UserDetailSerializer
+    queryset = User.objects.none()
 
+    @extend_schema(request=inline_serializer('EmployeeLoginRequest', fields={'employee_id': serializers.CharField(), 'password': serializers.CharField()}), responses={200: UserDetailSerializer})
     def post(self, request, *args, **kwargs):
         employee_id = request.data.get('employee_id', '').strip()
         password = request.data.get('password', '')

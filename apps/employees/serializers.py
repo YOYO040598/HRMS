@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 from django.contrib.auth import get_user_model
 from apps.employees.models import (
     Employee, EmployeePersonalInfo, EmployeeAddress,
@@ -113,6 +114,7 @@ class EmployeeDetailSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
+    @extend_schema_field(serializers.CharField(allow_null=True))
     def get_manager_name(self, obj):
         if obj.manager:
             return obj.manager.user.full_name

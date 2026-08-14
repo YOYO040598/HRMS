@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 
 from apps.accounts.models import Role, UserRole
 
@@ -39,6 +40,22 @@ class UserListSerializer(serializers.ModelSerializer):
         fields = ['id', 'email', 'first_name', 'last_name', 'full_name', 'phone_number', 'role', 'is_active', 'date_joined']
 
 
+class RoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Role
+        fields = ['id', 'name', 'slug', 'description', 'is_active', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+
+class UserRoleSerializer(serializers.ModelSerializer):
+    role_name = serializers.CharField(source='role.name', read_only=True)
+
+    class Meta:
+        model = UserRole
+        fields = ['id', 'role', 'role_name', 'assigned_at']
+        read_only_fields = ['id', 'assigned_at']
+
+
 class UserDetailSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(read_only=True)
     roles = serializers.SerializerMethodField()
@@ -50,6 +67,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
             'phone_number', 'role', 'is_active', 'date_joined', 'updated_at', 'roles',
         ]
 
+    @extend_schema_field(UserRoleSerializer(many=True))
     def get_roles(self, obj):
         return UserRoleSerializer(obj.user_roles.all(), many=True).data
 
@@ -71,19 +89,3 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'email', 'first_name', 'last_name', 'full_name', 'phone_number', 'role', 'date_joined']
         read_only_fields = ['id', 'email', 'role', 'date_joined']
-
-
-class RoleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Role
-        fields = ['id', 'name', 'slug', 'description', 'is_active', 'created_at']
-        read_only_fields = ['id', 'created_at']
-
-
-class UserRoleSerializer(serializers.ModelSerializer):
-    role_name = serializers.CharField(source='role.name', read_only=True)
-
-    class Meta:
-        model = UserRole
-        fields = ['id', 'role', 'role_name', 'assigned_at']
-        read_only_fields = ['id', 'assigned_at']

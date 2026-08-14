@@ -1,5 +1,6 @@
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, serializers
 from rest_framework.permissions import IsAuthenticated
+from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiParameter
 
 from apps.leave_management.models import LeaveType, LeaveBalance, LeaveApplication, LeaveApproval, Holiday
 from apps.leave_management.serializers import (
@@ -99,7 +100,18 @@ class HolidayViewSet(ResponseMixin, viewsets.ModelViewSet):
 
 class ApplyLeaveView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = LeaveApplicationDetailSerializer
 
+    @extend_schema(
+        request=inline_serializer('ApplyLeaveRequest', fields={
+            'leave_type': serializers.UUIDField(),
+            'start_date': serializers.DateField(),
+            'end_date': serializers.DateField(),
+            'reason': serializers.CharField(required=False, default=''),
+            'is_emergency': serializers.BooleanField(required=False, default=False),
+        }),
+        responses={201: LeaveApplicationDetailSerializer}
+    )
     def post(self, request, *args, **kwargs):
         from datetime import date
         try:
@@ -132,7 +144,15 @@ class ApplyLeaveView(ResponseMixin, generics.GenericAPIView):
 
 class ApproveLeaveView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsManagerOrAbove]
+    serializer_class = LeaveApprovalSerializer
 
+    @extend_schema(
+        request=inline_serializer('ApproveLeaveRequest', fields={
+            'approval_id': serializers.UUIDField(),
+            'comments': serializers.CharField(required=False, default=''),
+        }),
+        responses={200: LeaveApprovalSerializer}
+    )
     def post(self, request, *args, **kwargs):
         approval_id = request.data.get('approval_id')
         comments = request.data.get('comments', '')
@@ -148,7 +168,15 @@ class ApproveLeaveView(ResponseMixin, generics.GenericAPIView):
 
 class RejectLeaveView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsManagerOrAbove]
+    serializer_class = LeaveApprovalSerializer
 
+    @extend_schema(
+        request=inline_serializer('RejectLeaveRequest', fields={
+            'approval_id': serializers.UUIDField(),
+            'comments': serializers.CharField(required=False, default=''),
+        }),
+        responses={200: LeaveApprovalSerializer}
+    )
     def post(self, request, *args, **kwargs):
         approval_id = request.data.get('approval_id')
         comments = request.data.get('comments', '')
@@ -165,6 +193,10 @@ class RejectLeaveView(ResponseMixin, generics.GenericAPIView):
 class LeaveBalanceSummaryView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        parameters=[OpenApiParameter('year', type=int, required=False)],
+        responses={200: inline_serializer('LeaveBalanceSummaryResponse', fields={'summary': serializers.ListField()})}
+    )
     def get(self, request, *args, **kwargs):
         try:
             employee = request.user.employee_profile
@@ -178,7 +210,10 @@ class LeaveBalanceSummaryView(ResponseMixin, generics.GenericAPIView):
 
 class PendingApprovalsView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsManagerOrAbove]
+    serializer_class = LeaveApprovalSerializer
+    queryset = LeaveApproval.objects.none()
 
+    @extend_schema(request=None, responses={200: LeaveApprovalSerializer(many=True)})
     def get(self, request, *args, **kwargs):
         approvals = get_pending_approvals(request.user)
         return self.success_response(
@@ -188,7 +223,13 @@ class PendingApprovalsView(ResponseMixin, generics.GenericAPIView):
 
 class LeaveHistoryView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = LeaveApplicationListSerializer
+    queryset = LeaveApplication.objects.none()
 
+    @extend_schema(
+        parameters=[OpenApiParameter('year', type=int, required=False)],
+        responses={200: LeaveApplicationListSerializer(many=True)}
+    )
     def get(self, request, *args, **kwargs):
         try:
             employee = request.user.employee_profile
@@ -204,7 +245,12 @@ class LeaveHistoryView(ResponseMixin, generics.GenericAPIView):
 
 class CancelLeaveView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = LeaveApplicationDetailSerializer
 
+    @extend_schema(
+        request=inline_serializer('CancelLeaveRequest', fields={'application_id': serializers.UUIDField()}),
+        responses={200: LeaveApplicationDetailSerializer}
+    )
     def post(self, request, *args, **kwargs):
         try:
             employee = request.user.employee_profile

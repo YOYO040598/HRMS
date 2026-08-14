@@ -1,7 +1,9 @@
 from django.http import HttpResponse
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
+from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 
 from apps.payroll.models import (
     SalaryStructure, Payroll, Allowance, Deduction, Reimbursement, Payslip, PayslipAuditLog,
@@ -119,7 +121,17 @@ class PayslipViewSet(ResponseMixin, viewsets.ModelViewSet):
 
 class GeneratePayrollView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsHROrAdmin]
+    serializer_class = PayrollDetailSerializer
 
+    @extend_schema(
+        request=inline_serializer('GeneratePayrollRequest', fields={
+            'employee_id': serializers.UUIDField(),
+            'month': serializers.IntegerField(),
+            'year': serializers.IntegerField(),
+            'salary_structure_id': serializers.UUIDField(required=False, allow_null=True),
+        }),
+        responses={201: PayrollDetailSerializer}
+    )
     def post(self, request, *args, **kwargs):
         from apps.employees.models import Employee
         employee_id = request.data.get('employee_id')
@@ -138,7 +150,12 @@ class GeneratePayrollView(ResponseMixin, generics.GenericAPIView):
 
 class ProcessPayrollView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsHROrAdmin]
+    serializer_class = PayrollDetailSerializer
 
+    @extend_schema(
+        request=inline_serializer('ProcessPayrollRequest', fields={'payroll_id': serializers.UUIDField()}),
+        responses={200: PayrollDetailSerializer}
+    )
     def post(self, request, *args, **kwargs):
         payroll_id = request.data.get('payroll_id')
         payroll, success, message = process_payroll(payroll_id, request.user)
@@ -149,7 +166,12 @@ class ProcessPayrollView(ResponseMixin, generics.GenericAPIView):
 
 class ApprovePayrollView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsHROrAdmin]
+    serializer_class = PayrollDetailSerializer
 
+    @extend_schema(
+        request=inline_serializer('ApprovePayrollRequest', fields={'payroll_id': serializers.UUIDField()}),
+        responses={200: PayrollDetailSerializer}
+    )
     def post(self, request, *args, **kwargs):
         payroll_id = request.data.get('payroll_id')
         payroll, success, message = approve_payroll(payroll_id)
@@ -160,7 +182,16 @@ class ApprovePayrollView(ResponseMixin, generics.GenericAPIView):
 
 class MarkPayrollPaidView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsHROrAdmin]
+    serializer_class = PayrollDetailSerializer
 
+    @extend_schema(
+        request=inline_serializer('MarkPayrollPaidRequest', fields={
+            'payroll_id': serializers.UUIDField(),
+            'payment_method': serializers.CharField(required=False, default=''),
+            'transaction_id': serializers.CharField(required=False, default=''),
+        }),
+        responses={200: PayrollDetailSerializer}
+    )
     def post(self, request, *args, **kwargs):
         payroll_id = request.data.get('payroll_id')
         payment_method = request.data.get('payment_method', '')
@@ -174,6 +205,10 @@ class MarkPayrollPaidView(ResponseMixin, generics.GenericAPIView):
 class PayrollSummaryView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        parameters=[OpenApiParameter('year', type=int, required=False)],
+        responses={200: inline_serializer('PayrollSummaryResponse', fields={'summary': serializers.DictField()})}
+    )
     def get(self, request, *args, **kwargs):
         try:
             employee = request.user.employee_profile
@@ -186,7 +221,15 @@ class PayrollSummaryView(ResponseMixin, generics.GenericAPIView):
 
 class ApproveReimbursementView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsHROrAdmin]
+    serializer_class = ReimbursementSerializer
 
+    @extend_schema(
+        request=inline_serializer('ApproveReimbursementRequest', fields={
+            'reimbursement_id': serializers.UUIDField(),
+            'comments': serializers.CharField(required=False, default=''),
+        }),
+        responses={200: ReimbursementSerializer}
+    )
     def post(self, request, *args, **kwargs):
         reimbursement_id = request.data.get('reimbursement_id')
         if not reimbursement_id:
@@ -199,7 +242,15 @@ class ApproveReimbursementView(ResponseMixin, generics.GenericAPIView):
 
 class RejectReimbursementView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsHROrAdmin]
+    serializer_class = ReimbursementSerializer
 
+    @extend_schema(
+        request=inline_serializer('RejectReimbursementRequest', fields={
+            'reimbursement_id': serializers.UUIDField(),
+            'comments': serializers.CharField(required=False, default=''),
+        }),
+        responses={200: ReimbursementSerializer}
+    )
     def post(self, request, *args, **kwargs):
         reimbursement_id = request.data.get('reimbursement_id')
         if not reimbursement_id:
@@ -212,7 +263,16 @@ class RejectReimbursementView(ResponseMixin, generics.GenericAPIView):
 
 class EmployeePayrollView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = PayrollDetailSerializer
+    queryset = Payroll.objects.none()
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter('month', type=int, required=False),
+            OpenApiParameter('year', type=int, required=False),
+        ],
+        responses={200: PayrollDetailSerializer(many=True)}
+    )
     def get(self, request, *args, **kwargs):
         try:
             employee = request.user.employee_profile
@@ -234,6 +294,14 @@ class EmployeePayrollView(ResponseMixin, generics.GenericAPIView):
 class BulkGeneratePayrollView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsHROrAdmin]
 
+    @extend_schema(
+        request=inline_serializer('BulkGeneratePayrollRequest', fields={
+            'month': serializers.IntegerField(),
+            'year': serializers.IntegerField(),
+            'salary_structure_id': serializers.UUIDField(required=False, allow_null=True),
+        }),
+        responses={200: inline_serializer('BulkGeneratePayrollResponse', fields={'created': serializers.IntegerField(), 'skipped': serializers.IntegerField()})}
+    )
     def post(self, request, *args, **kwargs):
         month = request.data.get('month')
         year = request.data.get('year')
@@ -247,6 +315,10 @@ class BulkGeneratePayrollView(ResponseMixin, generics.GenericAPIView):
 class DownloadPayslipView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        parameters=[OpenApiParameter('password_protected', type=bool, required=False)],
+        responses={(200, 'application/pdf'): OpenApiTypes.BINARY}
+    )
     def get(self, request, payslip_id, *args, **kwargs):
         try:
             employee = request.user.employee_profile
@@ -298,6 +370,7 @@ class DownloadPayslipView(ResponseMixin, generics.GenericAPIView):
 class AdminPayslipDownloadView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsHROrAdmin]
 
+    @extend_schema(responses={(200, 'application/pdf'): OpenApiTypes.BINARY})
     def get(self, request, payslip_id, *args, **kwargs):
         try:
             payslip = Payslip.objects.get(id=payslip_id)
@@ -328,7 +401,19 @@ class AdminPayslipDownloadView(ResponseMixin, generics.GenericAPIView):
 
 class GeneratePayslipView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsHROrAdmin]
+    serializer_class = PayslipDetailSerializer
 
+    @extend_schema(
+        request=inline_serializer('GeneratePayslipRequest', fields={
+            'employee_id': serializers.CharField(),
+            'month': serializers.IntegerField(),
+            'year': serializers.IntegerField(),
+            'earnings': serializers.ListField(required=False, default=list),
+            'deductions': serializers.ListField(required=False, default=list),
+            'notes': serializers.CharField(required=False, default=''),
+        }),
+        responses={201: PayslipDetailSerializer}
+    )
     def post(self, request, *args, **kwargs):
         from apps.employees.models import Employee
         employee_id = request.data.get('employee_id')
@@ -358,7 +443,17 @@ class GeneratePayslipView(ResponseMixin, generics.GenericAPIView):
 class UploadPayslipView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsHROrAdmin]
     parser_classes = [MultiPartParser, FormParser]
+    serializer_class = PayslipDetailSerializer
 
+    @extend_schema(
+        request=inline_serializer('UploadPayslipRequest', fields={
+            'employee_id': serializers.CharField(),
+            'month': serializers.IntegerField(),
+            'year': serializers.IntegerField(),
+            'pdf_file': serializers.FileField(),
+        }),
+        responses={200: PayslipDetailSerializer}
+    )
     def post(self, request, *args, **kwargs):
         from apps.employees.models import Employee
         employee_id = request.data.get('employee_id')
@@ -382,7 +477,12 @@ class UploadPayslipView(ResponseMixin, generics.GenericAPIView):
 
 class PublishPayslipView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsHROrAdmin]
+    serializer_class = PayslipDetailSerializer
 
+    @extend_schema(
+        request=inline_serializer('PublishPayslipRequest', fields={'payslip_id': serializers.UUIDField()}),
+        responses={200: PayslipDetailSerializer}
+    )
     def post(self, request, *args, **kwargs):
         payslip_id = request.data.get('payslip_id')
         if not payslip_id:
@@ -396,7 +496,16 @@ class PublishPayslipView(ResponseMixin, generics.GenericAPIView):
 
 class EmployeePayslipListView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = PayslipDetailSerializer
+    queryset = Payslip.objects.none()
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter('month', type=int, required=False),
+            OpenApiParameter('year', type=int, required=False),
+        ],
+        responses={200: PayslipDetailSerializer(many=True)}
+    )
     def get(self, request, *args, **kwargs):
         # Auto-publish scheduled payslips first
         try:
@@ -442,6 +551,14 @@ class BulkUploadPayslipView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsHROrAdmin]
     parser_classes = [MultiPartParser, FormParser]
 
+    @extend_schema(
+        request=inline_serializer('BulkUploadPayslipRequest', fields={
+            'month': serializers.IntegerField(),
+            'year': serializers.IntegerField(),
+            'file': serializers.FileField(),
+        }),
+        responses={200: inline_serializer('BulkUploadPayslipResponse', fields={'results': serializers.ListField()})}
+    )
     def post(self, request, *args, **kwargs):
         month = request.data.get('month')
         year = request.data.get('year')
@@ -471,6 +588,14 @@ class BulkUploadPayslipView(ResponseMixin, generics.GenericAPIView):
 class BulkConfirmPayslipView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsHROrAdmin]
 
+    @extend_schema(
+        request=inline_serializer('BulkConfirmPayslipRequest', fields={
+            'payslip_ids': serializers.ListField(child=serializers.UUIDField()),
+            'action': serializers.CharField(required=False, default='publish'),
+            'publish_at': serializers.DateTimeField(required=False, allow_null=True),
+        }),
+        responses={200: inline_serializer('BulkConfirmPayslipResponse', fields={'message': serializers.CharField()})}
+    )
     def post(self, request, *args, **kwargs):
         payslip_ids = request.data.get('payslip_ids', [])
         action = request.data.get('action', 'publish')  # 'publish', 'draft', 'delete'
@@ -560,6 +685,10 @@ from rest_framework.views import APIView
 class EmployeeSalaryPreviewView(ResponseMixin, APIView):
     permission_classes = [IsHROrAdmin]
 
+    @extend_schema(
+        parameters=[OpenApiParameter('employee_id', type=str, required=True)],
+        responses={200: inline_serializer('EmployeeSalaryPreviewResponse', fields={'earnings': serializers.ListField(), 'deductions': serializers.ListField()})}
+    )
     def get(self, request, *args, **kwargs):
         employee_id = request.query_params.get('employee_id')
         if not employee_id:

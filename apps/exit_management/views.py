@@ -1,5 +1,6 @@
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, serializers
 from rest_framework.permissions import IsAuthenticated
+from drf_spectacular.utils import extend_schema, inline_serializer
 
 from apps.exit_management.models import Resignation, ExitApproval, FullAndFinal, ExperienceLetter
 from apps.exit_management.serializers import (
@@ -82,7 +83,18 @@ class ExperienceLetterViewSet(ResponseMixin, viewsets.ModelViewSet):
 
 class ApplyResignationView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = ResignationDetailSerializer
 
+    @extend_schema(
+        request=inline_serializer('ApplyResignationRequest', fields={
+            'employee_id': serializers.UUIDField(required=False),
+            'last_working_day': serializers.DateField(),
+            'reason': serializers.CharField(required=False, default=''),
+            'notice_period_days': serializers.IntegerField(required=False, default=30),
+            'force_exit': serializers.BooleanField(required=False, default=False),
+        }),
+        responses={201: ResignationDetailSerializer}
+    )
     def post(self, request, *args, **kwargs):
         from django.utils.dateparse import parse_date
         from apps.employees.models import Employee
@@ -129,7 +141,16 @@ class ApplyResignationView(ResponseMixin, generics.GenericAPIView):
 
 class ApproveResignationView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsManagerOrAbove]
+    serializer_class = ExitApprovalSerializer
 
+    @extend_schema(
+        request=inline_serializer('ApproveResignationRequest', fields={
+            'approval_id': serializers.UUIDField(required=False),
+            'resignation_id': serializers.UUIDField(required=False),
+            'comments': serializers.CharField(required=False, default=''),
+        }),
+        responses={200: ExitApprovalSerializer}
+    )
     def post(self, request, *args, **kwargs):
         from django.utils import timezone
         approval_id = request.data.get('approval_id')
@@ -175,7 +196,16 @@ class ApproveResignationView(ResponseMixin, generics.GenericAPIView):
 
 class RejectResignationView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsManagerOrAbove]
+    serializer_class = ExitApprovalSerializer
 
+    @extend_schema(
+        request=inline_serializer('RejectResignationRequest', fields={
+            'approval_id': serializers.UUIDField(required=False),
+            'resignation_id': serializers.UUIDField(required=False),
+            'comments': serializers.CharField(required=False, default=''),
+        }),
+        responses={200: ExitApprovalSerializer}
+    )
     def post(self, request, *args, **kwargs):
         from django.utils import timezone
         approval_id = request.data.get('approval_id')
@@ -219,7 +249,14 @@ class RejectResignationView(ResponseMixin, generics.GenericAPIView):
 
 class RelieveEmployeeView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsHROrAdmin]
+    serializer_class = ResignationDetailSerializer
 
+    @extend_schema(
+        request=inline_serializer('RelieveEmployeeRequest', fields={
+            'resignation_id': serializers.UUIDField(),
+        }),
+        responses={200: ResignationDetailSerializer}
+    )
     def post(self, request, *args, **kwargs):
         resignation_id = request.data.get('resignation_id')
 
@@ -234,7 +271,15 @@ class RelieveEmployeeView(ResponseMixin, generics.GenericAPIView):
 
 class GenerateExperienceLetterView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsHROrAdmin]
+    serializer_class = ExperienceLetterSerializer
 
+    @extend_schema(
+        request=inline_serializer('GenerateExperienceLetterRequest', fields={
+            'employee_id': serializers.UUIDField(),
+            'content': serializers.CharField(required=False, default=''),
+        }),
+        responses={201: ExperienceLetterSerializer}
+    )
     def post(self, request, *args, **kwargs):
         from apps.employees.models import Employee
         employee_id = request.data.get('employee_id')
@@ -254,7 +299,14 @@ class GenerateExperienceLetterView(ResponseMixin, generics.GenericAPIView):
 
 class InitiateFnFView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsHROrAdmin]
+    serializer_class = FullAndFinalSerializer
 
+    @extend_schema(
+        request=inline_serializer('InitiateFnFRequest', fields={
+            'resignation_id': serializers.UUIDField(),
+        }),
+        responses={201: FullAndFinalSerializer}
+    )
     def post(self, request, *args, **kwargs):
         resignation_id = request.data.get('resignation_id')
         if not resignation_id:
@@ -274,7 +326,15 @@ class InitiateFnFView(ResponseMixin, generics.GenericAPIView):
 
 class CompleteFnFView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsHROrAdmin]
+    serializer_class = FullAndFinalSerializer
 
+    @extend_schema(
+        request=inline_serializer('CompleteFnFRequest', fields={
+            'fnf_id': serializers.UUIDField(),
+            'final_amount': serializers.DecimalField(max_digits=12, decimal_places=2, required=False, default=0),
+        }),
+        responses={200: FullAndFinalSerializer}
+    )
     def post(self, request, *args, **kwargs):
         fnf_id = request.data.get('fnf_id')
         final_amount = request.data.get('final_amount', 0)

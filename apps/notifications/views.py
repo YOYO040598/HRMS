@@ -1,7 +1,8 @@
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from drf_spectacular.utils import extend_schema, inline_serializer
 
 from apps.notifications.models import Notification, NotificationTemplate, NotificationPreference
 from apps.notifications.serializers import (
@@ -56,6 +57,7 @@ class NotificationPreferenceViewSet(ResponseMixin, generics.RetrieveUpdateAPIVie
 class MarkAllReadView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(request=None, responses={200: inline_serializer('MarkAllReadResponse', fields={'updated': serializers.IntegerField()})})
     def post(self, request, *args, **kwargs):
         from apps.notifications.services import mark_all_read
         updated = mark_all_read(request.user)
@@ -65,6 +67,7 @@ class MarkAllReadView(ResponseMixin, generics.GenericAPIView):
 class UnreadCountView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(request=None, responses={200: inline_serializer('UnreadCountResponse', fields={'unread_count': serializers.IntegerField()})})
     def get(self, request, *args, **kwargs):
         from apps.notifications.services import get_unread_count
         count = get_unread_count(request.user)

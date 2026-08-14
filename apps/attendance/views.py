@@ -1,6 +1,7 @@
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, serializers
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
+from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiParameter
 
 from apps.attendance.models import Attendance, AttendanceBreak, AttendanceLog, AttendanceApproval
 from apps.attendance.serializers import (
@@ -53,7 +54,9 @@ class AttendanceViewSet(ResponseMixin, viewsets.ModelViewSet):
 
 class CheckInView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = AttendanceDetailSerializer
 
+    @extend_schema(request=None, responses={201: AttendanceDetailSerializer})
     def post(self, request, *args, **kwargs):
         try:
             employee = request.user.employee_profile
@@ -75,7 +78,9 @@ class CheckInView(ResponseMixin, generics.GenericAPIView):
 
 class CheckOutView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = AttendanceDetailSerializer
 
+    @extend_schema(request=None, responses={200: AttendanceDetailSerializer})
     def post(self, request, *args, **kwargs):
         try:
             employee = request.user.employee_profile
@@ -118,7 +123,14 @@ class AttendanceApprovalViewSet(ResponseMixin, viewsets.ModelViewSet):
 
 class MonthlyAttendanceView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = AttendanceListSerializer
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter('year', type=int, required=False),
+            OpenApiParameter('month', type=int, required=False),
+        ]
+    )
     def get(self, request, *args, **kwargs):
         try:
             employee = request.user.employee_profile
@@ -139,7 +151,15 @@ class MonthlyAttendanceView(ResponseMixin, generics.GenericAPIView):
 
 class ApproveAttendanceView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsManagerOrAbove]
+    serializer_class = AttendanceDetailSerializer
 
+    @extend_schema(
+        request=inline_serializer('ApproveAttendanceRequest', fields={
+            'attendance_id': serializers.UUIDField(),
+            'comments': serializers.CharField(required=False, default=''),
+        }),
+        responses={200: AttendanceDetailSerializer}
+    )
     def post(self, request, *args, **kwargs):
         attendance_id = request.data.get('attendance_id')
         try:
@@ -155,7 +175,15 @@ class ApproveAttendanceView(ResponseMixin, generics.GenericAPIView):
 
 class StartBreakView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = AttendanceBreakSerializer
 
+    @extend_schema(
+        request=inline_serializer('StartBreakRequest', fields={
+            'break_type': serializers.CharField(required=False, default='LUNCH'),
+            'notes': serializers.CharField(required=False, default=''),
+        }),
+        responses={201: AttendanceBreakSerializer}
+    )
     def post(self, request, *args, **kwargs):
         try:
             employee = request.user.employee_profile
@@ -182,7 +210,9 @@ class StartBreakView(ResponseMixin, generics.GenericAPIView):
 
 class EndBreakView(ResponseMixin, generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = AttendanceBreakSerializer
 
+    @extend_schema(request=None, responses={200: AttendanceBreakSerializer})
     def post(self, request, *args, **kwargs):
         try:
             employee = request.user.employee_profile

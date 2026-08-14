@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 from apps.payroll.models import (
     SalaryStructure, Payroll, Allowance, Deduction, Reimbursement,
     Payslip, PayslipEarning, PayslipDeduction, PayslipAuditLog,
@@ -72,11 +73,13 @@ class PayslipListSerializer(serializers.ModelSerializer):
             'has_pdf', 'pdf_file',
         ]
 
+    @extend_schema_field(serializers.CharField(allow_null=True))
     def get_generated_by_name(self, obj):
         if obj.generated_by:
             return obj.generated_by.full_name
         return None
 
+    @extend_schema_field(serializers.BooleanField())
     def get_has_pdf(self, obj):
         return bool(obj.pdf_file)
 
@@ -101,21 +104,25 @@ class PayslipDetailSerializer(serializers.ModelSerializer):
             'notes', 'earnings', 'payslip_deductions', 'has_pdf', 'pdf_file',
         ]
 
+    @extend_schema_field(serializers.CharField())
     def get_department_name(self, obj):
         if obj.employee and obj.employee.department:
             return obj.employee.department.name
         return 'N/A'
 
+    @extend_schema_field(serializers.CharField())
     def get_designation_name(self, obj):
         if obj.employee and obj.employee.designation:
             return obj.employee.designation.name
         return 'N/A'
 
+    @extend_schema_field(serializers.CharField(allow_null=True))
     def get_generated_by_name(self, obj):
         if obj.generated_by:
             return obj.generated_by.full_name
         return None
 
+    @extend_schema_field(serializers.BooleanField())
     def get_has_pdf(self, obj):
         return bool(obj.pdf_file)
 
@@ -151,6 +158,7 @@ class PayrollDetailSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'created_at']
 
+    @extend_schema_field(serializers.CharField(allow_null=True))
     def get_processed_by_name(self, obj):
         if obj.processed_by:
             return obj.processed_by.full_name
@@ -171,6 +179,7 @@ class PayslipAuditLogSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'timestamp']
 
+    @extend_schema_field(serializers.CharField())
     def get_payslip_period(self, obj):
         if obj.payslip:
             from apps.payroll.services import MONTH_NAMES

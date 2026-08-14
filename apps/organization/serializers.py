@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 from apps.organization.models import Company, Department, Designation, Team, Location
 
 
@@ -27,6 +28,7 @@ class DepartmentSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'employee_count', 'created_at']
 
+    @extend_schema_field(serializers.CharField(allow_null=True))
     def get_head_name(self, obj):
         if obj.head:
             return obj.head.user.full_name
@@ -59,6 +61,7 @@ class TeamSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'member_count', 'created_at']
 
+    @extend_schema_field(serializers.CharField(allow_null=True))
     def get_lead_name(self, obj):
         if obj.lead:
             return obj.lead.user.full_name
