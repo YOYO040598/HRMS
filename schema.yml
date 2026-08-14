@@ -55,13 +55,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EmployeeLoginRequestRequest'
+              $ref: '#/components/schemas/UserLoginRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/EmployeeLoginRequestRequest'
+              $ref: '#/components/schemas/UserLoginRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/EmployeeLoginRequestRequest'
+              $ref: '#/components/schemas/UserLoginRequest'
         required: true
       security:
       - jwtAuth: []
@@ -71,7 +71,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserDetail'
+                $ref: '#/components/schemas/UserLogin'
           description: ''
   /api/accounts/login/:
     post:
@@ -9813,7 +9813,7 @@ components:
           type: string
           maxLength: 50
         category:
-          $ref: '#/components/schemas/AssetCategoryEnum'
+          $ref: '#/components/schemas/CategoryEnum'
         description:
           type: string
         brand:
@@ -10078,7 +10078,7 @@ components:
           minLength: 1
           maxLength: 50
         category:
-          $ref: '#/components/schemas/AssetCategoryEnum'
+          $ref: '#/components/schemas/CategoryEnum'
         description:
           type: string
         brand:
@@ -10439,7 +10439,7 @@ components:
           type: string
           format: date
         status:
-          $ref: '#/components/schemas/AttendanceStatusEnum'
+          $ref: '#/components/schemas/Status6bfEnum'
         check_in:
           type: string
           format: date-time
@@ -10503,7 +10503,7 @@ components:
           type: string
           format: date
         status:
-          $ref: '#/components/schemas/AttendanceStatusEnum'
+          $ref: '#/components/schemas/Status6bfEnum'
         check_in:
           type: string
           format: date-time
@@ -10551,7 +10551,7 @@ components:
           type: string
           format: date
         status:
-          $ref: '#/components/schemas/AttendanceStatusEnum'
+          $ref: '#/components/schemas/Status6bfEnum'
         check_in:
           type: string
           format: date-time
@@ -10647,24 +10647,6 @@ components:
       required:
       - action
       - employee
-    AttendanceStatusEnum:
-      enum:
-      - PRESENT
-      - ABSENT
-      - HALF_DAY
-      - LATE
-      - WFH
-      - HOLIDAY
-      - LEAVE
-      type: string
-      description: |-
-        * `PRESENT` - Present
-        * `ABSENT` - Absent
-        * `HALF_DAY` - Half Day
-        * `LATE` - Late Mark
-        * `WFH` - Work From Home
-        * `HOLIDAY` - Holiday
-        * `LEAVE` - Leave
     AttendanceTrendResponse:
       type: object
       properties:
@@ -10769,6 +10751,22 @@ components:
           format: uuid
       required:
       - application_id
+    CategoryEnum:
+      enum:
+      - LAPTOP
+      - DESKTOP
+      - MOBILE
+      - SIM_CARD
+      - ID_CARD
+      - ACCESSORIES
+      type: string
+      description: |-
+        * `LAPTOP` - Laptop
+        * `DESKTOP` - Desktop
+        * `MOBILE` - Mobile
+        * `SIM_CARD` - SIM Card
+        * `ID_CARD` - ID Card
+        * `ACCESSORIES` - Accessories
     ChangePasswordRequest:
       type: object
       properties:
@@ -12129,18 +12127,6 @@ components:
       - id
       - user
       - user_full_name
-    EmployeeLoginRequestRequest:
-      type: object
-      properties:
-        employee_id:
-          type: string
-          minLength: 1
-        password:
-          type: string
-          minLength: 1
-      required:
-      - employee_id
-      - password
     EmployeePersonalInfo:
       type: object
       properties:
@@ -12799,7 +12785,7 @@ components:
         reason:
           type: string
         status:
-          $ref: '#/components/schemas/LeaveApplicationStatusEnum'
+          $ref: '#/components/schemas/StatusA03Enum'
         applied_at:
           type: string
           format: date-time
@@ -12864,7 +12850,7 @@ components:
           type: string
           minLength: 1
         status:
-          $ref: '#/components/schemas/LeaveApplicationStatusEnum'
+          $ref: '#/components/schemas/StatusA03Enum'
         reviewed_by:
           type: string
           format: uuid
@@ -12923,7 +12909,7 @@ components:
         reason:
           type: string
         status:
-          $ref: '#/components/schemas/LeaveApplicationStatusEnum'
+          $ref: '#/components/schemas/StatusA03Enum'
         is_emergency:
           type: boolean
         applied_at:
@@ -12956,20 +12942,6 @@ components:
       - reviewed_by_name
       - start_date
       - total_days
-    LeaveApplicationStatusEnum:
-      enum:
-      - DRAFT
-      - PENDING
-      - APPROVED
-      - REJECTED
-      - CANCELLED
-      type: string
-      description: |-
-        * `DRAFT` - Draft
-        * `PENDING` - Pending
-        * `APPROVED` - Approved
-        * `REJECTED` - Rejected
-        * `CANCELLED` - Cancelled
     LeaveApproval:
       type: object
       properties:
@@ -14699,7 +14671,7 @@ components:
           minLength: 1
           maxLength: 50
         category:
-          $ref: '#/components/schemas/AssetCategoryEnum'
+          $ref: '#/components/schemas/CategoryEnum'
         description:
           type: string
         brand:
@@ -14825,7 +14797,7 @@ components:
           type: string
           format: date
         status:
-          $ref: '#/components/schemas/AttendanceStatusEnum'
+          $ref: '#/components/schemas/Status6bfEnum'
         check_in:
           type: string
           format: date-time
@@ -15474,7 +15446,7 @@ components:
           type: string
           minLength: 1
         status:
-          $ref: '#/components/schemas/LeaveApplicationStatusEnum'
+          $ref: '#/components/schemas/StatusA03Enum'
         reviewed_by:
           type: string
           format: uuid
@@ -15716,7 +15688,7 @@ components:
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
         status:
-          $ref: '#/components/schemas/PayrollStatusEnum'
+          $ref: '#/components/schemas/Status40aEnum'
         processed_by:
           type: string
           format: uuid
@@ -15845,7 +15817,7 @@ components:
           type: string
           minLength: 1
         status:
-          $ref: '#/components/schemas/ResignationStatusEnum'
+          $ref: '#/components/schemas/Status9a3Enum'
         notice_period_days:
           type: integer
           maximum: 9223372036854775807
@@ -16021,7 +15993,7 @@ components:
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
         status:
-          $ref: '#/components/schemas/PayrollStatusEnum'
+          $ref: '#/components/schemas/Status40aEnum'
         processed_by:
           type: string
           format: uuid
@@ -16107,7 +16079,7 @@ components:
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
         status:
-          $ref: '#/components/schemas/PayrollStatusEnum'
+          $ref: '#/components/schemas/Status40aEnum'
         processed_by:
           type: string
           format: uuid
@@ -16178,7 +16150,7 @@ components:
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
         status:
-          $ref: '#/components/schemas/PayrollStatusEnum'
+          $ref: '#/components/schemas/Status40aEnum'
         paid_date:
           type: string
           format: date
@@ -16193,20 +16165,6 @@ components:
       - month
       - net_salary
       - year
-    PayrollStatusEnum:
-      enum:
-      - DRAFT
-      - PROCESSING
-      - PROCESSED
-      - APPROVED
-      - PAID
-      type: string
-      description: |-
-        * `DRAFT` - Draft
-        * `PROCESSING` - Processing
-        * `PROCESSED` - Processed
-        * `APPROVED` - Approved
-        * `PAID` - Paid
     PayrollSummaryResponse:
       type: object
       properties:
@@ -16807,7 +16765,7 @@ components:
         reason:
           type: string
         status:
-          $ref: '#/components/schemas/ResignationStatusEnum'
+          $ref: '#/components/schemas/Status9a3Enum'
         notice_period_days:
           type: integer
           maximum: 9223372036854775807
@@ -16864,7 +16822,7 @@ components:
           type: string
           minLength: 1
         status:
-          $ref: '#/components/schemas/ResignationStatusEnum'
+          $ref: '#/components/schemas/Status9a3Enum'
         notice_period_days:
           type: integer
           maximum: 9223372036854775807
@@ -16910,7 +16868,7 @@ components:
           type: string
           format: date
         status:
-          $ref: '#/components/schemas/ResignationStatusEnum'
+          $ref: '#/components/schemas/Status9a3Enum'
         notice_period_days:
           type: integer
           maximum: 9223372036854775807
@@ -16929,22 +16887,6 @@ components:
       - employee_name
       - id
       - last_working_day
-    ResignationStatusEnum:
-      enum:
-      - DRAFT
-      - PENDING
-      - APPROVED
-      - REJECTED
-      - ACCEPTED
-      - CANCELLED
-      type: string
-      description: |-
-        * `DRAFT` - Draft
-        * `PENDING` - Pending
-        * `APPROVED` - Approved
-        * `REJECTED` - Rejected
-        * `ACCEPTED` - Accepted
-        * `CANCELLED` - Cancelled
     ReturnAssetRequestRequest:
       type: object
       properties:
@@ -17119,6 +17061,20 @@ components:
           type: string
           minLength: 1
           default: ''
+    Status40aEnum:
+      enum:
+      - DRAFT
+      - PROCESSING
+      - PROCESSED
+      - APPROVED
+      - PAID
+      type: string
+      description: |-
+        * `DRAFT` - Draft
+        * `PROCESSING` - Processing
+        * `PROCESSED` - Processed
+        * `APPROVED` - Approved
+        * `PAID` - Paid
     Status612Enum:
       enum:
       - ACTIVE
@@ -17131,6 +17087,54 @@ components:
         * `INACTIVE` - Inactive
         * `ON_NOTICE` - On Notice
         * `EXITED` - Exited
+    Status6bfEnum:
+      enum:
+      - PRESENT
+      - ABSENT
+      - HALF_DAY
+      - LATE
+      - WFH
+      - HOLIDAY
+      - LEAVE
+      type: string
+      description: |-
+        * `PRESENT` - Present
+        * `ABSENT` - Absent
+        * `HALF_DAY` - Half Day
+        * `LATE` - Late Mark
+        * `WFH` - Work From Home
+        * `HOLIDAY` - Holiday
+        * `LEAVE` - Leave
+    Status9a3Enum:
+      enum:
+      - DRAFT
+      - PENDING
+      - APPROVED
+      - REJECTED
+      - ACCEPTED
+      - CANCELLED
+      type: string
+      description: |-
+        * `DRAFT` - Draft
+        * `PENDING` - Pending
+        * `APPROVED` - Approved
+        * `REJECTED` - Rejected
+        * `ACCEPTED` - Accepted
+        * `CANCELLED` - Cancelled
+    StatusA03Enum:
+      enum:
+      - DRAFT
+      - PENDING
+      - APPROVED
+      - REJECTED
+      - CANCELLED
+      type: string
+      description: |-
+        * `DRAFT` - Draft
+        * `PENDING` - Pending
+        * `APPROVED` - Approved
+        * `REJECTED` - Rejected
+        * `CANCELLED` - Cancelled
     StatusD28Enum:
       enum:
       - DRAFT
@@ -17407,22 +17411,20 @@ components:
       properties:
         email:
           type: string
-          format: email
-      required:
-      - email
+        employee_id:
+          type: string
     UserLoginRequest:
       type: object
       properties:
         email:
           type: string
-          format: email
-          minLength: 1
+        employee_id:
+          type: string
         password:
           type: string
           writeOnly: true
           minLength: 1
       required:
-      - email
       - password
     UserProfile:
       type: object
