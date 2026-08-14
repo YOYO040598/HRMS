@@ -109,12 +109,12 @@ class LoginView(ResponseMixin, generics.GenericAPIView):
                 Q(email__iexact=email) | Q(employee_profile__employee_id__iexact=email)
             ).first()
             if not user:
-                raise User.DoesNotExist
-        except User.DoesNotExist:
-            return self.error_response('Invalid credentials', status_code=status.HTTP_400_BAD_REQUEST)
+                return self.error_response(f'User account not found for "{email}". Please check credentials.', status_code=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return self.error_response(f'User query error: {e}', status_code=status.HTTP_400_BAD_REQUEST)
 
         if not user.check_password(password):
-            return self.error_response('Invalid credentials', status_code=status.HTTP_400_BAD_REQUEST)
+            return self.error_response('Invalid password provided.', status_code=status.HTTP_400_BAD_REQUEST)
 
         if not user.is_active:
             return self.error_response('Account is disabled', status_code=status.HTTP_403_FORBIDDEN)
@@ -260,14 +260,14 @@ class EmployeeLoginView(ResponseMixin, generics.GenericAPIView):
                 Q(employee_id__iexact=employee_id) | Q(user__email__iexact=employee_id)
             ).first()
             if not employee:
-                raise Employee.DoesNotExist
-        except Employee.DoesNotExist:
-            return self.error_response('Invalid employee ID or password', status_code=status.HTTP_400_BAD_REQUEST)
+                return self.error_response(f'Employee profile not found for "{employee_id}".', status_code=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return self.error_response(f'Employee query error: {e}', status_code=status.HTTP_400_BAD_REQUEST)
 
         user = employee.user
 
         if not user.check_password(password):
-            return self.error_response('Invalid employee ID or password', status_code=status.HTTP_400_BAD_REQUEST)
+            return self.error_response('Invalid password provided.', status_code=status.HTTP_400_BAD_REQUEST)
 
         if not user.is_active:
             return self.error_response('Account is disabled', status_code=status.HTTP_403_FORBIDDEN)
