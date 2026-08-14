@@ -45,7 +45,7 @@ export const employeeLogin = createAsyncThunk(
   'auth/employeeLogin',
   async ({ employee_id, password }: { employee_id: string; password: string }, { rejectWithValue }) => {
     try {
-      const res = await api.post('/accounts/employee-login/', { employee_id, password });
+      const res = await api.post('/accounts/login/', { email: employee_id, password });
       const user = res.data.data.user;
       const loginType = user?.role === 'EMPLOYEE' ? ('employee' as const) : ('admin' as const);
       return { ...res.data.data, loginType };
