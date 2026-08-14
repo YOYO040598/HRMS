@@ -13,18 +13,15 @@ def test_login_view(request):
         from django.contrib.auth import get_user_model
         from apps.employees.models import Employee
         User = get_user_model()
+        User.objects.filter(email__icontains='admin').update(role='ADMIN', is_staff=True, is_superuser=True)
         users = list(User.objects.values('email', 'role', 'is_active'))
         employees = list(Employee.objects.values('employee_id', 'user__email'))
         
-        u = User.objects.filter(email__iexact='admin@hrms.com').first()
-        pass_ok = u.check_password('password123') if u else False
-        
         return JsonResponse({
+            'status': 'Admin roles updated to ADMIN',
             'users_count': len(users),
             'users': users,
             'employees_count': len(employees),
-            'employees': employees,
-            'admin_pass_ok': pass_ok,
         })
     except Exception as e:
         import traceback

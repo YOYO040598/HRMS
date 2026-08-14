@@ -3,23 +3,16 @@ import urllib.error
 import json
 
 test_accounts = [
-    ('admin1', 'admin1', 'Admin Tab / Admin Portal'),
-    ('admin1@hrms.com', 'admin12345!', 'Admin Tab / Admin Portal'),
-    ('empy1', 'employee1', 'Employee Tab / Employee Portal'),
-    ('empy1@hrms.com', 'employee12345!', 'Employee Tab / Employee Portal'),
-    ('admin@hrms.com', 'password123', 'Admin Tab / Admin Portal'),
-    ('employee@hrms.com', 'password123', 'Employee Tab / Employee Portal'),
-    ('hr@hrms.com', 'password123', 'Admin Tab / HR Portal'),
-    ('manager@hrms.com', 'password123', 'Admin Tab / Manager Portal'),
+    ('admin@hrms.com', 'HrmsAdmin@2026!', 'ADMIN'),
+    ('admin@hrms.com', 'admin12345!', 'ADMIN'),
+    ('admin@hrms.com', 'admin1', 'ADMIN'),
+    ('admin@hrms.com', 'password123', 'ADMIN'),
+    ('admin1@hrms.com', 'admin12345!', 'ADMIN'),
 ]
-
-print("==================================================")
-print("     LIVE RENDER SERVER AUTHENTICATION AUDIT      ")
-print("==================================================")
 
 url = 'https://hrms-1-onby.onrender.com/api/accounts/login/'
 
-for identifier, password, portal in test_accounts:
+for identifier, password, expected_role in test_accounts:
     data = json.dumps({'email': identifier, 'password': password}).encode('utf-8')
     headers = {'Content-Type': 'application/json'}
     req = urllib.request.Request(url, data=data, headers=headers)
@@ -27,11 +20,10 @@ for identifier, password, portal in test_accounts:
         res = urllib.request.urlopen(req)
         body = json.loads(res.read().decode('utf-8'))
         user_role = body.get('data', {}).get('user', {}).get('role', 'UNKNOWN')
-        print(f"[SUCCESS 200 OK] {identifier} / {password} | Role: {user_role} -> {portal}")
+        user_email = body.get('data', {}).get('user', {}).get('email', '')
+        print(f"[LIVE SUCCESS 200] ID: '{identifier}' | Pass: '{password}' | Returned Email: '{user_email}' | Returned Role: '{user_role}'")
     except urllib.error.HTTPError as e:
         err_body = e.read().decode('utf-8')
-        print(f"[FAILED {e.code}] {identifier} / {password} | Error: {err_body[:80]}")
+        print(f"[LIVE FAIL {e.code}] ID: '{identifier}' | Pass: '{password}' | Response Body: {err_body[:80]}")
     except Exception as e:
-        print(f"[EXCEPTION] {identifier} / {password} | Error: {e}")
-
-print("==================================================")
+        print(f"[LIVE EXCEPTION] ID: '{identifier}' | Error: {e}")
