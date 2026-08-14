@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.shortcuts import redirect
@@ -7,7 +7,14 @@ from django.http import HttpResponse, FileResponse
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 
-def root_redirect(request):
+def frontend_view(request):
+    frontend_index = settings.BASE_DIR / 'hrms-frontend' / 'dist' / 'index.html'
+    if frontend_index.exists():
+        try:
+            with open(frontend_index, 'r', encoding='utf-8') as f:
+                return HttpResponse(f.read(), content_type='text/html')
+        except Exception:
+            pass
     return redirect('/api/docs/')
 
 
@@ -26,7 +33,6 @@ def static_schema_view(request):
 
 
 urlpatterns = [
-    path('', root_redirect, name='root-redirect'),
     path('admin/', admin.site.urls),
     path('api/schema/', static_schema_view, name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
@@ -41,6 +47,7 @@ urlpatterns = [
     path('api/reports/', include('apps.reports.urls')),
     path('api/notifications/', include('apps.notifications.urls')),
     path('api/dashboard/', include('apps.dashboard.urls')),
+    re_path(r'^(?:(?!api|admin|static|media).)*$', frontend_view, name='frontend'),
 ]
 
 if settings.DEBUG:
