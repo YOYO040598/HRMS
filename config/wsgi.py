@@ -14,9 +14,10 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
 application = get_wsgi_application()
 
-# Run database migrations automatically on application startup
+# Run database migrations and seed default demo users automatically on application startup
 try:
     from django.core.management import call_command
     call_command('migrate', interactive=False)
+    call_command('seed_data')
 except Exception as e:
-    print(f"Startup migration status: {e}")
+    print(f"Startup migration/seed status: {e}")
