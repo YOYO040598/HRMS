@@ -61,10 +61,15 @@ class LeaveApplicationViewSet(ResponseMixin, viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
+        if getattr(self, 'swagger_fake_view', False) or not hasattr(self.request, 'user') or not self.request.user.is_authenticated:
+            return qs.none()
         user = self.request.user
-        if user.role in ['ADMIN', 'HR_ADMIN', 'HR_EXECUTIVE']:
+        role = getattr(user, 'role', None)
+        if role in ['ADMIN', 'HR_ADMIN', 'HR_EXECUTIVE']:
             return qs
-        return qs.filter(employee=user.employee_profile)
+        if hasattr(user, 'employee_profile'):
+            return qs.filter(employee=user.employee_profile)
+        return qs.none()
 
     def get_serializer_class(self):
         if self.action == 'list':

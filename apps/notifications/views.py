@@ -23,6 +23,8 @@ class NotificationViewSet(ResponseMixin, viewsets.ModelViewSet):
     filterset_fields = ['notification_type', 'is_read']
 
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False) or not hasattr(self.request, 'user') or not self.request.user.is_authenticated:
+            return Notification.objects.none()
         return Notification.objects.filter(user=self.request.user)
 
     @action(detail=True, methods=['post'], url_path='mark-as-read')

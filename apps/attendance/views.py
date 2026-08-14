@@ -28,10 +28,13 @@ class AttendanceViewSet(ResponseMixin, viewsets.ModelViewSet):
     ordering = ['-date']
 
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False) or not hasattr(self.request, 'user'):
+            return self.queryset.none()
         user = self.request.user
         if not user or not user.is_authenticated:
             return self.queryset.none()
-        if user.is_superuser or getattr(user, 'is_staff', False) or user.role in ['ADMIN', 'HR_ADMIN', 'HR_EXECUTIVE']:
+        role = getattr(user, 'role', None)
+        if getattr(user, 'is_superuser', False) or getattr(user, 'is_staff', False) or role in ['ADMIN', 'HR_ADMIN', 'HR_EXECUTIVE']:
             return self.queryset
         try:
             employee = user.employee_profile

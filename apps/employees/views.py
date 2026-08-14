@@ -95,8 +95,11 @@ class EmployeeDocumentViewSet(ResponseMixin, viewsets.ModelViewSet):
     filterset_fields = ['employee', 'document_type']
 
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False) or not hasattr(self.request, 'user') or not self.request.user.is_authenticated:
+            return EmployeeDocuments.objects.none()
         user = self.request.user
-        if user.is_staff or user.role in ['ADMIN', 'HR_ADMIN', 'HR_EXECUTIVE']:
+        role = getattr(user, 'role', None)
+        if getattr(user, 'is_staff', False) or role in ['ADMIN', 'HR_ADMIN', 'HR_EXECUTIVE']:
             return EmployeeDocuments.objects.all()
         if hasattr(user, 'employee_profile'):
             return EmployeeDocuments.objects.filter(employee=user.employee_profile)
@@ -104,7 +107,8 @@ class EmployeeDocumentViewSet(ResponseMixin, viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         user = self.request.user
-        if not (user.is_staff or user.role in ['ADMIN', 'HR_ADMIN', 'HR_EXECUTIVE']):
+        role = getattr(user, 'role', None)
+        if not (getattr(user, 'is_staff', False) or role in ['ADMIN', 'HR_ADMIN', 'HR_EXECUTIVE']):
             if hasattr(user, 'employee_profile'):
                 serializer.save(employee=user.employee_profile)
                 return
