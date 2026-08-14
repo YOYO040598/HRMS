@@ -56,34 +56,40 @@ def ensure_demo_users():
             {'email': 'employee@hrms.com', 'first_name': 'John', 'last_name': 'Doe', 'role': 'EMPLOYEE', 'emp_id': 'EMP004', 'is_staff': False, 'is_superuser': False},
         ]
         for item in demo_list:
-            u, created = User.objects.get_or_create(
-                email=item['email'],
-                defaults={
-                    'first_name': item['first_name'],
-                    'last_name': item['last_name'],
-                    'role': item['role'],
-                    'is_staff': item['is_staff'],
-                    'is_superuser': item['is_superuser'],
-                    'is_active': True,
-                }
-            )
-            if created or not u.check_password('password123'):
-                u.set_password('password123')
-                u.save()
-            Employee.objects.get_or_create(
-                user=u,
-                defaults={
-                    'company': company,
-                    'employee_id': item['emp_id'],
-                    'department': dept,
-                    'designation': desig,
-                    'employment_type': 'FULL_TIME',
-                    'status': 'ACTIVE',
-                    'date_of_joining': '2024-01-01',
-                }
-            )
-    except Exception:
-        pass
+            u = User.objects.filter(email__iexact=item['email']).first()
+            if not u:
+                u = User.objects.create(
+                    email=item['email'],
+                    first_name=item['first_name'],
+                    last_name=item['last_name'],
+                    role=item['role'],
+                    is_staff=item['is_staff'],
+                    is_superuser=item['is_superuser'],
+                    is_active=True,
+                )
+            u.set_password('password123')
+            u.is_active = True
+            u.save()
+
+            emp = Employee.objects.filter(user=u).first() or Employee.objects.filter(employee_id__iexact=item['emp_id']).first()
+            if not emp:
+                Employee.objects.create(
+                    user=u,
+                    company=company,
+                    employee_id=item['emp_id'],
+                    department=dept,
+                    designation=desig,
+                    employment_type='FULL_TIME',
+                    status='ACTIVE',
+                    date_of_joining='2024-01-01',
+                )
+            else:
+                emp.user = u
+                emp.employee_id = item['emp_id']
+                emp.company = company
+                emp.save()
+    except Exception as e:
+        print(f"[DEMO USER ERROR]: {e}")
 
 
 class LoginView(ResponseMixin, generics.GenericAPIView):
