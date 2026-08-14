@@ -37,6 +37,14 @@ from pathlib import Path
 
 
 def frontend_view(request):
+    def spa_fallback(request, path=''):
+        index_path = settings.BASE_DIR / 'hrms-frontend' / 'dist' / 'index.html'
+        if index_path.exists():
+            response = FileResponse(open(index_path, 'rb'))
+            response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+            return response
+        return HttpResponse("Frontend index.html not found.", status=404)
+    
     possible_paths = [
         Path(settings.BASE_DIR) / 'hrms-frontend' / 'dist' / 'index.html',
         Path(settings.BASE_DIR) / 'staticfiles' / 'index.html',
@@ -49,7 +57,9 @@ def frontend_view(request):
         if p.exists():
             try:
                 with open(p, 'r', encoding='utf-8') as f:
-                    return HttpResponse(f.read(), content_type='text/html')
+                    res = HttpResponse(f.read(), content_type='text/html')
+                    res['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+                    return res
             except Exception as e:
                 print(f"Error reading frontend index at {p}: {e}")
         else:
