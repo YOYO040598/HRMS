@@ -52,7 +52,12 @@ class LoginView(ResponseMixin, generics.GenericAPIView):
         password = serializer.validated_data['password']
 
         try:
-            user = User.objects.get(email=email)
+            from django.db.models import Q
+            user = User.objects.filter(
+                Q(email__iexact=email) | Q(employee_profile__employee_id__iexact=email)
+            ).first()
+            if not user:
+                raise User.DoesNotExist
         except User.DoesNotExist:
             return self.error_response('Invalid credentials', status_code=status.HTTP_400_BAD_REQUEST)
 
@@ -197,7 +202,12 @@ class EmployeeLoginView(ResponseMixin, generics.GenericAPIView):
 
         try:
             from apps.employees.models import Employee
-            employee = Employee.objects.select_related('user').get(employee_id=employee_id)
+            from django.db.models import Q
+            employee = Employee.objects.select_related('user').filter(
+                Q(employee_id__iexact=employee_id) | Q(user__email__iexact=employee_id)
+            ).first()
+            if not employee:
+                raise Employee.DoesNotExist
         except Employee.DoesNotExist:
             return self.error_response('Invalid employee ID or password', status_code=status.HTTP_400_BAD_REQUEST)
 
