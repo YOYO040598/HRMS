@@ -7,11 +7,17 @@ from django.http import HttpResponse, FileResponse
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 
+import os
 from pathlib import Path
 
 
 def frontend_view(request):
+    cwd = Path(os.getcwd())
     possible_paths = [
+        cwd / 'hrms-frontend' / 'dist' / 'index.html',
+        cwd / 'staticfiles' / 'index.html',
+        Path('/opt/render/project/src/hrms-frontend/dist/index.html'),
+        Path('/opt/render/project/src/staticfiles/index.html'),
         Path('/app/hrms-frontend/dist/index.html'),
         Path('/app/staticfiles/index.html'),
         settings.BASE_DIR / 'hrms-frontend' / 'dist' / 'index.html',
