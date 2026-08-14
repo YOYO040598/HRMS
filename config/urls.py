@@ -3,7 +3,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.shortcuts import redirect
-from django.http import FileResponse
+from django.http import HttpResponse, FileResponse
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 
@@ -14,7 +14,14 @@ def root_redirect(request):
 def static_schema_view(request):
     schema_path = settings.BASE_DIR / 'schema.yml'
     if schema_path.exists():
-        return FileResponse(open(schema_path, 'rb'), content_type='text/yaml')
+        try:
+            with open(schema_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            response = HttpResponse(content, content_type='application/x-yaml')
+            response['Access-Control-Allow-Origin'] = '*'
+            return response
+        except Exception:
+            pass
     return SpectacularAPIView.as_view()(request)
 
 
