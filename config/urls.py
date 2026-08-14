@@ -7,10 +7,15 @@ from django.http import HttpResponse, FileResponse
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 
+from pathlib import Path
+
+
 def frontend_view(request):
     possible_paths = [
-        settings.BASE_DIR / 'staticfiles' / 'index.html',
+        Path('/app/hrms-frontend/dist/index.html'),
+        Path('/app/staticfiles/index.html'),
         settings.BASE_DIR / 'hrms-frontend' / 'dist' / 'index.html',
+        settings.BASE_DIR / 'staticfiles' / 'index.html',
         settings.STATIC_ROOT / 'index.html',
     ]
     for p in possible_paths:
@@ -18,8 +23,8 @@ def frontend_view(request):
             try:
                 with open(p, 'r', encoding='utf-8') as f:
                     return HttpResponse(f.read(), content_type='text/html')
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"Error reading frontend index at {p}: {e}")
     return redirect('/api/docs/')
 
 
