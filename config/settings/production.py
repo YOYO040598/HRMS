@@ -4,10 +4,10 @@ from config.settings.base import *  # noqa
 
 DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 't')
 
-# Reverse proxy SSL header required for Render/Heroku to recognize HTTPS
+# Reverse proxy SSL header required for Render/Heroku
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-DATABASE_URL = os.environ.get('DATABASE_URL')
+DATABASE_URL = os.environ.get('DATABASE_URL') or os.environ.get('INTERNAL_DATABASE_URL')
 if DATABASE_URL:
     url = urllib.parse.urlparse(DATABASE_URL)
     DATABASES = {
@@ -45,15 +45,16 @@ else:
         }
     }
 
-# Security Settings
+# Security Settings - Render proxy handles SSL redirection externally
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
-SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'True').lower() in ('true', '1', 't')
+SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 X_FRAME_OPTIONS = 'DENY'
 
+ALLOWED_HOSTS = ['*']
 CORS_ALLOW_ALL_ORIGINS = True
