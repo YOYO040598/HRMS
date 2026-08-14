@@ -18,7 +18,12 @@ export default function EmployeeLoginPage() {
     e.preventDefault();
     const result = await dispatch(employeeLogin({ employee_id: employeeId, password }));
     if (employeeLogin.fulfilled.match(result)) {
-      navigate('/emp');
+      const role = result.payload?.user?.role;
+      if (role === 'EMPLOYEE' || result.payload?.loginType === 'employee') {
+        navigate('/emp');
+      } else {
+        navigate('/');
+      }
     }
   };
 
